@@ -18,7 +18,7 @@ class Receiver:
 
             # TODO REMOVE THIS TEST
             packet = Packet().decode(data)
-            file = File(select=False).decode(packet.data)
+            file = File().decode(packet.data)
             file.save("C:/Users/Martin/Downloads")
             pass
             # TODO:: Wait for SYN packet to start transmitting data. If SYN is received. Send ACK, etc...

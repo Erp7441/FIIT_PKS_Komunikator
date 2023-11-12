@@ -8,9 +8,9 @@ def encoding_tests():
     pass
 
     from data.File import File
-    file = File()
+    file = File(select=True)
     encoded_file = file.encode()
-    file2 = File(select=False)
+    file2 = File()
     decoded_file = file2.decode(encoded_file)
     file2.save("C:/Users/Martin/Desktop")
     pass

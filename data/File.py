@@ -14,7 +14,7 @@ def read_file(path, mode: str = 'rb'):
 
 
 class File(Data):
-    def __init__(self, path: str = None, select: bool = True):
+    def __init__(self, path: str = None, select: bool = False):
         if select is True:
             path = select_file()
 
