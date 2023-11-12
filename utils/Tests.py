@@ -33,9 +33,11 @@ def packet_tests():
     pass
 
 
-def connection_test():
-    from modes.Receiver import Receiver
+def connection_tests_client():
     from modes.Sender import Sender
+    sender = Sender("192.168.48.128")
 
-    # receiver = Receiver()
-    # sender = Sender()
+
+def connection_tests_server():
+    from modes.Receiver import Receiver
+    receiver = Receiver()

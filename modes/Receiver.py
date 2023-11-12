@@ -1,8 +1,9 @@
 import socket as s
+from utils.Constants import DEFAULT_PORT
 
 
 class Receiver:
-    def __init__(self, port: int = 3333, ip: str = "0.0.0.0"):
+    def __init__(self, port: int = DEFAULT_PORT, ip: str = "0.0.0.0"):
         self.socket = s.socket(s.AF_INET, s.SOCK_STREAM)
         self.socket.bind((ip, port))
         self.socket.listen(1)
