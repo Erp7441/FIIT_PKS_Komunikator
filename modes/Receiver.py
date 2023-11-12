@@ -16,7 +16,10 @@ class Receiver:
         print("Waiting for connection...")
 
         while True:
-            data, ip, port = self.socket.recvfrom(MTU)
+            data, addr = self.socket.recvfrom(MTU)
+            ip = addr[0]
+            port = addr[1]
+
             packet = Packet().decode(data)
             connection = self.connections.get_connection(ip, port)
 
