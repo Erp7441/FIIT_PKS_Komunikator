@@ -20,7 +20,7 @@ class SenderConnectionManager(ConnectionManager):
         return connection
 
     def await_syn_ack(self, connection):
-        # TODO:: Handle not reciving syn ack
+        # TODO:: Handle not reciving syn ack (Kill connection)?
         ip, port, packet = self.await_packet()
 
         if (
@@ -44,7 +44,7 @@ class SenderConnectionManager(ConnectionManager):
             print("Connection with", str(connection), "closed")
 
     def await_fin_ack(self, connection):
-        # TODO:: Handle not reciving fin ack
+        # TODO:: Handle not reciving syn ack (Kill connection)?
         ip, port, packet = self.await_packet()
 
         if (

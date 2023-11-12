@@ -26,7 +26,7 @@ class ReceiverConnectionManager(ConnectionManager):
         elif packet.flags.nack and connection and connection.state == ConnectionState.SYN_ACK_SENT:
             # If we received nack after syn ack. Resend syn ack
             self.send_syn_ack_packet(connection)
-        # Else we wont do anything.
+
         # TODO:: ACK wont be received within 5 seconds, kill connection?
 
     # Closing connection
@@ -34,7 +34,6 @@ class ReceiverConnectionManager(ConnectionManager):
         if packet.flags.fin and connection is not None:
             connection.state = ConnectionState.FIN_RECEIVED
             self.move_connection_to_inactive(connection)
-
             self.send_fin_ack_packet(connection)
 
     def finish_closing_connection(self, packet, connection: Connection):
@@ -45,5 +44,5 @@ class ReceiverConnectionManager(ConnectionManager):
         elif packet.flags.nack and connection and connection.state == ConnectionState.SYN_ACK_SENT:
             # If we received nack after syn ack. Resend syn ack
             self.send_fin_ack_packet(connection)
-        # Else we wont do anything.
+
         # TODO:: ACK wont be received within 5 seconds, kill connection?
