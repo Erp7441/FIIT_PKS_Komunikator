@@ -1,17 +1,23 @@
 from connection.Communication import Communication
-from utils.ThreadManager import ThreadManager
 from connection.ConnectionState import ConnectionState
+from utils.ThreadManager import ThreadManager
 
 
 class Connection:
-    def __init__(self, ip, port, syn_packet):
+    def __init__(self, ip: str, port: int, syn_packet=None):
         self.ip = ip
         self.port = port
-        self.state = ConnectionState.SYN_RECEIVED
-        self.communication = Communication([syn_packet])
+        self.state = None if syn_packet is None else ConnectionState.SYN_SENT
+        self.communication = Communication()
         self.thread_manager = ThreadManager()
 
+        if syn_packet is not None:
+            self.communication.packets.append(syn_packet)
+
         # Run timer for keep alive
+
+    def __str__(self):
+        return self.ip + ":" + str(self.port)
 
     # Pseudo idea
     # Holds information about connection state

@@ -1,8 +1,9 @@
+from os.path import basename
+
 from data.Data import Data
 from utils.Coder import decode_part, encode_str_to_hex
-from utils.Dialog import select_file
-from os.path import basename
 from utils.Constants import NAME_HEX_HEADER
+from utils.Dialog import select_file
 
 
 # Reads file into a variable then closes it.

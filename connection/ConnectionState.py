@@ -2,10 +2,12 @@ from enum import Enum
 
 
 class ConnectionState(Enum):
-    SYN_RECEIVED = 0
-    SYN_ACK_SENT = 1
-    ACTIVE = 2
-    FIN_RECEIVED = 3
-    FIN_ACK_SENT = 4
-    CLOSED = 5
+    SYN_SENT = 0
+    SYN_RECEIVED = 1
+    SYN_ACK_SENT = 2
+    ACTIVE = 3
+    FIN_RECEIVED = 4
+    FIN_ACK_SENT = 5
+    FIN_SENT = 6
+    CLOSED = 7
 

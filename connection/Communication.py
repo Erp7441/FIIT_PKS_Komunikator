@@ -1,6 +1,6 @@
 class Communication:
-    def __init__(self, packets):
-        self.packets = packets
+    def __init__(self, packets=None):
+        self.packets = packets if packets is not None else []
 
     def receive(self, packet):
         # TODO:: Check if packet with seq number is not already present

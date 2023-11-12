@@ -1,60 +1,16 @@
 from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
 from packet.Packet import Packet
-from utils.Coder import encode_str_to_bytes
 
 
 class ConnectionManager:
-    def __init__(self, receiver):
+    def __init__(self, parent):
         self.active_connections = []
         self.inactive_connections = []
         self.refreshing_connections = []
-        self.receiver = receiver
+        self.parent = parent
 
-    # Establishing connection
-    def start_establish_connection(self, packet, ip: str, port: str):
-        existing_connection = self.get_connection(ip, port)
-
-        if packet.flags.syn and existing_connection is None:
-
-            connection = Connection(ip, port, syn_packet=packet)
-            self.inactive_connections.append(connection)
-
-            self.send_syn_ack_packet(connection)
-            connection.state = ConnectionState.SYN_ACK_SENT
-
-    def finish_establish_connection(self, packet, connection: Connection):
-        if packet.flags.ack and connection and connection.state == ConnectionState.SYN_ACK_SENT:
-            # If we received ack after syn ack. Move communication to active list
-            connection.state = ConnectionState.ACTIVE
-            self.move_connection_to_active(connection)
-        elif packet.flags.nack and connection and connection.state == ConnectionState.SYN_ACK_SENT:
-            # If we received nack after syn ack. Resend syn ack
-            self.send_syn_ack_packet(connection)
-        # Else we wont do anything.
-        # TODO:: ACK wont be received within 5 seconds, kill connection?
-
-    # Closing connection
-    def start_closing_connection(self, packet, connection: Connection):
-        if packet.flags.fin and connection is not None:
-            connection.state = ConnectionState.FIN_RECEIVED
-            self.move_connection_to_inactive(connection)
-
-            self.send_fin_ack_packet(connection)
-            connection.state = ConnectionState.FIN_ACK_SENT
-
-    def finish_closing_connection(self, packet, connection: Connection):
-        if packet.flags.ack and connection and connection.state == ConnectionState.FIN_ACK_SENT:
-            # If we received ack after syn ack. Move communication to active list
-            connection.state = ConnectionState.CLOSED
-            self.remove_connection(connection)
-        elif packet.flags.nack and connection and connection.state == ConnectionState.SYN_ACK_SENT:
-            # If we received nack after syn ack. Resend syn ack
-            self.send_fin_ack_packet(connection)
-        # Else we wont do anything.
-        # TODO:: ACK wont be received within 5 seconds, kill connection?
-
-    def get_connection(self, ip: str, port: str):
+    def get_connection(self, ip: str, port: int):
         for connection in self.inactive_connections:
             if connection.ip == ip and connection.port == port:
                 return connection
@@ -92,17 +48,31 @@ class ConnectionManager:
             self.inactive_connections.append(connection)
 
     # Send packets
+    def send_syn_packet(self, connection: Connection):
+        syn_packet = Packet()
+        syn_packet.flags.syn = True
+        syn_packet.send_to((connection.ip, connection.port), self.parent.socket)
+        connection.state = ConnectionState.SYN_SENT
+
+    def send_fin_packet(self, connection: Connection):
+        fin_packet = Packet()
+        fin_packet.flags.fin = True
+        fin_packet.send_to((connection.ip, connection.port), self.parent.socket)
+        connection.state = ConnectionState.FIN_SENT
+
     def send_syn_ack_packet(self, connection: Connection):
         syn_ack_packet = Packet()
         syn_ack_packet.flags.syn = True
         syn_ack_packet.flags.ack = True
-        syn_ack_packet.send_to((connection.ip, connection.port), self.receiver.socket)
+        syn_ack_packet.send_to((connection.ip, connection.port), self.parent.socket)
+        connection.state = ConnectionState.SYN_ACK_SENT
 
     def send_fin_ack_packet(self, connection: Connection):
         fin_ack_packet = Packet()
         fin_ack_packet.flags.fin = True
         fin_ack_packet.flags.ack = True
-        fin_ack_packet.send_to((connection.ip, connection.port), self.receiver.socket)
+        fin_ack_packet.send_to((connection.ip, connection.port), self.parent.socket)
+        connection.state = ConnectionState.FIN_ACK_SENT
 
 
 
