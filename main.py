@@ -1,9 +1,9 @@
-def main():
-    from packet.Flags import Flags
+from utils.Tests import *
 
-    test = Flags(syn=True, ack=True, fin=True, info=True)
-    encoded_flags = test.encode_flags()
-    print("{0:b}".format(encoded_flags))
+
+def main():
+    # encoding_tests()
+    pass
 
 
 if __name__ == "__main__":
