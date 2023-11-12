@@ -7,7 +7,6 @@ class Assembler:
     # Split Data into packets
     # Create communication object
     # Add packets to communication
-    # Evaluate packets order and crc32
     # Return communication object
 
     # 2. Pseudo idea (assamble received data)
