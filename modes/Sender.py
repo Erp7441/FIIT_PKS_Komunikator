@@ -11,9 +11,7 @@ class Sender:
         self.server = (ip, port)
 
     def send_packet(self, data: Packet):
-        encoded_data_string = data.encode()
-        encoded_data_bytes = encode_str_to_bytes(encoded_data_string)
-        self.socket.sendto(encoded_data_bytes, self.server)
+        data.send_to(self.server, self.socket)
 
     # Pseudo idea
     # Receive communication from assembler

@@ -96,18 +96,13 @@ class ConnectionManager:
         syn_ack_packet = Packet()
         syn_ack_packet.flags.syn = True
         syn_ack_packet.flags.ack = True
-        self.send_packet(syn_ack_packet, connection)
+        syn_ack_packet.send_to((connection.ip, connection.port), self.receiver.socket)
 
     def send_fin_ack_packet(self, connection: Connection):
         fin_ack_packet = Packet()
         fin_ack_packet.flags.fin = True
         fin_ack_packet.flags.ack = True
-        self.send_packet(fin_ack_packet, connection)
-
-    def send_packet(self, packet, connection: Connection):
-        encoded_data_string = packet.encode()
-        encoded_data_bytes = encode_str_to_bytes(encoded_data_string)
-        self.receiver.socket.sendto(encoded_data_bytes.encode(), (connection.ip, connection.port))
+        fin_ack_packet.send_to((connection.ip, connection.port), self.receiver.socket)
 
 
 

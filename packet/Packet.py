@@ -1,6 +1,6 @@
 from data.Data import Data
 from packet.Flags import Flags
-from utils.Coder import encode_int_to_hex, decode_int_from_hex, decode_str_from_bytes
+from utils.Coder import encode_int_to_hex, decode_int_from_hex, decode_str_from_bytes, encode_str_to_bytes
 from utils.Constants import SEQ_B_SIZE, CRC_B_SIZE, FLAGS_B_SIZE, SEQ_SIZE, CRC_SIZE
 
 
@@ -31,3 +31,8 @@ class Packet:
         self.crc = decode_int_from_hex(crc_header)
         self.data = data_header
         return self
+
+    def send_to(self, destination: tuple, socket):
+        encoded_data_string = self.encode()
+        encoded_data_bytes = encode_str_to_bytes(encoded_data_string)
+        socket.sendto(encoded_data_bytes, destination)
