@@ -1,5 +1,5 @@
-from packet.Flags import Flags
 from data.Data import Data
+from packet.Flags import Flags
 
 
 class Packet:

@@ -1,18 +1,19 @@
 from binascii import crc32
-from utils.Constants import ENCODING
+
+from utils.Coder import decode_bytes_from_hex, encode_bytes_to_hex, decode_str_from_bytes, encode_str_to_bytes, encode_any_to_bytes
 
 
 class Data:
     def __init__(self, value=None):
-        # If value is type of bytes
-        if value is not None and isinstance(value, bytes):
+        # Value is type of bytes to represent many data structures
+        if value is None:
+            self.value = b''
+        elif isinstance(value, bytes):
             self.value = value
-        # If value is not type of bytes convert it to bytes
-        elif value is not None and not isinstance(value, bytes):
-            self.value = bytes(value, ENCODING)
-        # If value is None
+        elif isinstance(value, str):
+            self.value = encode_str_to_bytes(value)
         else:
-            self.value = bytes("", ENCODING)
+            self.value = encode_any_to_bytes(value)
 
     # Calculates CRC32 of the data
     def crc32(self):
@@ -20,13 +21,16 @@ class Data:
 
     # Encodes data bytes into hex string
     def encode(self):
-        return self.value.hex()
+        return encode_bytes_to_hex(self.value)
 
     # Decodes hex string into data bytes
-    def decode(self, encoded_data):
-        self.value = bytes.fromhex(encoded_data)
+    def decode(self, encoded_data: str):
+        self.value = decode_bytes_from_hex(encoded_data)
         return self.value
 
     # Convert data bytes into string
     def __str__(self):
-        return str(self.value.decode(ENCODING))
+        return decode_str_from_bytes(self.value)
+
+    def __bytes__(self):
+        return self.value

@@ -2,7 +2,7 @@ from utils.Tests import *
 
 
 def main():
-    # encoding_tests()
+    encoding_tests()
     packet_tests()
     pass
 

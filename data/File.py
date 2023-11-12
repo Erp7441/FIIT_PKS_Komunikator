@@ -1,52 +1,39 @@
-import os.path
-
 from data.Data import Data
-from tkinter import Tk
-from tkinter.filedialog import askopenfilename
-
-from utils.Constants import ENCODING
-
-
-def select_file():
-    root = Tk()
-    root.withdraw()  # Hides the root window
-    file = askopenfilename(title="Select file")  # Opens a file dialog
-    return None if len(file) == 0 else file
+from utils.Coder import decode_part, encode_str_to_hex
+from utils.Dialog import select_file
+from os.path import basename
+from utils.Constants import NAME_HEX_HEADER
 
 
-# Decodes part of hex data string
-def decode_part(part_name: str, data):
-    if data is None:
-        return
-    encoded_part = data[:data.index(part_name)]
-    data = data[len(encoded_part+part_name):]  # Removes data header from the hex data string
-    return bytes.fromhex(encoded_part).decode(ENCODING), data  # Return extracted data along with modified hex string
+# Reads file into a variable then closes it.
+def read_file(path, mode: str = 'rb'):
+    file = open(path, mode)
+    content = file.read()
+    file.close()
+    return content
 
 
 class File(Data):
-    def __init__(self, path=None, select=True):
+    def __init__(self, path: str = None, select: bool = True):
         if select is True:
             path = select_file()
 
-        if path is not None and isinstance(path, str):
-            file = open(path, 'rb')
-            super(File, self).__init__(file.read())
-            file.close()
-
-            self.name = os.path.basename(path)
+        if path is not None:
+            super(File, self).__init__(read_file(path))
+            self.name = basename(path)
         else:
             super(File, self).__init__()
             self.name = ""
 
     # Encodes file into hexadecimal string
     def encode(self):
-        encoded_name = self.name.encode(ENCODING).hex() + "NAME"  # Encodes name within the hex string
+        encoded_name = encode_str_to_hex(self.name) + NAME_HEX_HEADER  # Encodes name within the hex string
         encoded_data = encoded_name + super(File, self).encode()
         return encoded_data
 
     # Decodes hexadecimal string to data bytes (including name)
     def decode(self, encoded_data):
-        self.name, data = decode_part("NAME", encoded_data)  # Decodes name and removes its header from data
+        self.name, data = decode_part(NAME_HEX_HEADER, encoded_data)  # Decodes name and removes its header from data
         return super(File, self).decode(data)  # Decode rest of the data
 
     # Saves current file object to a folder
