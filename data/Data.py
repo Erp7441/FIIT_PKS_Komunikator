@@ -26,7 +26,7 @@ class Data:
     # Decodes hex string into data bytes
     def decode(self, encoded_data: str):
         self.value = decode_bytes_from_hex(encoded_data)
-        return self.value
+        return self
 
     # Convert data bytes into string
     def __str__(self):

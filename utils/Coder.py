@@ -17,6 +17,10 @@ def decode_str_from_hex(hex_data: str):
     return decode_str_from_bytes(bytes_data)
 
 
+def decode_int_from_hex(hex_data: str):
+    return int.from_bytes(decode_bytes_from_hex(hex_data))
+
+
 # Decodes part of hex data string
 def decode_part(part_name: str, data):
     if data is None:
@@ -50,3 +54,7 @@ def encode_any_to_bytes(value):
             return encode_str_to_bytes(str(value))
     except (TypeError, ValueError):
         return None
+
+
+def encode_int_to_hex(value: int, length: int = 4):
+    return encode_bytes_to_hex(value.to_bytes(length, "big"))

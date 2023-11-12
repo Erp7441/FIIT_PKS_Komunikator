@@ -1,3 +1,5 @@
+from utils.Coder import encode_str_to_hex, decode_str_from_hex
+
 class Flags:
     def __init__(self, syn=False, ack=False, nack=False, swp=False, info=False, file=False, msg=False, rst=False, fin=False):
         self.syn = syn
@@ -14,7 +16,7 @@ class Flags:
         if not (syn or ack or nack or swp or info or file or msg or rst or fin):
             self.syn = True
 
-    def encode_flags(self):
+    def encode(self):
         flags = 0
         if self.syn:
             flags |= 1
@@ -34,9 +36,10 @@ class Flags:
             flags |= 128
         if self.fin:
             flags |= 256
-        return flags
+        return encode_str_to_hex(str(flags))
 
-    def decode_flags(self, flags):
+    def decode(self, flags):
+        flags = int(decode_str_from_hex(str(flags)))
         self.syn = True if flags & 1 == 1 else False
         self.ack = True if flags & 2 == 2 else False
         self.nack = True if flags & 4 == 4 else False
@@ -46,3 +49,4 @@ class Flags:
         self.msg = True if flags & 64 == 64 else False
         self.rst = True if flags & 128 == 128 else False
         self.fin = True if flags & 256 == 256 else False
+        return self

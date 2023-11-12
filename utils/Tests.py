@@ -28,14 +28,22 @@ def packet_tests():
     from packet.Flags import Flags
     from data.File import File
 
-    packet = Packet(Flags())
-    packet2 = Packet(Flags(file=True), data=File())
+    packet = Packet(Flags(file=True), data=File())
+    encoded_packet = packet.encode()
+    packet2 = Packet()
+    decoded_packet = packet2.decode(encoded_packet)
     pass
 
 
 def connection_tests_client():
     from modes.Sender import Sender
+    from packet.Packet import Packet
+    from data.File import File
+    from packet.Flags import Flags
+
     sender = Sender("192.168.48.128")
+    packet = Packet(Flags(file=True), data=File())
+    sender.send_packet(packet)
 
 
 def connection_tests_server():
