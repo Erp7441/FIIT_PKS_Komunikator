@@ -4,10 +4,10 @@ Navrhnite a implementujte program s použitím vlastného protokolu nad protok
 ## Classes
 - [ ] ConnectionManager - Manges connection between two nodes
 - [ ] Communication - Piece of communication between two nodes (consists of packets [fragments])
-- [ ] Packet - Self explanatory. Headers + Data
-- [ ] Data - This is a interface which will provide a unified methods for encrypting data
-- [ ] File (Data) - Data type
-- [ ] Message (Data) - Data type
+- [x] Packet - Self explanatory. Headers + Data
+- [x] Data - This is a interface which will provide a unified methods for encrypting data
+- [x] File (Data) - Data type
+- [x] Message (Data) - Data type
 - [ ] Receiver - Mode of the communicator
 - [ ] Sender - Mode of the communicator
 - [ ] ThreadManager - Manages multiple threads. (One for establishing and keeping connection alive. One for 
@@ -17,7 +17,7 @@ Navrhnite a implementujte program s použitím vlastného protokolu nad protok
 - [ ] Flags - Communication packet flags
 - [ ] Constants - Contains constant values of the program. (Doesn't have to be a class)
 - [ ] Settings - Contains settings of communicator session
-- [ ] Crc - handles crc calculations
+- [ ] Tests - Functions for testing purposes
 
 ## Optimal project structure
 
@@ -33,12 +33,12 @@ Navrhnite a implementujte program s použitím vlastného protokolu nad protok
   - Receiver.py
   - Sender.py
 - packet
-  - Crc.py
   - Flags.py
   - Packet.py
 - utils
   - Constants.py
   - Menu.py
   - Settings.py
+  - Tests.py
   - ThreadManager.py
 - main.py

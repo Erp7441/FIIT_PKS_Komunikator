@@ -9,17 +9,18 @@ from utils.Constants import ENCODING
 
 def select_file():
     root = Tk()
-    root.withdraw()
-    file = askopenfilename(title="Select file")
+    root.withdraw()  # Hides the root window
+    file = askopenfilename(title="Select file")  # Opens a file dialog
     return None if len(file) == 0 else file
 
 
+# Decodes part of hex data string
 def decode_part(part_name: str, data):
     if data is None:
         return
     encoded_part = data[:data.index(part_name)]
-    data = data[len(encoded_part+part_name):]
-    return bytes.fromhex(encoded_part).decode(ENCODING), data
+    data = data[len(encoded_part+part_name):]  # Removes data header from the hex data string
+    return bytes.fromhex(encoded_part).decode(ENCODING), data  # Return extracted data along with modified hex string
 
 
 class File(Data):
@@ -45,7 +46,7 @@ class File(Data):
 
     # Decodes hexadecimal string to data bytes (including name)
     def decode(self, encoded_data):
-        self.name, data = decode_part("NAME", encoded_data)  # Decodes name and removes it's header from data
+        self.name, data = decode_part("NAME", encoded_data)  # Decodes name and removes its header from data
         return super(File, self).decode(data)  # Decode rest of the data
 
     # Saves current file object to a folder

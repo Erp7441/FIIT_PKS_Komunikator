@@ -14,15 +14,19 @@ class Data:
         else:
             self.value = bytes("", ENCODING)
 
+    # Calculates CRC32 of the data
     def crc32(self):
         return crc32(self.value)
 
+    # Encodes data bytes into hex string
     def encode(self):
         return self.value.hex()
 
+    # Decodes hex string into data bytes
     def decode(self, encoded_data):
         self.value = bytes.fromhex(encoded_data)
         return self.value
 
+    # Convert data bytes into string
     def __str__(self):
         return str(self.value.decode(ENCODING))

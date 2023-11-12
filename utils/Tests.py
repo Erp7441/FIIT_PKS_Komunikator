@@ -19,3 +19,13 @@ def encoding_tests():
     # encoded_message = message.encode()
     # decoded_message = message.decode(encoded_message)
     pass
+
+
+def packet_tests():
+    from packet.Packet import Packet
+    from packet.Flags import Flags
+    from data.File import File
+
+    packet = Packet(Flags())
+    packet2 = Packet(Flags(file=True), data=File())
+    pass
