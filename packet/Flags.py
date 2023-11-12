@@ -1,4 +1,6 @@
-from utils.Coder import encode_str_to_hex, decode_str_from_hex
+from utils.Coder import encode_int_to_hex, decode_int_from_hex
+from utils.Constants import FLAGS_SIZE
+
 
 class Flags:
     def __init__(self, syn=False, ack=False, nack=False, swp=False, info=False, file=False, msg=False, rst=False, fin=False):
@@ -36,10 +38,10 @@ class Flags:
             flags |= 128
         if self.fin:
             flags |= 256
-        return encode_str_to_hex(str(flags))
+        return encode_int_to_hex(flags, FLAGS_SIZE)
 
     def decode(self, flags):
-        flags = int(decode_str_from_hex(str(flags)))
+        flags = decode_int_from_hex(flags)
         self.syn = True if flags & 1 == 1 else False
         self.ack = True if flags & 2 == 2 else False
         self.nack = True if flags & 4 == 4 else False

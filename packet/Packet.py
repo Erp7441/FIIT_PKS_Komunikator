@@ -1,7 +1,7 @@
 from data.Data import Data
 from packet.Flags import Flags
 from utils.Coder import encode_int_to_hex, decode_int_from_hex, decode_str_from_bytes
-from utils.Constants import SEQ_SIZE, CRC_SIZE
+from utils.Constants import SEQ_B_SIZE, CRC_B_SIZE, FLAGS_B_SIZE, SEQ_SIZE, CRC_SIZE
 
 
 class Packet:
@@ -20,9 +20,13 @@ class Packet:
         if isinstance(data, bytes):
             data = decode_str_from_bytes(data)
 
-        self.flags = Flags()
-        self.flags.decode(data[0:4])
-        self.seq = decode_int_from_hex(data[4:12])
-        self.crc = decode_int_from_hex(data[12:20])
-        self.data = data[20:]
+        flags_header = data[0:FLAGS_B_SIZE]
+        seq_header = data[FLAGS_B_SIZE:FLAGS_B_SIZE + SEQ_B_SIZE]
+        crc_header = data[FLAGS_B_SIZE + SEQ_B_SIZE:FLAGS_B_SIZE + SEQ_B_SIZE + CRC_B_SIZE]
+        data_header = data[FLAGS_B_SIZE + SEQ_B_SIZE + CRC_B_SIZE:]
+
+        self.flags = Flags().decode(flags_header)
+        self.seq = decode_int_from_hex(seq_header)
+        self.crc = decode_int_from_hex(crc_header)
+        self.data = data_header
         return self

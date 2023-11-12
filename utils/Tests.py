@@ -27,13 +27,38 @@ def packet_tests():
     from packet.Packet import Packet
     from packet.Flags import Flags
     from data.File import File
+    from utils.Constants import MAX_PAYLOAD_SIZE
 
     packet = Packet(Flags(file=True), data=File())
     encoded_packet = packet.encode()
+
+
+    while len(encoded_packet) != MAX_PAYLOAD_SIZE:
+        encoded_packet += '0'
+
     packet2 = Packet()
     decoded_packet = packet2.decode(encoded_packet)
     pass
 
+
+def packet_length_tests():
+    from packet.Packet import Packet
+    from packet.Flags import Flags
+    from data.File import File
+    from utils.Constants import MTU
+
+    packet = Packet(Flags(file=True), data=File())
+    encoded_packet = packet.encode()
+
+    while len(encoded_packet) != MTU:
+        encoded_packet += '0'
+
+    packet2 = Packet().decode(encoded_packet)
+
+    from modes.Sender import Sender
+
+    sender = Sender("192.168.48.128")
+    sender.send_packet(packet2)
 
 def connection_tests_client():
     from modes.Sender import Sender

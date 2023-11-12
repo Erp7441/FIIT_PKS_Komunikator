@@ -4,7 +4,8 @@ from utils.Tests import *
 def main():
     # encoding_tests()
     # packet_tests()
-    connection_tests_client()
+    packet_length_tests()
+    # connection_tests_client()
     # connection_tests_server()
     pass
 

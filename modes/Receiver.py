@@ -1,5 +1,6 @@
 import socket as s
 from packet.Packet import Packet
+from data.File import File
 from utils.Constants import DEFAULT_PORT
 
 
@@ -15,6 +16,9 @@ class Receiver:
             print("Connected from", addr)
             print("Received data", data)
 
+            # TODO REMOVE THIS TEST
             packet = Packet().decode(data)
-
+            file = File(select=False).decode(packet.data)
+            file.save("C:/Users/Martin/Downloads")
+            pass
             # TODO:: Wait for SYN packet to start transmitting data. If SYN is received. Send ACK, etc...
