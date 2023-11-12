@@ -1,7 +1,7 @@
 import socket as s
 from packet.Packet import Packet
 from data.File import File
-from utils.Constants import DEFAULT_PORT
+from utils.Constants import DEFAULT_PORT, MTU
 
 
 class Receiver:
@@ -12,7 +12,7 @@ class Receiver:
         print("Waiting for connection...")
 
         while True:
-            data, addr = self.socket.recvfrom(1024)
+            data, addr = self.socket.recvfrom(MTU)
             print("Connected from", addr)
             print("Received data", data)
 
