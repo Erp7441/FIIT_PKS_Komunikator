@@ -46,6 +46,7 @@ def encode_str_to_hex(str_data: str):
     return encode_bytes_to_hex(bytes_data)
 
 
+# Tries to convert any data type into bytes
 def encode_any_to_bytes(value):
     try:
         if isinstance(value, bytes):

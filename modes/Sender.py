@@ -14,3 +14,9 @@ class Sender:
         encoded_data_string = data.encode()
         encoded_data_bytes = encode_str_to_bytes(encoded_data_string)
         self.socket.sendto(encoded_data_bytes, self.server)
+
+    # Pseudo idea
+    # Receive communication from assembler
+    # Create some kind of main loop like in client for data sending
+    # Receive ACK per packet
+    # Handle errors by resending packets
