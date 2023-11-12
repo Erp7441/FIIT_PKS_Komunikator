@@ -14,7 +14,8 @@ class Packet:
     def encode(self):
         encoded_seq = encode_int_to_hex(self.seq, SEQ_SIZE)
         encoded_crc = encode_int_to_hex(self.crc, CRC_SIZE)
-        return self.flags.encode() + encoded_seq + encoded_crc + self.data
+        encoded_data = "" if self.data is None else self.data
+        return self.flags.encode() + encoded_seq + encoded_crc + encoded_data
 
     def decode(self, data):
         if isinstance(data, bytes):

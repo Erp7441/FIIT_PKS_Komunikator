@@ -66,6 +66,14 @@ def connection_tests_client():
     packet = Packet(Flags(file=True), data=File())
     sender.send_packet(packet)
 
+def connection_tests_establishment():
+    from modes.Sender import Sender
+    from packet.Packet import Packet
+    from packet.Flags import Flags
+
+    sender = Sender("192.168.48.128")
+    packet = Packet(Flags(syn=True))
+    sender.send_packet(packet)
 
 def connection_tests_server():
     from modes.Receiver import Receiver

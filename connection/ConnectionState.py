@@ -1,7 +1,7 @@
-import enum
+from enum import Enum
 
 
-class ConnectionState(enum):
+class ConnectionState(Enum):
     SYN_RECEIVED = 0
     SYN_ACK_SENT = 1
     ACTIVE = 2
