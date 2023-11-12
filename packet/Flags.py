@@ -14,10 +14,6 @@ class Flags:
         self.rst = rst
         self.fin = fin
 
-        # If no arguments were given set SYN flag to True
-        if not (syn or ack or nack or swp or info or file or msg or rst or fin):
-            self.syn = True
-
     def encode(self):
         flags = 0
         if self.syn:

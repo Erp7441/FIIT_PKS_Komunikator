@@ -6,7 +6,7 @@ from utils.Constants import SEQ_B_SIZE, CRC_B_SIZE, FLAGS_B_SIZE, SEQ_SIZE, CRC_
 
 class Packet:
     def __init__(self, flags: Flags = None, seq=0, data: Data = None):
-        self.flags = flags
+        self.flags = Flags() if flags is None else flags
         self.seq = seq
         self.crc = 0 if data is None else data.crc32()
         self.data = None if data is None else data.encode()

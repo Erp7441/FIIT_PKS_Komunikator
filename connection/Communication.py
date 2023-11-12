@@ -1,6 +1,11 @@
 class Communication:
-    def __init__(self):
-        pass
+    def __init__(self, packets):
+        self.packets = packets
+
+    def receive(self, packet):
+        # TODO:: Check if packet with seq number is not already present
+        self.packets.append(packet)
+        self.packets.sort(key=lambda seq: seq.seq)
 
     # Pseudo idea
     # Gets splited data in packets
