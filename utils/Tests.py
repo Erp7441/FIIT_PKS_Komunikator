@@ -31,3 +31,11 @@ def packet_tests():
     packet = Packet(Flags())
     packet2 = Packet(Flags(file=True), data=File())
     pass
+
+
+def connection_test():
+    from modes.Receiver import Receiver
+    from modes.Sender import Sender
+
+    # receiver = Receiver()
+    # sender = Sender()
