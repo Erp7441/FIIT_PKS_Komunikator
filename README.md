@@ -14,6 +14,31 @@ Navrhnite a implementujte program s použitím vlastného protokolu nad protok
   communication between endpoints. )
 - [ ] Assembler - Handles data packet encryption and data packet decryption.
 - [ ] Menu - Menu for sender mode
-- [ ] Flags (enum) - Communication packet flags
-- [ ] Constants - Contains constant values of the program
+- [ ] Flags - Communication packet flags
+- [ ] Constants - Contains constant values of the program. (Doesn't have to be a class)
 - [ ] Settings - Contains settings of communicator session
+- [ ] Crc - handles crc calculations
+
+## Optimal project structure
+
+- connection
+  - Communication.py
+  - ConnectionManager.py
+- data
+  - Assembler.py
+  - Data.py
+  - File.py
+  - Message.py
+- modes
+  - Receiver.py
+  - Sender.py
+- packet
+  - Crc.py
+  - Flags.py
+  - Packet.py
+- utils
+  - Constants.py
+  - Menu.py
+  - Settings.py
+  - ThreadManager.py
+- main.py
