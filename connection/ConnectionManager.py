@@ -2,6 +2,7 @@ from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
 from packet.Packet import Packet
 from utils.Constants import MTU
+from utils.Debug import print_debug
 
 
 class ConnectionManager:
@@ -20,12 +21,14 @@ class ConnectionManager:
         return None
 
     def remove_connection(self, connection: Connection):
+        print_debug(connection, "was removed!")
         if connection in self.inactive_connections:
             self.inactive_connections.remove(connection)
         elif connection in self.active_connections:
             self.active_connections.remove(connection)
 
     def kill_connection(self, connection: Connection):
+        print_debug(connection, "was killed!")
         rst_packet = Packet()
         rst_packet.flags.rst = True
         rst_packet.send_to((connection.ip, connection.port), self.parent.socket)
@@ -116,7 +119,9 @@ class ConnectionManager:
         if self.await_syn_ack(connection):
             connection.current_keepalive_time = connection.keepalive_time
             self.send_ack_packet(connection)
+            print_debug("Refreshed keepalive state!")
             return True
+        print_debug("Failed to refresh keepalive state!")
         return False
 
 

@@ -71,7 +71,7 @@ def connection_tests_establishment():
     from modes.Sender import Sender
 
     sender = Sender("192.168.48.128")
-    sender.close_connection()
+    #sender.close_connection()
 
 
 def connection_tests_server():

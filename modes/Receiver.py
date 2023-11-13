@@ -5,6 +5,7 @@ from connection.ConnectionState import ConnectionState
 from connection.ReceiverConnectionManager import ReceiverConnectionManager
 from packet.Packet import Packet
 from utils.Constants import DEFAULT_PORT
+from utils.Debug import print_debug
 
 # TODO:: If first data packet is not INFO kill connection
 
@@ -20,10 +21,12 @@ class Receiver:
         # Receiver main loop
         while True:
             ip, port, packet = self.connection_manager.await_packet()
+            print_debug("Received packet from {0}:{1}".format(ip, port))
             connection = self.connection_manager.get_connection(ip, port)
 
             # Begin establishing connection
             if packet.flags.syn and connection is None:
+                print_debug("Received SYN packet from {0}:{1}. Establishing connection...".format(ip, port))
                 self.connection_manager.start_establish_connection(packet, ip, port)
             # Begin refreshing connection
             elif packet.flags.syn and connection is not None:
@@ -33,6 +36,7 @@ class Receiver:
             if packet.flags.ack and connection is not None:
                 if connection.state == ConnectionState.REFRESHING:
                     # Reset current keepalive time
+                    print_debug("Refreshed keepalive state of client!")
                     connection.current_keepalive_time = connection.keepalive_time
                 else:
                     self.received_ack(packet, connection)
@@ -43,6 +47,7 @@ class Receiver:
 
             # Closing connection
             if packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
+                print_debug("Received FIN packet from {0}:{1} client".format(ip, port))
                 self.connection_manager.start_closing_connection(packet, connection)
 
             # Pseudo idea
@@ -57,10 +62,14 @@ class Receiver:
             # 8. Close connection
 
     def received_syn_for_refreshing_connection(self, connection):
+        print_debug("Received SYN packet from {0}:{1}. Refreshing connection...".format(connection.ip, connection.port))
         self.connection_manager.send_syn_ack_packet(connection)
+        print_debug("Sent SYN-ACK packet to {0}:{1} client".format(connection.ip, connection.port))
         connection.state = ConnectionState.REFRESHING
 
     def received_ack(self, packet: Packet, connection: Connection):
+        print_debug("Received ACK packet from {0}:{1} client".format(connection.ip, connection.port))
+
         # For establishing connection
         if connection.state == ConnectionState.SYN_ACK_SENT:
             self.connection_manager.finish_establish_connection(packet, connection)
@@ -76,7 +85,9 @@ class Receiver:
             print("Connection with", str(connection.ip)+":"+str(connection.port), "refreshed")
 
     def received_data(self, packet: Packet, connection: Connection):
+        print_debug("Received DATA packet from {0}:{1} client".format(connection.ip, connection.port))
         connection.communication.receive(packet)
+        print_debug("Sent ACK packet to {0}:{1} client".format(connection.ip, connection.port))
         self.connection_manager.send_ack_packet(connection)
 
     @staticmethod
