@@ -33,32 +33,36 @@ class Connection:
             # Initialize receiver keepalive time
             if keepalive_time is None:
                 self.keepalive_time = RECEIVER_KEEPALIVE_TIME
+                self.current_keepalive_time = RECEIVER_KEEPALIVE_TIME
             else:
                 self.keepalive_time = keepalive_time
+                self.current_keepalive_time = keepalive_time
 
-            # Initialize receiver keepalive thread
+                # Initialize receiver keepalive thread
             self.keepalive_thread = Thread(target=self.await_keep_alive)
             self.keepalive_thread.start()
         elif parent.__class__.__name__ == "SenderConnectionManager":
             # Initialize sender keepalive time
             if keepalive_time is None:
                 self.keepalive_time = SENDER_KEEPALIVE_TIME
+                self.current_keepalive_time = SENDER_KEEPALIVE_TIME
             else:
                 self.keepalive_time = keepalive_time
+                self.current_keepalive_time = keepalive_time
 
-            # Initialize sender keepalive thread
+                # Initialize sender keepalive thread
             self.keepalive_thread = Thread(target=self.keep_alive)
             self.keepalive_thread.start()
         else:
             # Initialize default keepalive time
             if keepalive_time is None:
                 self.keepalive_time = DEFAULT_KEEPALIVE_TIME
+                self.current_keepalive_time = DEFAULT_KEEPALIVE_TIME
             else:
                 self.keepalive_time = keepalive_time
+                self.current_keepalive_time = keepalive_time
 
             self.keepalive_thread = None
-
-        self.current_keepalive_time = self.keepalive_time
 
     # Run timer for keep alive
     # Client side method
