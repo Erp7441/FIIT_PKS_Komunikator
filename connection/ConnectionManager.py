@@ -11,6 +11,7 @@ from utils.Utils import print_debug
 # sending and receiving packets from hosts.
 ###############################################
 
+
 class ConnectionManager:
     def __init__(self, parent):
         self.active_connections = []
@@ -130,13 +131,16 @@ class ConnectionManager:
     # Keep alive sequence
     ###############################################
     def refresh_keepalive(self, connection: Connection):
+        connection.keepalive_event.set()
         self.send_syn_packet(connection)
         if self.await_syn_ack(connection):
             connection.current_keepalive_time = connection.keepalive_time
             self.send_ack_packet(connection)
             print_debug("Refreshed keepalive state!")
+            connection.keepalive_event.clear()
             return True
         print_debug("Failed to refresh keepalive state!")
+        connection.keepalive_event.clear()
         return False
 
 
