@@ -4,7 +4,7 @@ from time import sleep
 from connection.Communication import Communication
 from connection.ConnectionState import ConnectionState
 
-from utils.Constants import DEFAULT_KEEPALIVE_TIME
+from utils.Constants import RECEIVER_KEEPALIVE_TIME, SENDER_KEEPALIVE_TIME, DEFAULT_KEEPALIVE_TIME
 
 
 # TODO:: Next implement threading for keep alive
@@ -18,27 +18,47 @@ from utils.Constants import DEFAULT_KEEPALIVE_TIME
 # If the counter reaches 0 then kill the connection
 
 class Connection:
-    def __init__(self, ip: str, port: int, syn_packet=None, parent=None, keepalive_time=DEFAULT_KEEPALIVE_TIME):
+    def __init__(self, ip: str, port: int, syn_packet=None, parent=None, keepalive_time=None):
         self.ip = ip
         self.port = port
         self.state = None if syn_packet is None else ConnectionState.SYN_SENT
         self.communication = Communication()
         self.parent = parent
-        self.keepalive_time = keepalive_time
-        self.current_keepalive_time = keepalive_time
 
         if syn_packet is not None:
             self.communication.packets.append(syn_packet)
 
         # Initializing keep alive thread
         if parent.__class__.__name__ == "ReceiverConnectionManager":
+            # Initialize receiver keepalive time
+            if keepalive_time is None:
+                self.keepalive_time = RECEIVER_KEEPALIVE_TIME
+            else:
+                self.keepalive_time = keepalive_time
+
+            # Initialize receiver keepalive thread
             self.keepalive_thread = Thread(target=self.await_keep_alive)
             self.keepalive_thread.start()
         elif parent.__class__.__name__ == "SenderConnectionManager":
+            # Initialize sender keepalive time
+            if keepalive_time is None:
+                self.keepalive_time = SENDER_KEEPALIVE_TIME
+            else:
+                self.keepalive_time = keepalive_time
+
+            # Initialize sender keepalive thread
             self.keepalive_thread = Thread(target=self.keep_alive)
             self.keepalive_thread.start()
         else:
+            # Initialize default keepalive time
+            if keepalive_time is None:
+                self.keepalive_time = DEFAULT_KEEPALIVE_TIME
+            else:
+                self.keepalive_time = keepalive_time
+
             self.keepalive_thread = None
+
+        self.current_keepalive_time = self.keepalive_time
 
     # Run timer for keep alive
     # Client side method
