@@ -10,4 +10,6 @@ class ConnectionState(Enum):
     FIN_ACK_SENT = 5
     FIN_SENT = 6
     CLOSED = 7
+    RESET = 8
+    REFRESHING = 9
 

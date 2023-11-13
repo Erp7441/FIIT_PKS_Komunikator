@@ -13,7 +13,7 @@ class ReceiverConnectionManager(ConnectionManager):
 
         if packet.flags.syn and existing_connection is None:
 
-            connection = Connection(ip, port, syn_packet=packet)
+            connection = Connection(ip, port, syn_packet=packet, parent=self)
             self.inactive_connections.append(connection)
 
             self.send_syn_ack_packet(connection)
