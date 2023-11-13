@@ -60,7 +60,7 @@ class Tests:
         from packet.Flags import Flags
 
         sender = Sender("192.168.48.128")
-        packet = Packet(Flags(file=True), data=File())
+        packet = Packet(Flags(file=True), data=File(select=True))
         sender.send_packet(packet)
 
     @staticmethod
@@ -68,6 +68,16 @@ class Tests:
         from modes.Sender import Sender
 
         sender = Sender("192.168.48.128")
+        # sender.close_connection()
+
+    @staticmethod
+    def connection_tests_establishment_data():
+        from modes.Sender import Sender
+
+        sender = Sender("192.168.48.128")
+        while True:
+            packet = Packet(Flags(file=True), data=File(select=True))
+            sender.send_packet(packet)
         # sender.close_connection()
 
     @staticmethod
