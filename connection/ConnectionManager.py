@@ -2,8 +2,14 @@ from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
 from packet.Packet import Packet
 from utils.Constants import MTU
-from utils.Debug import print_debug
+from utils.Utils import print_debug
 
+###############################################
+# Connection manager handles everything about
+# connections. How to establish connections,
+# keep them alive and close them as well as
+# sending and receiving packets from hosts.
+###############################################
 
 class ConnectionManager:
     def __init__(self, parent):
@@ -11,6 +17,9 @@ class ConnectionManager:
         self.inactive_connections = []
         self.parent = parent
 
+    ###############################################
+    # Connection
+    ###############################################
     def get_connection(self, ip: str, port: int):
         for connection in self.inactive_connections:
             if connection.ip == ip and connection.port == port:
@@ -35,7 +44,6 @@ class ConnectionManager:
         self.remove_connection(connection)
         connection.state = ConnectionState.RESET
 
-    # Move connections
     def move_connection_to_active(self, connection: Connection):
         if connection in self.inactive_connections:
             self.inactive_connections.remove(connection)
@@ -46,7 +54,9 @@ class ConnectionManager:
             self.active_connections.remove(connection)
             self.inactive_connections.append(connection)
 
-    # Send packets
+    ###############################################
+    # Send packet (types)
+    ###############################################
     def send_syn_packet(self, connection: Connection):
         syn_packet = Packet()
         syn_packet.flags.syn = True
@@ -78,7 +88,9 @@ class ConnectionManager:
         ack_packet.flags.ack = True
         ack_packet.send_to((connection.ip, connection.port), self.parent.socket)
 
+    ###############################################
     # Await packets
+    ###############################################
     def await_packet(self):
         data, addr = self.parent.socket.recvfrom(MTU)
         ip = addr[0]
@@ -114,6 +126,9 @@ class ConnectionManager:
             return True
         return False
 
+    ###############################################
+    # Keep alive sequence
+    ###############################################
     def refresh_keepalive(self, connection: Connection):
         self.send_syn_packet(connection)
         if self.await_syn_ack(connection):

@@ -1,5 +1,5 @@
-from utils.Coder import encode_int_to_hex, decode_int_from_hex
 from utils.Constants import FLAGS_SIZE
+from utils.Utils import encode_int_to_hex, decode_int_from_hex
 
 
 class Flags:

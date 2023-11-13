@@ -1,4 +1,37 @@
+from datetime import datetime
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename, askdirectory
+
+from utils.Constants import DEBUG
 from utils.Constants import ENCODING
+
+
+###############################################
+# Dialog windows
+###############################################
+def select_file():
+    root = Tk()
+    root.withdraw()  # Hides the root window
+    file = askopenfilename(title="Select file")  # Opens a file dialog
+    return None if len(file) == 0 else file
+
+
+def select_folder():
+    root = Tk()
+    root.withdraw()  # Hides the root window
+    folder = askdirectory(title="Select folder")  # Opens a file dialog
+    return None if len(folder) == 0 else folder
+
+
+###############################################
+# Debug
+###############################################
+def print_debug(*args, **kwargs):
+    if DEBUG:
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        prefix = f"DEBUG [{timestamp}]: "
+        message = " ".join(str(arg) for arg in args)
+        print(prefix + message, **kwargs)
 
 
 ###############################################
@@ -26,7 +59,7 @@ def decode_part(part_name: str, data):
     if data is None:
         return
     encoded_part = data[:data.index(part_name)]
-    data = data[len(encoded_part+part_name):]  # Removes data header from the hex data string
+    data = data[len(encoded_part + part_name):]  # Removes data header from the hex data string
     return decode_str_from_hex(encoded_part), data  # Return extracted data along with modified hex string
 
 

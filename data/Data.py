@@ -1,7 +1,10 @@
 from binascii import crc32
 
-from utils.Coder import decode_bytes_from_hex, encode_bytes_to_hex, decode_str_from_bytes, encode_str_to_bytes, \
+from utils.Utils import decode_bytes_from_hex, encode_bytes_to_hex, decode_str_from_bytes, encode_str_to_bytes, \
     encode_any_to_bytes
+
+
+# TODO:: Add info packet, with dict about data to be transmitted
 
 
 class Data:

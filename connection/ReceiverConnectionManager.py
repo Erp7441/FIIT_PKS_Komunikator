@@ -7,15 +7,15 @@ class ReceiverConnectionManager(ConnectionManager):
     def __init__(self, receiver):
         super().__init__(receiver)
 
-    # Establishing connection
+    ###############################################
+    # Establishing connection (receiver)
+    ###############################################
     def start_establish_connection(self, packet, ip: str, port: int):
         existing_connection = self.get_connection(ip, port)
 
         if packet.flags.syn and existing_connection is None:
-
             connection = Connection(ip, port, syn_packet=packet, parent=self)
             self.inactive_connections.append(connection)
-
             self.send_syn_ack_packet(connection)
 
     def finish_establish_connection(self, packet, connection: Connection):
@@ -29,7 +29,9 @@ class ReceiverConnectionManager(ConnectionManager):
 
         # TODO:: ACK wont be received within 5 seconds, kill connection?
 
-    # Closing connection
+    ###############################################
+    # Closing connection (receiver)
+    ###############################################
     def start_closing_connection(self, packet, connection: Connection):
         if packet.flags.fin and connection is not None:
             connection.state = ConnectionState.FIN_RECEIVED

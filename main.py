@@ -1,15 +1,9 @@
-from utils.Tests import *
-
-
-def main():
-    # encoding_tests()
-    # packet_tests()
-    # packet_length_tests()
-    # connection_tests_client()
-    # connection_tests_server()
-    connection_tests_establishment()
-    pass
-
+from modes.Receiver import Receiver
+from modes.Sender import Sender
 
 if __name__ == "__main__":
-    main()
+    mode = input("Mode? [r/s]: ")
+    if mode == "r":
+        Receiver()
+    elif mode == "s":
+        Sender("192.168.48.128")

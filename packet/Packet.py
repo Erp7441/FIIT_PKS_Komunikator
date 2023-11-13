@@ -1,7 +1,7 @@
 from data.Data import Data
 from packet.Flags import Flags
-from utils.Coder import encode_int_to_hex, decode_int_from_hex, decode_str_from_bytes, encode_str_to_bytes
 from utils.Constants import SEQ_B_SIZE, CRC_B_SIZE, FLAGS_B_SIZE, SEQ_SIZE, CRC_SIZE
+from utils.Utils import encode_int_to_hex, decode_int_from_hex, decode_str_from_bytes, encode_str_to_bytes
 
 
 class Packet:

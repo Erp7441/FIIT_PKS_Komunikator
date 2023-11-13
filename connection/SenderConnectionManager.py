@@ -6,7 +6,9 @@ class SenderConnectionManager(ConnectionManager):
     def __init__(self, sender):
         super().__init__(sender)
 
-    # Establishing connection
+    ###############################################
+    # Establishing connection (sender)
+    ###############################################
     def establish_connection(self, ip: str, port: int):
         connection = Connection(ip, port, None, parent=self)
         self.send_syn_packet(connection)
@@ -16,6 +18,9 @@ class SenderConnectionManager(ConnectionManager):
             print("Connection with", str(connection), "established")
         return connection
 
+    ###############################################
+    # Closing connection (sender)
+    ###############################################
     def close_connection(self, ip: str, port: int):
         connection = self.get_connection(ip, port)
         self.send_fin_packet(connection)
