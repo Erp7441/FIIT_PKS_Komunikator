@@ -48,3 +48,16 @@ class Flags:
         self.rst = True if flags & 128 == 128 else False
         self.fin = True if flags & 256 == 256 else False
         return self
+
+    def __str__(self):
+        _str = ""
+        _str += " SYN " if self.syn else ""
+        _str += " ACK " if self.ack else ""
+        _str += " NACK " if self.nack else ""
+        _str += " SWP " if self.swp else ""
+        _str += " INFO " if self.info else ""
+        _str += " FILE " if self.file else ""
+        _str += " MSG " if self.msg else ""
+        _str += " RST " if self.rst else ""
+        _str += " FIN " if self.fin else ""
+        return _str.strip()
