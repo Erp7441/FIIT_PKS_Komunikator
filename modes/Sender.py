@@ -25,8 +25,6 @@ class Sender:
         self.settings = None  # TODO:: Implement settings
 
     def send_packet(self, packet: Packet):
-        if packet.flags.file or packet.flags.msg:
-            self.connection_manager.get_connection(self.server[0], self.server[1]).keepalive_event.wait()
         print_debug("Sent packet to {0}:{1} server with data: {2}".format(self.server[0], self.server[1], packet.data))
         packet.send_to(self.server, self.socket)
 

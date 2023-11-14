@@ -43,7 +43,7 @@ class Receiver:
         ###############################################
         while True:
             ip, port, packet = self.connection_manager.await_packet()
-            print_debug("Received packet from {0}:{1}".format(ip, port))
+            print_debug("Received packet from {0}:{1} with flags {2}".format(ip, port, str(packet.flags)))
             connection = self.connection_manager.get_connection(ip, port)
 
             # Begin establishing connection
@@ -54,15 +54,15 @@ class Receiver:
                 self.connection_manager.refresh_keepalive(connection)
 
             # Receive ACK from client
-            if packet.flags.ack and connection is not None:
+            elif packet.flags.ack and connection is not None:
                 self.received_ack(packet, connection)
 
             # Received data packet
-            if Receiver.check_if_received_data_packet(packet, connection):
+            elif Receiver.check_if_received_data_packet(packet, connection):
                 self.received_data(packet, connection)
 
             # Closing connection
-            if packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
+            elif packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
                 self.connection_manager.start_closing_connection(packet, connection)
 
     ###############################################
@@ -80,16 +80,11 @@ class Receiver:
             ip, port = connection.ip, connection.port
             self.connection_manager.finish_closing_connection(packet, connection)
             print("Connection with", str(ip)+":"+str(port), "closed")
-        # For refreshing connection
-        elif connection.state == ConnectionState.REFRESHING:
-            self.connection_manager.send_ack_packet(connection)
-            print("Connection with", str(connection.ip)+":"+str(connection.port), "refreshed")
 
     ###############################################
     # Received data packet from client
     ###############################################
     def received_data(self, packet: Packet, connection: Connection):
-        connection.keepalive_event.wait(connection.keepalive_time)
         print_debug("Received DATA packet from {0}:{1} client".format(connection.ip, connection.port))
         connection.add_packet(packet)
         print_debug("Sent ACK packet to {0}:{1} client".format(connection.ip, connection.port))

@@ -102,7 +102,6 @@ class Connection:
             self.current_keepalive_time = keepalive_time
 
             # Initialize sender keepalive thread
-        self.keepalive_event = Event()
         self.keepalive_thread = Thread(target=keep_alive_method)
         self.keepalive_thread.start()
 

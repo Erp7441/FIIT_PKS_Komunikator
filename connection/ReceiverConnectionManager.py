@@ -64,3 +64,7 @@ class ReceiverConnectionManager(ConnectionManager):
             # Reset current keepalive time
             print_debug("Refreshed keepalive state of client!")
             connection.current_keepalive_time = connection.keepalive_time
+            connection.state = ConnectionState.ACTIVE
+            return True
+        print_debug("Failed to refresh keepalive state!")
+        return False
