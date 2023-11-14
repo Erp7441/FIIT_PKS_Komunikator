@@ -9,4 +9,5 @@ if __name__ == "__main__":
         Sender("192.168.48.128")
     elif mode == "t":
         from utils.Tests import Tests
-        Tests.connection_tests_establishment_data()
+        #Tests.connection_tests_establishment_data()
+        Tests.data_resassembly_test()

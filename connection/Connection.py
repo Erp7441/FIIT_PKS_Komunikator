@@ -1,4 +1,4 @@
-from threading import Thread, Event
+from threading import Thread
 from time import sleep
 from typing import Callable
 

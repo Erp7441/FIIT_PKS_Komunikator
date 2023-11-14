@@ -1,6 +1,8 @@
 import socket as s
 
 from connection.SenderConnectionManager import SenderConnectionManager
+from data.Builder import disassemble
+from data.Data import Data
 from packet.Packet import Packet
 from utils.Constants import DEFAULT_PORT
 from utils.Utils import print_debug
@@ -25,7 +27,7 @@ class Sender:
         self.establish_connection()
         self.settings = None  # TODO:: Implement settings
 
-    def send_packet(self, packet: Packet):
+    def _send_packet_(self, packet: Packet):
         print_debug("Sent packet to {0}:{1} server with data: {2}".format(self.ip, self.port, packet.data))
         packet.send_to((self.ip, self.port), self.socket)
         ip, port, packet = self.connection_manager.await_packet()
@@ -47,6 +49,12 @@ class Sender:
         # Send ack packet
         # Remove connection from connections
         self.connection_manager.close_connection(self.ip, self.port)
+
+    def send(self, data: Data):
+        packets = disassemble(data)
+        for packet in packets:
+            self._send_packet_(packet)
+        # TODO:: Close communication?
 
     # Pseudo idea
     # Receive communication from assembler
