@@ -7,6 +7,8 @@ from packet.Packet import Packet
 from utils.Constants import MAX_FILE_SIZE, MAX_PAYLOAD_SIZE
 from utils.Utils import encode_str_to_hex, decode_str_from_hex
 
+# TODO:: Add max size of 2MB limit before disassembly
+
 
 def disassemble(data: Data):
     is_file = isinstance(data, File)
