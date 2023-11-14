@@ -48,20 +48,14 @@ class Receiver:
 
             # Begin establishing connection
             if packet.flags.syn and connection is None:
-                print_debug("Received SYN packet from {0}:{1}. Establishing connection...".format(ip, port))
                 self.connection_manager.start_establish_connection(packet, ip, port)
             # Begin refreshing connection
             elif packet.flags.syn and connection is not None:
-                self.received_syn_for_refreshing_connection(connection)
+                self.connection_manager.refresh_keepalive(connection)
 
             # Receive ACK from client
             if packet.flags.ack and connection is not None:
-                if connection.state == ConnectionState.REFRESHING:
-                    # Reset current keepalive time
-                    print_debug("Refreshed keepalive state of client!")
-                    connection.current_keepalive_time = connection.keepalive_time
-                else:
-                    self.received_ack(packet, connection)
+                self.received_ack(packet, connection)
 
             # Received data packet
             if Receiver.check_if_received_data_packet(packet, connection):
@@ -69,17 +63,7 @@ class Receiver:
 
             # Closing connection
             if packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
-                print_debug("Received FIN packet from {0}:{1} client".format(ip, port))
                 self.connection_manager.start_closing_connection(packet, connection)
-
-    #############################################################
-    # Received SYN for refreshing the connection keepalive state
-    #############################################################
-    def received_syn_for_refreshing_connection(self, connection):
-        print_debug("Received SYN packet from {0}:{1}. Refreshing connection...".format(connection.ip, connection.port))
-        self.connection_manager.send_syn_ack_packet(connection)
-        print_debug("Sent SYN-ACK packet to {0}:{1} client".format(connection.ip, connection.port))
-        connection.state = ConnectionState.REFRESHING
 
     ###############################################
     # Received ACK from client

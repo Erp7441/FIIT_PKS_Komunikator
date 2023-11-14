@@ -127,23 +127,6 @@ class ConnectionManager:
             return True
         return False
 
-    ###############################################
-    # Keep alive sequence
-    ###############################################
-    def refresh_keepalive(self, connection: Connection):
-        connection.keepalive_event.set()
-        self.send_syn_packet(connection)
-        if self.await_syn_ack(connection):
-            connection.current_keepalive_time = connection.keepalive_time
-            self.send_ack_packet(connection)
-            print_debug("Refreshed keepalive state!")
-            connection.keepalive_event.clear()
-            return True
-        print_debug("Failed to refresh keepalive state!")
-        connection.keepalive_event.clear()
-        return False
-
-
     # Pseudo idea
     # Hold list of active connections
     # Each connection has its own thread manager???

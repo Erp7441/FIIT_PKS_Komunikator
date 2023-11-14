@@ -28,3 +28,19 @@ class SenderConnectionManager(ConnectionManager):
         if self.await_fin_ack(connection):
             self.active_connections.remove(connection)
             print("Connection with", str(connection), "closed")
+
+    ###############################################
+    # Keep alive sequence
+    ###############################################
+    def refresh_keepalive(self, connection: Connection):
+        connection.keepalive_event.set()
+        self.send_syn_packet(connection)
+        if self.await_syn_ack(connection):
+            connection.current_keepalive_time = connection.keepalive_time
+            self.send_ack_packet(connection)
+            print_debug("Refreshed keepalive state!")
+            connection.keepalive_event.clear()
+            return True
+        print_debug("Failed to refresh keepalive state!")
+        connection.keepalive_event.clear()
+        return False

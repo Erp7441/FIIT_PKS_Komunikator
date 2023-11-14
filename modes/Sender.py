@@ -3,6 +3,7 @@ import socket as s
 from connection.SenderConnectionManager import SenderConnectionManager
 from packet.Packet import Packet
 from utils.Constants import DEFAULT_PORT
+from utils.Utils import print_debug
 
 
 # Settings
@@ -23,10 +24,11 @@ class Sender:
         self.establish_connection()
         self.settings = None  # TODO:: Implement settings
 
-    def send_packet(self, data: Packet):
-        if data.flags.file or data.flags.msg:
-            self.connection_manager.get_connection(self.server[0], self.server[1]).wait()
-        data.send_to(self.server, self.socket)
+    def send_packet(self, packet: Packet):
+        if packet.flags.file or packet.flags.msg:
+            self.connection_manager.get_connection(self.server[0], self.server[1]).keepalive_event.wait()
+        print_debug("Sent packet to {0}:{1} server with data: {2}".format(self.server[0], self.server[1], packet.data))
+        packet.send_to(self.server, self.socket)
 
     def establish_connection(self):
         # Send syn packet
