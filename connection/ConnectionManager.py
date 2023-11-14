@@ -1,3 +1,5 @@
+import threading
+
 from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
 from packet.Packet import Packet
@@ -17,6 +19,7 @@ class ConnectionManager:
         self.active_connections = []
         self.inactive_connections = []
         self.parent = parent
+        self.lock = threading.Lock()
 
     ###############################################
     # Connection

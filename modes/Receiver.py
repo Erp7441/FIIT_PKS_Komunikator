@@ -59,6 +59,9 @@ class Receiver:
 
             # Received data packet
             elif Receiver.check_if_received_data_packet(packet, connection):
+                with self.connection_manager.lock:
+                    self.connection_manager.lock.release()
+                    self.connection_manager.lock.acquire()
                 self.received_data(packet, connection)
 
             # Closing connection
