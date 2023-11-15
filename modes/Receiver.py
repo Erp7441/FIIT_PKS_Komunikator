@@ -46,6 +46,10 @@ class Receiver:
             print_debug("Received packet from {0}:{1} with flags {2}".format(ip, port, str(packet.flags)))
             connection = self.connection_manager.get_connection(ip, port)
 
+            if connection is None and (packet is None or not packet.flags.syn):
+                print_debug("Received invalid packet!")
+                continue
+
             # Begin establishing connection
             if packet.flags.syn and connection is None:
                 self.connection_manager.start_establish_connection(packet, ip, port)
@@ -59,9 +63,6 @@ class Receiver:
 
             # Received data packet
             elif Receiver.check_if_received_data_packet(packet, connection):
-                with self.connection_manager.lock:
-                    self.connection_manager.lock.release()
-                    self.connection_manager.lock.acquire()
                 self.received_data(packet, connection)
 
             # Closing connection
