@@ -15,8 +15,8 @@ class Packet:
             self.data = None if data is None else data
             self.crc = 0 if data is None else crc32(data)
         elif isinstance(data, str):
-            self.data = None if data is None else data
-            self.crc = 0 if data is None else crc32(convert_str_to_bytes(data))
+            self.data = None if data is None else convert_str_to_bytes(data)
+            self.crc = 0 if data is None else crc32(self.data)
         else:
             self.crc = 0 if data is None else data.crc32()
             self.data = None if data is None else data.encode()

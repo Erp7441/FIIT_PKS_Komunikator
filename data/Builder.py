@@ -5,6 +5,7 @@ from data.File import File
 from packet.Flags import Flags
 from packet.Packet import Packet
 from utils.Constants import MAX_PAYLOAD_SIZE
+from utils.Utils import convert_str_to_bytes
 
 
 # TODO:: Add max size of 2MB limit before disassembly
@@ -53,7 +54,7 @@ def assemble(packets: list[Packet]):
 
     # TODO:: Add decoding of info packet?
     info = loads(info_packet.data)
-    
+
     is_file = info.get('type') == 'File'
     name = info.get('name')
 
