@@ -1,7 +1,6 @@
 from os.path import basename
 
 from data.Data import Data
-#from utils.Constants import NAME_HEX_HEADER
 from utils.Utils import select_file
 
 
@@ -27,18 +26,16 @@ class File(Data):
 
     # Encodes file into hexadecimal string
     def encode(self):
-        #encoded_name = encode_str_to_hex(self.name) + NAME_HEX_HEADER  # Encodes name within the hex string
-        #encoded_data = encoded_name + super(File, self).encode()
-        #return encoded_data
         return super(File, self).encode()
 
     # Decodes hexadecimal string to data bytes (including name)
     def decode(self, encoded_data):
-        #self.name, data = decode_part(NAME_HEX_HEADER, encoded_data)  # Decodes name and removes its header from data
-        #return super(File, self).decode(data)  # Decode rest of the data
         return super(File, self).decode(encoded_data)
 
     # Saves current file object to a folder
     def save(self, folder_path):
         with open(folder_path + "/" + self.name, 'wb') as f:
             f.write(self.value)
+
+    def __str__(self):
+        return "NAME: " + self.name + "\n" + "DATA: " + super().__str__()

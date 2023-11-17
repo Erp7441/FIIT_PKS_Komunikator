@@ -35,14 +35,14 @@ class ConnectionManager:
         return None
 
     def remove_connection(self, connection: Connection):
-        print_debug(connection, "was removed!")
+        print_debug(connection.ip+":"+str(connection.port), "was removed!")
         if connection in self.inactive_connections:
             self.inactive_connections.remove(connection)
         elif connection in self.active_connections:
             self.active_connections.remove(connection)
 
     def kill_connection(self, connection: Connection):
-        print_debug(connection, "was killed!")
+        print_debug(connection.ip+":"+str(connection.port), "was killed!")
         rst_packet = Packet()
         rst_packet.flags.rst = True
         rst_packet.send_to((connection.ip, connection.port), self.parent.socket)
@@ -130,6 +130,20 @@ class ConnectionManager:
             connection.state = ConnectionState.CLOSED
             return True
         return False
+
+    def __str__(self):
+        _str = "Connection Manger:\n"
+
+        _str += "Active connections:\n"
+        for active_connection in self.active_connections:
+            _str += str(active_connection) + "\n"
+
+        _str += "Inactive connections:\n"
+        for inactive_connection in self.inactive_connections:
+            _str += str(inactive_connection) + "\n"
+
+        return _str
+
 
     # Pseudo idea
     # Hold list of active connections

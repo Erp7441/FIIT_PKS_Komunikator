@@ -12,3 +12,6 @@ class ConnectionState(Enum):
     CLOSED = 7
     RESET = 8
     REFRESHING = 9
+
+    def __str__(self):
+        return str(self.name)

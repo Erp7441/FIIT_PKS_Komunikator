@@ -69,3 +69,6 @@ class ReceiverConnectionManager(ConnectionManager):
                 return True
             print_debug("Failed to refresh keepalive state!")
             return False
+
+    def __str__(self):
+        return "Receiver " + super().__str__()

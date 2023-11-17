@@ -49,9 +49,13 @@ class Packet:
         socket.sendto(encoded_data_bytes, destination)
 
     def __str__(self):
-        _str = ""
-        _str += "Flags: " + str(self.flags) + "\n"
-        _str += "SEQ: " + str(self.seq) + "\n"
-        _str += "CRC: " + str(self.crc) + "\n"
-        _str += "Data: " + str(self.data) + "\n"
+        _str = "Packet:\n"
+        if self.flags is not None:
+            _str += "Flags: " + str(self.flags) + "\n"
+        if self.seq is not None:
+            _str += "SEQ: " + str(self.seq) + "\n"
+        if self.crc is not None:
+            _str += "CRC: " + str(self.crc) + "\n"
+        if self.data is not None:
+            _str += "Data: " + str(self.data) + "\n"
         return _str

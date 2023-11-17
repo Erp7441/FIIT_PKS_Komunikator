@@ -106,4 +106,26 @@ class Connection:
         self.keepalive_thread.start()
 
     def __str__(self):
-        return self.ip + ":" + str(self.port)
+        _str = "Connection:\n"
+
+        if self.ip is not None:
+            _str += "IP: " + str(self.ip) + "\n"
+        if self.port is not None:
+            _str += "Port: " + str(self.port) + "\n"
+
+        if self.state is not None:
+            _str += "State: " + str(self.state) + "\n"
+
+        if self.current_keepalive_time is not None:
+            _str += "Current keepalive time: " + str(self.current_keepalive_time) + "\n"
+
+        if self.packets is not None:
+            _str += "Packets:\n"
+            for packet in self.packets:
+                _str += str(packet) + "\n"
+
+        if self.keepalive_time is not None:
+            _str += "Keepalive time: " + str(self.keepalive_time) + "\n"
+        if self.keepalive_thread is not None:
+            _str += "Keepalive thread: " + str(self.keepalive_thread)
+        return _str

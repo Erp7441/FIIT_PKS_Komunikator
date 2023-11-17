@@ -7,3 +7,6 @@ class Menu:
         # Sending files
         # Sending messages
         # Managing settings
+
+    def __str__(self):
+        return ""  # TODO:: Implement

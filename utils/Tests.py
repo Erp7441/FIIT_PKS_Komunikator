@@ -101,10 +101,15 @@ class Tests:
         # sender = Sender("192.168.48.128")
         # sender.send(data)
 
-
-
-
     @staticmethod
     def connection_tests_server():
         from modes.Receiver import Receiver
         receiver = Receiver()
+
+    @classmethod
+    def test_string_conversion(cls):
+        # from modes.Sender import Sender
+        from modes.Receiver import Receiver
+        # sender = Sender("192.168.48.128")
+        receiver = Receiver()
+        pass

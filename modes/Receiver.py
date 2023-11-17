@@ -33,6 +33,8 @@ class Receiver:
     def __init__(self, port: int = DEFAULT_PORT, ip: str = "0.0.0.0"):
         self.connection_manager = ReceiverConnectionManager(self)
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
+        self.ip = ip,
+        self.port = port
         self.socket.bind((ip, port))
         self.settings = None  # TODO:: Implement
 
@@ -101,3 +103,17 @@ class Receiver:
             packet.flags.info or packet.flags.file or packet.flags.msg
             and connection is not None and connection.state == ConnectionState.ACTIVE
         )
+
+    def __str__(self):
+        _str = "Receiver:\n"
+        if self.connection_manager is not None:
+            _str += str(self.connection_manager)
+
+        if self.ip is not None:
+            _str += "IP: " + str(self.ip) + "\n"
+        if self.port is not None:
+            _str += "Port: " + str(self.port) + "\n"
+
+        if self.settings is not None:
+            _str += "Settings: " + str(self.settings) + "\n"
+        return _str

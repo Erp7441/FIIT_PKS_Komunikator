@@ -56,6 +56,22 @@ class Sender:
             self._send_packet_(packet)
         # TODO:: Close communication?
 
+    def __str__(self):
+        _str = "Sender:\n"
+        if self.connection_manager is not None:
+            _str += str(self.connection_manager) + "\n"
+
+        _str += "Connected to:\n"
+        if self.ip is not None:
+            _str += "IP: " + str(self.ip) + "\n"
+        if self.port is not None:
+            _str += "Port: " + str(self.port) + "\n"
+
+        if self.settings is not None:
+            _str += "Settings: " + str(self.settings) + "\n"
+        return _str
+
+
     # Pseudo idea
     # Receive communication from assembler
     # Create some kind of main loop like in client for data sending
