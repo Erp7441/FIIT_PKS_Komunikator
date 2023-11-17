@@ -2,8 +2,7 @@ from binascii import crc32
 
 from packet.Flags import Flags
 from utils.Constants import FLAGS_SIZE, SEQ_SIZE, CRC_SIZE
-from utils.Utils import convert_int_to_bytes, convert_bytes_to_str, convert_str_to_bytes, \
-    convert_bytes_to_int
+from utils.Utils import convert_int_to_bytes, convert_str_to_bytes, convert_bytes_to_int
 
 
 class Packet:
