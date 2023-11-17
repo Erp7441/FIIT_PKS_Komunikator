@@ -86,6 +86,7 @@ class Receiver:
             ip, port = connection.ip, connection.port
             self.connection_manager.finish_closing_connection(packet, connection)
             print("Connection with", str(ip)+":"+str(port), "closed")
+            # TODO:: Start file reassembly
 
     ###############################################
     # Received data packet from client
