@@ -35,36 +35,33 @@ def print_debug(*args, **kwargs):
 
 
 ###############################################
-# Decoding
+# Conversions
 ###############################################
-def decode_str_from_bytes(bytes_data: bytes):
+def convert_bytes_to_str(bytes_data: bytes):
     return str(bytes_data.decode(ENCODING))
 
 
-def decode_int_to_bytes(value: int):
-    return int.from_bytes(value, "big")
-
-
-###############################################
-# Encoding
-###############################################
-def encode_str_to_bytes(str_data: str):
+def convert_str_to_bytes(str_data: str):
     return bytes(str_data, ENCODING)
 
 
-def encode_int_to_bytes(value: int, length: int = 4):
+def convert_bytes_to_int(value: bytes):
+    return int.from_bytes(value, "big")
+
+
+def convert_int_to_bytes(value: int, length: int = 4):
     return value.to_bytes(length, "big")
 
 
 # Tries to convert any data type into bytes
-def encode_any_to_bytes(value):
+def convert_any_to_bytes(value):
     try:
         if isinstance(value, bytes):
             return value
         elif isinstance(value, int):
-            return encode_int_to_bytes(value)
+            return convert_int_to_bytes(value)
         else:
-            return encode_str_to_bytes(str(value))
+            return convert_str_to_bytes(str(value))
     except (TypeError, ValueError):
         return None
 

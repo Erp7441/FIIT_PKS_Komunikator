@@ -1,6 +1,6 @@
 from binascii import crc32
 
-from utils.Utils import decode_str_from_bytes, encode_str_to_bytes, encode_any_to_bytes
+from utils.Utils import convert_bytes_to_str, convert_str_to_bytes, convert_any_to_bytes
 
 
 # TODO:: Add info packet, with dict about data to be transmitted
@@ -14,9 +14,9 @@ class Data:
         elif isinstance(value, bytes):
             self.value = value
         elif isinstance(value, str):
-            self.value = encode_str_to_bytes(value)
+            self.value = convert_str_to_bytes(value)
         else:
-            self.value = encode_any_to_bytes(value)
+            self.value = convert_any_to_bytes(value)
 
     # Calculates CRC32 of the data
     def crc32(self):
@@ -24,16 +24,16 @@ class Data:
 
     # TODO:: Add encoding?
     def encode(self):
-        return self.value
+        return convert_bytes_to_str(self.value)
 
     # TODO:: Add decoding?
     def decode(self, encoded_data: str):
-        self.value = encoded_data
+        self.value = convert_str_to_bytes(encoded_data)
         return self
 
     # Convert data bytes into string
     def __str__(self):
-        return decode_str_from_bytes(self.value)
+        return convert_bytes_to_str(self.value)
 
     def __bytes__(self):
         return self.value
