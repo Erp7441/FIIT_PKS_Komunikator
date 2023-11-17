@@ -40,6 +40,7 @@ class ConnectionManager:
             self.inactive_connections.remove(connection)
         elif connection in self.active_connections:
             self.active_connections.remove(connection)
+        connection.keepalive_thread.stop()
 
     def kill_connection(self, connection: Connection):
         print_debug(connection.ip+":"+str(connection.port), "was killed!")
@@ -47,6 +48,7 @@ class ConnectionManager:
         rst_packet.flags.rst = True
         rst_packet.send_to((connection.ip, connection.port), self.parent.socket)
         self.remove_connection(connection)
+        connection.keepalive_thread.stop()
         connection.state = ConnectionState.RESET
 
     def move_connection_to_active(self, connection: Connection):
