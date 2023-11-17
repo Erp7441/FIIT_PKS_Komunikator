@@ -5,7 +5,7 @@ from data.File import File
 from packet.Flags import Flags
 from packet.Packet import Packet
 from utils.Constants import MAX_PAYLOAD_SIZE
-from utils.Utils import encode_str_to_hex, decode_str_from_hex
+
 
 # TODO:: Add max size of 2MB limit before disassembly
 
@@ -34,7 +34,9 @@ def disassemble(data: Data):
         "number_of_packets": len(packets),
         "total_size": len(encoded_data)  # TODO:: Fix value
     }
-    encoded_dict = encode_str_to_hex(dumps(info_dict))
+
+    # TODO:: Add encoding of info packet?
+    encoded_dict = dumps(info_dict)
 
     info_packet = Packet(Flags(info=True), data=encoded_dict)
     packets.insert(0, info_packet)
@@ -48,7 +50,10 @@ def disassemble(data: Data):
 def assemble(packets: list[Packet]):
     # Get info about the data we'll be dealing with
     info_packet = packets.pop(0)
-    info = loads(decode_str_from_hex(info_packet.data))
+
+    # TODO:: Add decoding of info packet?
+    info = loads(info_packet.data)
+    
     is_file = info.get('type') == 'File'
     name = info.get('name')
 

@@ -1,7 +1,6 @@
 from binascii import crc32
 
-from utils.Utils import decode_bytes_from_hex, encode_bytes_to_hex, decode_str_from_bytes, encode_str_to_bytes, \
-    encode_any_to_bytes
+from utils.Utils import decode_str_from_bytes, encode_str_to_bytes, encode_any_to_bytes
 
 
 # TODO:: Add info packet, with dict about data to be transmitted
@@ -23,13 +22,13 @@ class Data:
     def crc32(self):
         return crc32(self.value)
 
-    # Encodes data bytes into hex string
+    # TODO:: Add encoding?
     def encode(self):
-        return encode_bytes_to_hex(self.value)
+        return self.value
 
-    # Decodes hex string into data bytes
+    # TODO:: Add decoding?
     def decode(self, encoded_data: str):
-        self.value = decode_bytes_from_hex(encoded_data)
+        self.value = encoded_data
         return self
 
     # Convert data bytes into string

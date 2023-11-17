@@ -5,9 +5,6 @@ from modes.Sender import Sender
 # 192.168.48.128 - Server
 # 192.168.48.129 - Client
 
-# TODO:: Should I encode bytes to hex? Would it be better to do some other kind of encoding?
-
-
 if __name__ == "__main__":
     mode = input("Mode? [r/s/t]: ")
     if mode == "r":

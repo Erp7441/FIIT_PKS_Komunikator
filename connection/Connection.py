@@ -1,4 +1,3 @@
-from threading import Thread
 from time import sleep
 from typing import Callable
 
@@ -6,6 +5,7 @@ from connection.ConnectionState import ConnectionState
 from packet.Packet import Packet
 from utils.Constants import RECEIVER_KEEPALIVE_TIME, SENDER_KEEPALIVE_TIME, DEFAULT_KEEPALIVE_TIME
 from utils.KeepaliveThread import KeepaliveThread
+
 
 # Comm
 # Pseudo idea
