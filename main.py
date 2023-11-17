@@ -15,5 +15,5 @@ if __name__ == "__main__":
     elif mode == "t":
         from utils.Tests import Tests
         #Tests.connection_tests_establishment_data()
-        #Tests.data_resassembly_test()
-        Tests.test_string_conversion()
+        Tests.data_resassembly_test()
+        # Tests.test_string_conversion()

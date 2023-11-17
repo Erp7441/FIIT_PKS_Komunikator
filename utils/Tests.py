@@ -83,23 +83,23 @@ class Tests:
 
     @staticmethod
     def data_resassembly_test():
-        from data.Builder import disassemble, assemble
-        data = File(select=True)
-        packets = disassemble(data)
-        data2 = assemble(packets)
-        print(data.value == data2.value)
-        pass
-
-        data = Data("Hello There!")
-        packets = disassemble(data)
-        data2 = assemble(packets)
-        print(data.value == data2.value)
-        pass
-
-        # from modes.Sender import Sender
+        # from data.Builder import disassemble, assemble
         # data = File(select=True)
-        # sender = Sender("192.168.48.128")
-        # sender.send(data)
+        # packets = disassemble(data)
+        # data2 = assemble(packets)
+        # print(data.value == data2.value)
+        # pass
+        #
+        # data = Data("Hello There!")
+        # packets = disassemble(data)
+        # data2 = assemble(packets)
+        # print(data.value == data2.value)
+        # pass
+
+        from modes.Sender import Sender
+        data = File(select=True)
+        sender = Sender("192.168.48.128")
+        sender.send(data)
 
     @staticmethod
     def connection_tests_server():

@@ -48,13 +48,14 @@ class Sender:
         # Wait for one response packet of FINACK
         # Send ack packet
         # Remove connection from connections
+        # TODO:: LOCK CLOSING CONNECTION SO IT DOES NOT GET RECREATED AGAIN!
         self.connection_manager.close_connection(self.ip, self.port)
 
     def send(self, data: Data):
         packets = disassemble(data)
         for packet in packets:
             self._send_packet_(packet)
-        # TODO:: Close communication?
+        self.close_connection()
 
     def __str__(self):
         _str = "Sender:\n"

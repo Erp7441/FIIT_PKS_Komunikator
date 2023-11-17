@@ -17,19 +17,21 @@ class SenderConnectionManager(ConnectionManager):
 
         if self.await_syn_ack(connection):
             self.active_connections.append(connection)
-            print("Connection with", str(connection), "established")
+            print("Connection with", connection.ip+":"+str(connection.port), "established")
         return connection
 
     ###############################################
     # Closing connection (sender)
     ###############################################
     def close_connection(self, ip: str, port: int):
-        connection = self.get_connection(ip, port)
-        self.send_fin_packet(connection)
+        with self.lock:  # TODO:: Needed?
+            connection = self.get_connection(ip, port)
+            self.send_fin_packet(connection)
 
-        if self.await_fin_ack(connection):
-            self.active_connections.remove(connection)
-            print("Connection with", str(connection), "closed")
+            if self.await_fin_ack(connection):
+                self.active_connections.remove(connection)
+                connection.keepalive_thread.stop()
+                print("Connection with", connection.ip+":"+str(connection.port), "closed")
 
     ###############################################
     # Keep alive sequence

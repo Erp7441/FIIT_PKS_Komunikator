@@ -35,20 +35,23 @@ class ReceiverConnectionManager(ConnectionManager):
     # Closing connection (receiver)
     ###############################################
     def start_closing_connection(self, packet, connection: Connection):
-        if packet.flags.fin and connection is not None:
-            print_debug("Received FIN packet from {0}:{1} client".format(connection.ip, connection.port))
-            connection.state = ConnectionState.FIN_RECEIVED
-            self.move_connection_to_inactive(connection)
-            self.send_fin_ack_packet(connection)
+        with self.lock:  # TODO:: Needed?
+            if packet.flags.fin and connection is not None:
+                print_debug("Received FIN packet from {0}:{1} client".format(connection.ip, connection.port))
+                connection.state = ConnectionState.FIN_RECEIVED
+                self.move_connection_to_inactive(connection)
+                self.send_fin_ack_packet(connection)
 
     def finish_closing_connection(self, packet, connection: Connection):
-        if packet.flags.ack and connection and connection.state == ConnectionState.FIN_ACK_SENT:
-            # If we received ack after syn ack. Move communication to active list
-            connection.state = ConnectionState.CLOSED
-            self.remove_connection(connection)
-        elif packet.flags.nack and connection and connection.state == ConnectionState.SYN_ACK_SENT:
-            # If we received nack after syn ack. Resend syn ack
-            self.send_fin_ack_packet(connection)
+        with self.lock:  # TODO:: Needed?
+            if packet.flags.ack and connection and connection.state == ConnectionState.FIN_ACK_SENT:
+                # If we received ack after syn ack. Move communication to active list
+                connection.state = ConnectionState.CLOSED
+                self.remove_connection(connection)
+                connection.keepalive_thread.stop()
+            elif packet.flags.nack and connection and connection.state == ConnectionState.SYN_ACK_SENT:
+                # If we received nack after syn ack. Resend syn ack
+                self.send_fin_ack_packet(connection)
 
         # TODO:: ACK wont be received within 5 seconds, kill connection?
 
