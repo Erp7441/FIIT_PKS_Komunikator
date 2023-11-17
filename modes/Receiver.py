@@ -96,6 +96,7 @@ class Receiver:
         connection.add_packet(packet)
         print_debug("Sent ACK packet to {0}:{1} client".format(connection.ip, connection.port))
         # TODO:: Implement sending of multiple ACKs here (server)
+        # TODO:: Implement CRC checking
         self.connection_manager.send_ack_packet(connection)
 
     @staticmethod
