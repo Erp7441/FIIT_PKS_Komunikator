@@ -4,7 +4,7 @@ from data.Data import Data
 from data.File import File
 from packet.Flags import Flags
 from packet.Packet import Packet
-from utils.Constants import MAX_FILE_SIZE, MAX_PAYLOAD_SIZE
+from utils.Constants import MAX_PAYLOAD_SIZE
 from utils.Utils import encode_str_to_hex, decode_str_from_hex
 
 # TODO:: Add max size of 2MB limit before disassembly
@@ -12,13 +12,12 @@ from utils.Utils import encode_str_to_hex, decode_str_from_hex
 
 def disassemble(data: Data):
     is_file = isinstance(data, File)
-    size = MAX_FILE_SIZE if isinstance(data, File) else MAX_PAYLOAD_SIZE
 
     # Encode the data
     encoded_data = data.encode()
 
     # Split encoded data into groups of size
-    split = [encoded_data[i:i + size] for i in range(0, len(encoded_data), size)]
+    split = [encoded_data[i:i + MAX_PAYLOAD_SIZE] for i in range(0, len(encoded_data), MAX_PAYLOAD_SIZE)]
 
     packets = []
     for seq, bytes_data in enumerate(split):
@@ -27,9 +26,11 @@ def disassemble(data: Data):
         packet = Packet(flags=flags, seq=seq+1, data=bytes_data)
         packets.append(packet)
 
+    # TODO:: Split this packet in case the name is too long
     # TODO:: Add name to this info and remove it from where its not needed.
     info_dict = {
         "type": 'File' if is_file else 'Data',
+        "name": data.name if is_file else None,
         "number_of_packets": len(packets),
         "total_size": len(encoded_data)  # TODO:: Fix value
     }
@@ -49,6 +50,7 @@ def assemble(packets: list[Packet]):
     info_packet = packets.pop(0)
     info = loads(decode_str_from_hex(info_packet.data))
     is_file = info.get('type') == 'File'
+    name = info.get('name')
 
 
     # Join together the packet data values
@@ -56,6 +58,6 @@ def assemble(packets: list[Packet]):
 
     # Decode the data
     if is_file:
-        return File().decode(data)
+        return File(name=name).decode(data)
     else:
         return Data().decode(data)

@@ -47,3 +47,11 @@ class Packet:
         encoded_data_string = self.encode()
         encoded_data_bytes = encode_str_to_bytes(encoded_data_string)
         socket.sendto(encoded_data_bytes, destination)
+
+    def __str__(self):
+        _str = ""
+        _str += "Flags: " + str(self.flags) + "\n"
+        _str += "SEQ: " + str(self.seq) + "\n"
+        _str += "CRC: " + str(self.crc) + "\n"
+        _str += "Data: " + str(self.data) + "\n"
+        return _str

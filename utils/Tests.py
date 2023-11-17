@@ -90,6 +90,12 @@ class Tests:
         print(data.value == data2.value)
         pass
 
+        data = Data("Hello There!")
+        packets = disassemble(data)
+        data2 = assemble(packets)
+        print(data.value == data2.value)
+        pass
+
         # from modes.Sender import Sender
         # data = File(select=True)
         # sender = Sender("192.168.48.128")

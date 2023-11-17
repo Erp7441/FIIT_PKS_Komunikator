@@ -54,15 +54,6 @@ def decode_int_from_hex(hex_data: str):
     return int.from_bytes(decode_bytes_from_hex(hex_data))
 
 
-# Decodes part of hex data string
-def decode_part(part_name: str, data):
-    if data is None:
-        return
-    encoded_part = data[:data.index(part_name)]
-    data = data[len(encoded_part + part_name):]  # Removes data header from the hex data string
-    return decode_str_from_hex(encoded_part), data  # Return extracted data along with modified hex string
-
-
 ###############################################
 # Encoding
 ###############################################

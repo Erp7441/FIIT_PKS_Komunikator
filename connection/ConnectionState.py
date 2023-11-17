@@ -12,4 +12,3 @@ class ConnectionState(Enum):
     CLOSED = 7
     RESET = 8
     REFRESHING = 9
-
