@@ -41,6 +41,7 @@ class ConnectionManager:
         elif connection in self.active_connections:
             self.active_connections.remove(connection)
         connection.keepalive_thread.stop()
+        connection.state = ConnectionState.CLOSED
 
     def kill_connection(self, connection: Connection):
         print_debug(connection.ip+":"+str(connection.port), "was killed!")
@@ -129,7 +130,7 @@ class ConnectionManager:
             and connection.ip == ip and connection.port == port
         ):
             self.send_ack_packet(connection)
-            connection.state = ConnectionState.CLOSED
+            self.remove_connection(connection)
             return True
         return False
 
