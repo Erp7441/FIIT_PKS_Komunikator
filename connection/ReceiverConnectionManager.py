@@ -48,8 +48,7 @@ class ReceiverConnectionManager(ConnectionManager):
                 # If we received ack after syn ack. Move communication to active list
                 connection.state = ConnectionState.CLOSED
                 self.remove_connection(connection)
-                connection.keepalive_thread.stop()
-            elif packet.flags.nack and connection and connection.state == ConnectionState.SYN_ACK_SENT:
+            elif packet.flags.nack and connection and connection.state == ConnectionState.FIN_ACK_SENT:
                 # If we received nack after syn ack. Resend syn ack
                 self.send_fin_ack_packet(connection)
 

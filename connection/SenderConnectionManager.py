@@ -29,8 +29,7 @@ class SenderConnectionManager(ConnectionManager):
             self.send_fin_packet(connection)
 
             if self.await_fin_ack(connection):
-                self.active_connections.remove(connection)
-                connection.keepalive_thread.stop()
+                self.remove_connection(connection)
                 print("Connection with", connection.ip+":"+str(connection.port), "closed")
 
     ###############################################
