@@ -35,11 +35,9 @@ class Connection:
             self._init_keep_alive_(keepalive_time, DEFAULT_KEEPALIVE_TIME)
 
     def add_packet(self, packet: Packet):
-        # TODO:: Check if packet with seq number is not already present
         self.packets.append(packet)
         self.packets.sort(key=lambda seq: seq.seq)
 
-    # TODO:: Refactor to client and server
     ###############################################
     # Client (sender) keep alive
     ###############################################

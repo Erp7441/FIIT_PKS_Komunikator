@@ -47,7 +47,7 @@ class ConnectionManager:
         print_debug(connection.ip+":"+str(connection.port), "was killed!")
         rst_packet = Packet()
         rst_packet.flags.rst = True
-        rst_packet.send_to((connection.ip, connection.port), self.parent.socket)
+        rst_packet.send_to(connection.ip, connection.port, self.parent.socket)
         self.remove_connection(connection)
         connection.keepalive_thread.stop()
         connection.state = ConnectionState.RESET
@@ -68,33 +68,33 @@ class ConnectionManager:
     def send_syn_packet(self, connection: Connection):
         syn_packet = Packet()
         syn_packet.flags.syn = True
-        syn_packet.send_to((connection.ip, connection.port), self.parent.socket)
+        syn_packet.send_to(connection.ip, connection.port, self.parent.socket)
         connection.state = ConnectionState.SYN_SENT
 
     def send_fin_packet(self, connection: Connection):
         fin_packet = Packet()
         fin_packet.flags.fin = True
-        fin_packet.send_to((connection.ip, connection.port), self.parent.socket)
+        fin_packet.send_to(connection.ip, connection.port, self.parent.socket)
         connection.state = ConnectionState.FIN_SENT
 
     def send_syn_ack_packet(self, connection: Connection):
         syn_ack_packet = Packet()
         syn_ack_packet.flags.syn = True
         syn_ack_packet.flags.ack = True
-        syn_ack_packet.send_to((connection.ip, connection.port), self.parent.socket)
+        syn_ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
         connection.state = ConnectionState.SYN_ACK_SENT
 
     def send_fin_ack_packet(self, connection: Connection):
         fin_ack_packet = Packet()
         fin_ack_packet.flags.fin = True
         fin_ack_packet.flags.ack = True
-        fin_ack_packet.send_to((connection.ip, connection.port), self.parent.socket)
+        fin_ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
         connection.state = ConnectionState.FIN_ACK_SENT
 
     def send_ack_packet(self, connection):
         ack_packet = Packet()
         ack_packet.flags.ack = True
-        ack_packet.send_to((connection.ip, connection.port), self.parent.socket)
+        ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
 
     ###############################################
     # Await packets
@@ -107,7 +107,6 @@ class ConnectionManager:
         return ip, port, packet
 
     def await_syn_ack(self, connection: Connection):
-        # TODO:: Handle not receiving syn ack (Kill connection)?
         ip, port, packet = self.await_packet()
 
         if (
@@ -118,10 +117,11 @@ class ConnectionManager:
             self.send_ack_packet(connection)
             connection.state = ConnectionState.ACTIVE
             return True
+        else:
+            self.kill_connection(connection)
         return False
 
     def await_fin_ack(self, connection: Connection):
-        # TODO:: Handle not receiving fin ack (Kill connection)?
         ip, port, packet = self.await_packet()
 
         if (
@@ -130,8 +130,9 @@ class ConnectionManager:
             and connection.ip == ip and connection.port == port
         ):
             self.send_ack_packet(connection)
-            self.remove_connection(connection)
             return True
+        else:
+            self.kill_connection(connection)
         return False
 
     def __str__(self):

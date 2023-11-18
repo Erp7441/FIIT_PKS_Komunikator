@@ -24,7 +24,7 @@ class SenderConnectionManager(ConnectionManager):
     # Closing connection (sender)
     ###############################################
     def close_connection(self, ip: str, port: int):
-        with self.lock:  # TODO:: Needed?
+        with self.lock:
             connection = self.get_connection(ip, port)
             self.send_fin_packet(connection)
 

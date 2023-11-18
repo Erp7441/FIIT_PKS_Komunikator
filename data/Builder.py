@@ -26,13 +26,12 @@ def disassemble(data: Data):
         packet = Packet(flags=flags, seq=seq+1, data=bytes_data)
         packets.append(packet)
 
-    # TODO:: Split this packet in case the name is too long
-    # TODO:: Add name to this info and remove it from where its not needed.
     info_dict = {
         "type": 'File' if is_file else 'Data',
         "name": data.name if is_file else None,
         "number_of_packets": len(packets),
-        "total_size": len(encoded_data)  # TODO:: Fix value
+        "total_encoded_size": len(encoded_data),
+        "total_size": len(data.value) if data.value is not None else 0
     }
 
     # TODO:: Add encoding of info packet?
@@ -40,9 +39,6 @@ def disassemble(data: Data):
 
     info_packet = Packet(Flags(info=True), data=encoded_dict)
     packets.insert(0, info_packet)
-
-    # TODO:: Append info packet at the begining
-    # TODO:: Append fin packet at the end (or find better way by "closing" communicaiton after send is done)
 
     return packets
 
@@ -56,7 +52,6 @@ def assemble(packets: list[Packet]):
 
     is_file = info.get('type') == 'File'
     name = info.get('name')
-
 
     # Join together the packet data values
     data = ''.join([packet.data for packet in packets])

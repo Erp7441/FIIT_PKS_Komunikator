@@ -3,9 +3,6 @@ from binascii import crc32
 from utils.Utils import convert_bytes_to_str, convert_str_to_bytes, convert_any_to_bytes
 
 
-# TODO:: Add info packet, with dict about data to be transmitted
-
-
 class Data:
     def __init__(self, value=None):
         # Value is type of bytes to represent many data structures

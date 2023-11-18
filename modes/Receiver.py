@@ -36,7 +36,7 @@ class Receiver:
         self.ip = ip,
         self.port = port
         self.socket.bind((ip, port))
-        self.settings = None  # TODO:: Implement
+        self.settings = None  # TODO:: Implement settings
 
         print("Waiting for connection...")
 

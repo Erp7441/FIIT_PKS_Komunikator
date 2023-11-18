@@ -39,10 +39,9 @@ class Packet:
         return self
 
     # TODO:: Should this class be responsible for this?
-    # TODO:: Get rid of tuples?
-    def send_to(self, destination: tuple, socket):
+    def send_to(self, ip: str, port: int, socket):
         encoded_data_bytes = self.encode()
-        socket.sendto(encoded_data_bytes, destination)
+        socket.sendto(encoded_data_bytes, (ip, port))
 
     def __str__(self):
         _str = "Packet:\n"

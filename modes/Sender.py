@@ -21,7 +21,6 @@ class Sender:
     def __init__(self, ip: str, port: int = DEFAULT_PORT):
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
         self.connection_manager = SenderConnectionManager(self)
-        # self.socket.bind(('0.0.0.0', 33333))  # TODO:: Enforce client port?
         self.ip = ip
         self.port = port
         self.establish_connection()
@@ -29,8 +28,10 @@ class Sender:
 
     def _send_packet_(self, packet: Packet):
         print_debug("Sent packet to {0}:{1} server with data: {2}".format(self.ip, self.port, packet.data))
-        packet.send_to((self.ip, self.port), self.socket)
+
+        packet.send_to(self.ip, self.port, self.socket)
         ip, port, packet = self.connection_manager.await_packet()
+
         # TODO:: Implement sending of multiple ACKs here (client)
         if ip != self.ip or port != self.port or not packet.flags.ack:
             connection = self.connection_manager.get_connection(self.ip, self.port)
@@ -48,7 +49,6 @@ class Sender:
         # Wait for one response packet of FINACK
         # Send ack packet
         # Remove connection from connections
-        # TODO:: LOCK CLOSING CONNECTION SO IT DOES NOT GET RECREATED AGAIN!
         self.connection_manager.close_connection(self.ip, self.port)
 
     def send(self, data: Data):

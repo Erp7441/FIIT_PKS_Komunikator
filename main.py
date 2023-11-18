@@ -5,6 +5,8 @@ from modes.Sender import Sender
 # 192.168.48.128 - Server
 # 192.168.48.129 - Client
 
+# TODO:: Check if connection reset from server side works. (Case where client connection dies suddenly)
+
 if __name__ == "__main__":
     mode = input("Mode? [r/s/t]: ")
     if mode == "r":
