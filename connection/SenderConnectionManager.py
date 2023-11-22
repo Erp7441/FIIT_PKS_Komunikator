@@ -41,8 +41,8 @@ class SenderConnectionManager(ConnectionManager):
             if self.await_syn_ack(connection):
                 connection.current_keepalive_time = connection.keepalive_time
                 self.send_ack_packet(connection)
-                print_debug("Refreshed keepalive state!")
                 connection.state = ConnectionState.ACTIVE
+                print_debug("Refreshed keepalive state!")
                 return True
             print_debug("Failed to refresh keepalive state!", color='orange')
             return False

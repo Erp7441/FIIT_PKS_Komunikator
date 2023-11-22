@@ -61,15 +61,15 @@ class ReceiverConnectionManager(ConnectionManager):
     def refresh_keepalive(self, connection: Connection):
         with (self.lock):
             self.send_syn_ack_packet(connection)
-            ip, port, packet = self.await_packet()
+            ip, port, packet = self.await_packet(connection)
             if (
                 packet is not None and
                 (connection.ip == ip and connection.port == port and packet.flags.ack)
             ):
                 # Reset current keepalive time
-                print_debug("Refreshed keepalive state of client!", color="green")
                 connection.current_keepalive_time = connection.keepalive_time
                 connection.state = ConnectionState.ACTIVE
+                print_debug("Refreshed keepalive state of client!", color="green")
                 return True
             print_debug("Failed to refresh keepalive state!", color="red")
             return False

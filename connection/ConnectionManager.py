@@ -36,13 +36,13 @@ class ConnectionManager:
         return None
 
     def remove_connection(self, connection: Connection):
-        print_debug(connection.ip+":"+str(connection.port), "was removed!")
         if connection in self.inactive_connections:
             self.inactive_connections.remove(connection)
         elif connection in self.active_connections:
             self.active_connections.remove(connection)
         connection.keepalive_thread.stop()
         connection.state = ConnectionState.CLOSED
+        print_debug(connection.ip+":"+str(connection.port), "was removed!")
 
     def kill_connection(self, connection: Connection):
         print_debug(connection.ip+":"+str(connection.port), "was killed!")
@@ -70,31 +70,31 @@ class ConnectionManager:
         syn_packet = Packet()
         syn_packet.flags.syn = True
         syn_packet.send_to(connection.ip, connection.port, self.parent.socket)
-        print_debug("Sent SYN packet to {0}:{1}".format(connection.ip, connection.port))
         connection.state = ConnectionState.SYN_SENT
+        print_debug("Sent SYN packet to {0}:{1}".format(connection.ip, connection.port))
 
     def send_fin_packet(self, connection: Connection):
         fin_packet = Packet()
         fin_packet.flags.fin = True
         fin_packet.send_to(connection.ip, connection.port, self.parent.socket)
-        print_debug("Sent FIN packet to {0}:{1}".format(connection.ip, connection.port))
         connection.state = ConnectionState.FIN_SENT
+        print_debug("Sent FIN packet to {0}:{1}".format(connection.ip, connection.port))
 
     def send_syn_ack_packet(self, connection: Connection):
         syn_ack_packet = Packet()
         syn_ack_packet.flags.syn = True
         syn_ack_packet.flags.ack = True
         syn_ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
-        print_debug("Sent SYN-ACK packet to {0}:{1}".format(connection.ip, connection.port))
         connection.state = ConnectionState.SYN_ACK_SENT
+        print_debug("Sent SYN-ACK packet to {0}:{1}".format(connection.ip, connection.port))
 
     def send_fin_ack_packet(self, connection: Connection):
         fin_ack_packet = Packet()
         fin_ack_packet.flags.fin = True
         fin_ack_packet.flags.ack = True
         fin_ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
-        print_debug("Sent FIN-ACK packet to {0}:{1}".format(connection.ip, connection.port))
         connection.state = ConnectionState.FIN_ACK_SENT
+        print_debug("Sent FIN-ACK packet to {0}:{1}".format(connection.ip, connection.port))
 
     def send_ack_packet(self, connection):
         ack_packet = Packet()
@@ -105,24 +105,30 @@ class ConnectionManager:
     ###############################################
     # Await packets
     ###############################################
-    def await_packet(self):
+    def await_packet(self, connection: Connection = None):
         # TODO:: Implement retry?
         # TODO:: Implement timeout
 
         try:
             data, addr = self.parent.socket.recvfrom(MTU)
         except ConnectionResetError:
-            return None, None, None # TODO:: Should be returning or throwing?
+            # If socket froze while waiting for packet kill connection
+            if connection is not None:
+                self.kill_connection(connection)
+            return None, None, None
 
         ip = addr[0]
         port = addr[1]
         packet = Packet().decode(data)
-        if packet is None:
-            return None, None, None
+
+        if packet is None or (connection is not None and connection.ip != ip and connection.port != port):
+            # If packet is broken, return ip and port and None
+            # TODO:: Write down number of the broken packet to request it later
+            return ip, port, None
         return ip, port, packet
 
     def await_syn_ack(self, connection: Connection):
-        ip, port, packet = self.await_packet()
+        ip, port, packet = self.await_packet(connection)
 
         if (
             packet is not None and
@@ -139,7 +145,7 @@ class ConnectionManager:
         return False
 
     def await_fin_ack(self, connection: Connection):
-        ip, port, packet = self.await_packet()
+        ip, port, packet = self.await_packet(connection)
 
         if (
             packet is not None and

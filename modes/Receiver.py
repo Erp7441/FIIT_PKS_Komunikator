@@ -6,7 +6,7 @@ from connection.ReceiverConnectionManager import ReceiverConnectionManager
 from data.Builder import assemble
 from data.File import File
 from packet.Packet import Packet
-from utils.Constants import DEFAULT_PORT
+from utils.Constants import DEFAULT_PORT, SOCKET_TIMEOUT
 from utils.Utils import print_debug, print_color
 
 
@@ -22,11 +22,14 @@ from utils.Utils import print_debug, print_color
 class Receiver:
     def __init__(self, port: int = DEFAULT_PORT, ip: str = "0.0.0.0", settings: dict = None):
         self.connection_manager = ReceiverConnectionManager(self)
-        self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
         self.ip = ip,
         self.port = port
-        self.socket.bind((ip, port))
         self.settings = settings  # TODO:: Implement settings
+
+        # Socket initialization
+        self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
+        self.socket.settimeout(SOCKET_TIMEOUT)
+        self.socket.bind((ip, port))
 
         print_color("Waiting for connection...", color="blue")
 
