@@ -7,7 +7,7 @@ from data.Builder import assemble
 from data.File import File
 from packet.Packet import Packet
 from utils.Constants import DEFAULT_PORT
-from utils.Utils import print_debug
+from utils.Utils import print_debug, print_color
 
 
 # TODO:: Implement Selective repeat ARQ
@@ -28,7 +28,7 @@ class Receiver:
         self.socket.bind((ip, port))
         self.settings = settings  # TODO:: Implement settings
 
-        print("Waiting for connection...")
+        print_color("Waiting for connection...", color="blue")
 
         ###############################################
         # Receiver main loop
@@ -49,6 +49,7 @@ class Receiver:
                 self.connection_manager.start_establish_connection(packet, ip, port)
             # Begin refreshing connection
             elif packet.flags.syn and connection is not None:
+                print_debug("Received SYN packet from {0}:{1}. Refreshing connection...".format(connection.ip, connection.port))
                 self.connection_manager.refresh_keepalive(connection)
 
             # Receive ACK from client
@@ -67,17 +68,17 @@ class Receiver:
     # Received ACK from client
     ###############################################
     def received_ack(self, packet: Packet, connection: Connection):
-        print_debug("Received ACK packet from {0}:{1} client".format(connection.ip, connection.port))
+        print_debug("Received ACK packet from {0}:{1}".format(connection.ip, connection.port))
 
         # For establishing connection
         if connection.state == ConnectionState.SYN_ACK_SENT:
             self.connection_manager.finish_establish_connection(packet, connection)
-            print("Connection with", str(connection.ip)+":"+str(connection.port), "established")
+            print_color("Connection with", str(connection.ip)+":"+str(connection.port), "established", color='green')
         # For terminating connection
         elif connection.state == ConnectionState.FIN_ACK_SENT:
             ip, port = connection.ip, connection.port
             self.connection_manager.finish_closing_connection(packet, connection)
-            print("Connection with", str(ip)+":"+str(port), "closed")
+            print_color("Connection with", str(ip)+":"+str(port), "closed", color="green")
 
             Receiver.reassemble_and_output_data(connection)
 
@@ -85,9 +86,9 @@ class Receiver:
     # Received data packet from client
     ###############################################
     def received_data(self, packet: Packet, connection: Connection):
-        print_debug("Received DATA packet from {0}:{1} client".format(connection.ip, connection.port))
+        print_debug("Received DATA packet from {0}:{1}".format(connection.ip, connection.port))
         connection.add_packet(packet)
-        print_debug("Sent ACK packet to {0}:{1} client".format(connection.ip, connection.port))
+        print_debug("Sent ACK packet to {0}:{1}".format(connection.ip, connection.port))
         # TODO:: Implement sending of multiple ACKs here (server)
         self.connection_manager.send_ack_packet(connection)
 
@@ -105,8 +106,7 @@ class Receiver:
         if isinstance(data, File):
             data.save("C:\\Users\\Martin\\Downloads")  # TODO:: Move path to settings
         else:
-            print(str(data))
-
+            print_color(str(data), color="blue")
 
     def __str__(self):
         _str = "Receiver:\n"

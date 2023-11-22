@@ -27,31 +27,47 @@ def select_folder():
 # Prints
 ###############################################
 def print_color(*args, color="white", **kwargs):
-    color_codes = {
-        'black': '30',
-        'red': '31',
-        'green': '32',
-        'yellow': '33',
-        'blue': '34',
-        'purple': '35',
-        'cyan': '36',
-        'white': '37'
-    }
+    color_code = None
 
-    if color not in color_codes:
-        raise ValueError(f"Invalid color: {color}")
+    if isinstance(color, int):
+        if color < 0 or color > 255:
+            raise ValueError(f"Invalid color code: {color}")
+        color_code = f"38;5;{color}"
+    elif isinstance(color, str):
+        color_codes = {
+            'black': '30',
+            'red': '31',
+            'green': '32',
+            'yellow': '33',
+            'blue': '34',
+            'purple': '35',
+            'cyan': '36',
+            'white': '37',
+            'orange': '38;5;208',
+            'navy': '38;5;4',
+            'teal': '38;5;6',
+            'lime': '38;5;10',
+            'fuchsia': '38;5;13',
+            'aqua': '38;5;14',
+            'gray': '38;5;16',
+        }
 
-    color_code = color_codes[color]
-    message = " ".join(str(arg) for arg in args)
-    print(f"\033[{color_code}m{message}\033[0m", **kwargs)
+        if color not in color_codes:
+            raise ValueError(f"Invalid color: {color}")
+
+        color_code = color_codes[color]
+
+    if color_code is not None:
+        message = " ".join(str(arg) for arg in args)
+        print(f"\033[{color_code}m{message}\033[0m", **kwargs)
 
 
-def print_debug(*args, **kwargs):
+def print_debug(*args, color="yellow", **kwargs):
     if DEBUG:
         timestamp = datetime.now().strftime("%H:%M:%S")
         prefix = f"DEBUG [{timestamp}]: "
         message = " ".join(str(arg) for arg in args)
-        print_color(prefix + message, color="yellow", **kwargs)
+        print_color(prefix + message, color=color, **kwargs)
 
 
 ###############################################

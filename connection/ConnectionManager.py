@@ -70,12 +70,14 @@ class ConnectionManager:
         syn_packet = Packet()
         syn_packet.flags.syn = True
         syn_packet.send_to(connection.ip, connection.port, self.parent.socket)
+        print_debug("Sent SYN packet to {0}:{1}".format(connection.ip, connection.port))
         connection.state = ConnectionState.SYN_SENT
 
     def send_fin_packet(self, connection: Connection):
         fin_packet = Packet()
         fin_packet.flags.fin = True
         fin_packet.send_to(connection.ip, connection.port, self.parent.socket)
+        print_debug("Sent FIN packet to {0}:{1}".format(connection.ip, connection.port))
         connection.state = ConnectionState.FIN_SENT
 
     def send_syn_ack_packet(self, connection: Connection):
@@ -83,6 +85,7 @@ class ConnectionManager:
         syn_ack_packet.flags.syn = True
         syn_ack_packet.flags.ack = True
         syn_ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
+        print_debug("Sent SYN-ACK packet to {0}:{1}".format(connection.ip, connection.port))
         connection.state = ConnectionState.SYN_ACK_SENT
 
     def send_fin_ack_packet(self, connection: Connection):
@@ -90,20 +93,27 @@ class ConnectionManager:
         fin_ack_packet.flags.fin = True
         fin_ack_packet.flags.ack = True
         fin_ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
+        print_debug("Sent FIN-ACK packet to {0}:{1}".format(connection.ip, connection.port))
         connection.state = ConnectionState.FIN_ACK_SENT
 
     def send_ack_packet(self, connection):
         ack_packet = Packet()
         ack_packet.flags.ack = True
         ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
+        print_debug("Sent ACK packet to {0}:{1}".format(connection.ip, connection.port))
 
     ###############################################
     # Await packets
     ###############################################
     def await_packet(self):
         # TODO:: Implement retry?
-        # TODO:: Add try catch?
-        data, addr = self.parent.socket.recvfrom(MTU)
+        # TODO:: Implement timeout
+
+        try:
+            data, addr = self.parent.socket.recvfrom(MTU)
+        except ConnectionResetError:
+            return None, None, None # TODO:: Should be returning or throwing?
+
         ip = addr[0]
         port = addr[1]
         packet = Packet().decode(data)

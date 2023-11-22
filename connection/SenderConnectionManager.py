@@ -1,7 +1,7 @@
 from connection.Connection import Connection
 from connection.ConnectionManager import ConnectionManager
 from connection.ConnectionState import ConnectionState
-from utils.Utils import print_debug
+from utils.Utils import print_debug, print_color
 
 
 class SenderConnectionManager(ConnectionManager):
@@ -16,8 +16,9 @@ class SenderConnectionManager(ConnectionManager):
         self.send_syn_packet(connection)
 
         if self.await_syn_ack(connection):
+            print_debug("Received SYN-ACK packet from {0}:{1}".format(connection.ip, connection.port))
             self.active_connections.append(connection)
-            print("Connection with", connection.ip+":"+str(connection.port), "established")
+            print_color("Connection with", connection.ip+":"+str(connection.port), "established", color='green')
         return connection
 
     ###############################################
@@ -29,8 +30,9 @@ class SenderConnectionManager(ConnectionManager):
             self.send_fin_packet(connection)
 
             if self.await_fin_ack(connection):
+                print_debug("Received FIN-ACK packet from {0}:{1}".format(connection.ip, connection.port))
                 self.remove_connection(connection)
-                print("Connection with", connection.ip+":"+str(connection.port), "closed")
+                print_color("Connection with", connection.ip+":"+str(connection.port), "closed", color='green')
 
     ###############################################
     # Keep alive sequence
@@ -38,16 +40,13 @@ class SenderConnectionManager(ConnectionManager):
     def refresh_keepalive(self, connection: Connection):
         with self.lock:
             self.send_syn_packet(connection)
-            print_debug("Sent SYN packet to {0}:{1} client".format(connection.ip, connection.port))
             if self.await_syn_ack(connection):
-                print_debug("Received SYN-ACK packet from {0}:{1} client".format(connection.ip, connection.port))
                 connection.current_keepalive_time = connection.keepalive_time
                 self.send_ack_packet(connection)
-                print_debug("Sent ACK packet to {0}:{1} client".format(connection.ip, connection.port))
                 print_debug("Refreshed keepalive state!")
                 connection.state = ConnectionState.ACTIVE
                 return True
-            print_debug("Failed to refresh keepalive state!")
+            print_debug("Failed to refresh keepalive state!", color='orange')
             return False
 
     def __str__(self):
