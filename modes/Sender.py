@@ -11,7 +11,7 @@ from utils.Utils import print_debug
 class Sender:
     def __init__(self, ip: str, port: int = DEFAULT_PORT, settings: dict = None):
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
-        self.socket.settimeout(SENDER_SOCKET_TIMEOUT)
+        self.socket.settimeout(SENDER_SOCKET_TIMEOUT)  # TODO:: Reconsider this method of timeout from server side
         self.connection_manager = SenderConnectionManager(self)
         self.ip = ip
         self.port = port

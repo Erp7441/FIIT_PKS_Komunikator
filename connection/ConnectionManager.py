@@ -42,16 +42,19 @@ class ConnectionManager:
             self.active_connections.remove(connection)
         connection.keepalive_thread.stop()
         connection.state = ConnectionState.CLOSED
-        print_debug(connection.ip+":"+str(connection.port), "was removed!")
+        print_debug("Connection with", connection.ip+":"+str(connection.port), "was removed!")
 
     def kill_connection(self, connection: Connection):
+        if connection.state == ConnectionState.CLOSED or connection.state == ConnectionState.RESET:
+            print_debug("Connection with", connection.ip+":"+str(connection.port), "is already dead!")
+            return
         rst_packet = Packet()
         rst_packet.flags.rst = True
         rst_packet.send_to(connection.ip, connection.port, self.parent.socket)
         self.remove_connection(connection)
         connection.keepalive_thread.stop()
         connection.state = ConnectionState.RESET
-        print_debug(connection.ip+":"+str(connection.port), "was killed!")
+        print_debug("Connection with", connection.ip+":"+str(connection.port), "was killed!")
 
     def move_connection_to_active(self, connection: Connection):
         if connection in self.inactive_connections:
