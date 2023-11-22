@@ -130,6 +130,7 @@ class ConnectionManager:
             and packet.flags.syn and packet.flags.ack
             and connection.ip == ip and connection.port == port
         ):
+            print_debug("Received SYN-ACK packet from {0}:{1}".format(connection.ip, connection.port))
             self.send_ack_packet(connection)
             connection.state = ConnectionState.ACTIVE
             return True
@@ -146,6 +147,7 @@ class ConnectionManager:
             and packet.flags.fin and packet.flags.ack
             and connection.ip == ip and connection.port == port
         ):
+            print_debug("Received FIN-ACK packet from {0}:{1}".format(connection.ip, connection.port))
             self.send_ack_packet(connection)
             return True
         else:

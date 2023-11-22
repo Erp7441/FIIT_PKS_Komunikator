@@ -16,7 +16,6 @@ class SenderConnectionManager(ConnectionManager):
         self.send_syn_packet(connection)
 
         if self.await_syn_ack(connection):
-            print_debug("Received SYN-ACK packet from {0}:{1}".format(connection.ip, connection.port))
             self.active_connections.append(connection)
             print_color("Connection with", connection.ip+":"+str(connection.port), "established", color='green')
         return connection
@@ -30,7 +29,6 @@ class SenderConnectionManager(ConnectionManager):
             self.send_fin_packet(connection)
 
             if self.await_fin_ack(connection):
-                print_debug("Received FIN-ACK packet from {0}:{1}".format(connection.ip, connection.port))
                 self.remove_connection(connection)
                 print_color("Connection with", connection.ip+":"+str(connection.port), "closed", color='green')
 
