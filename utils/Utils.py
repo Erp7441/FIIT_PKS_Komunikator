@@ -64,7 +64,7 @@ def print_color(*args, color="white", **kwargs):
 
 def print_debug(*args, color="yellow", **kwargs):
     if DEBUG:
-        timestamp = datetime.now().strftime("%H:%M:%S")
+        timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
         prefix = f"DEBUG [{timestamp}]: "
         message = " ".join(str(arg) for arg in args)
         print_color(prefix + message, color=color, **kwargs)

@@ -36,7 +36,7 @@ class Receiver:
         while True:
             ip, port, packet = self.connection_manager.await_packet()
 
-            print_debug("Received packet from {0}:{1} with flags {2}".format(ip, port, str(packet.flags)))
+            print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
             connection = self.connection_manager.get_connection(ip, port)
 
             # Checking if packet was not damaged and if it is a first packet then it has to be a SYN
@@ -68,8 +68,6 @@ class Receiver:
     # Received ACK from client
     ###############################################
     def received_ack(self, packet: Packet, connection: Connection):
-        print_debug("Received ACK packet from {0}:{1}".format(connection.ip, connection.port))
-
         # For establishing connection
         if connection.state == ConnectionState.SYN_ACK_SENT:
             self.connection_manager.finish_establish_connection(packet, connection)
