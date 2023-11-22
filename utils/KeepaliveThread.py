@@ -7,8 +7,8 @@ class KeepaliveThread(Thread):
     def __init__(self, target=None, args=None, kwargs=None):
         super().__init__(target=target, args=args, kwargs=kwargs)
         self._target = target
-        self._args = args if args is not None else None
-        self._kwargs = kwargs if kwargs is not None else None
+        self._args = args if args is not None else ()
+        self._kwargs = kwargs if kwargs is not None else {}
         self._stop_event = Event()
 
     def start(self):
