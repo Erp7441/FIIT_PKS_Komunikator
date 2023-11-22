@@ -33,6 +33,7 @@ class Sender:
         ip, port, packet = self.connection_manager.await_packet()
 
         # TODO:: Implement sending of multiple ACKs here (client)
+        # TODO:: How to handle faulty ACK?
         if ip != self.ip or port != self.port or not packet.flags.ack:
             connection = self.connection_manager.get_connection(self.ip, self.port)
             self.connection_manager.kill_connection(connection)

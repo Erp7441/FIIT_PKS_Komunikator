@@ -12,29 +12,33 @@ class Packet:
 
         if isinstance(data, bytes):
             self.data = None if data is None else data
-            self.crc = 0 if data is None else crc32(data)
         elif isinstance(data, str):
             self.data = None if data is None else convert_str_to_bytes(data)
-            self.crc = 0 if data is None else crc32(self.data)
         else:
-            self.crc = 0 if data is None else data.crc32()
             self.data = None if data is None else data.encode()
 
     def encode(self):
         encoded_seq = convert_int_to_bytes(self.seq, SEQ_SIZE)
-        encoded_crc = convert_int_to_bytes(self.crc, CRC_SIZE)
         encoded_data = b"" if self.data is None else self.data
-        return self.flags.encode() + encoded_seq + encoded_crc + encoded_data
+
+        encoded_packet = self.flags.encode() + encoded_seq + encoded_data
+        encoded_crc = convert_int_to_bytes(crc32(encoded_packet), CRC_SIZE)
+        return encoded_packet + encoded_crc
 
     def decode(self, data):
+        crc = data[-CRC_SIZE:]  # Save CRC
+        data = data[:-CRC_SIZE]  # Remove it from data
+
         flags_header = data[0:FLAGS_SIZE]
         seq_header = data[FLAGS_SIZE:FLAGS_SIZE + SEQ_SIZE]
-        crc_header = data[FLAGS_SIZE + SEQ_SIZE:FLAGS_SIZE + SEQ_SIZE + CRC_SIZE]
-        data_header = data[FLAGS_SIZE + SEQ_SIZE + CRC_SIZE:]
+        data_header = data[FLAGS_SIZE + SEQ_SIZE:]
+
+        if convert_bytes_to_int(crc) != crc32(data):
+            # If CRC doesn't match drop the packet
+            return None
 
         self.flags = Flags().decode(flags_header)
         self.seq = convert_bytes_to_int(seq_header)
-        self.crc = convert_bytes_to_int(crc_header)
         self.data = data_header
         return self
 

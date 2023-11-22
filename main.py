@@ -12,9 +12,10 @@ if __name__ == "__main__":
     if mode == "r":
         Receiver()
     elif mode == "s":
-        Sender("192.168.48.128")
+        Sender("192.168.48.129")
     elif mode == "t":
         from utils.Tests import Tests
         #Tests.connection_tests_establishment_data()
         Tests.data_resassembly_test()
-        # Tests.test_string_conversion()
+        #Tests.packet_tests()
+        #Tests.test_string_conversion()

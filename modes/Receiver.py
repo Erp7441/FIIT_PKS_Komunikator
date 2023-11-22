@@ -45,10 +45,17 @@ class Receiver:
         ###############################################
         while True:
             ip, port, packet = self.connection_manager.await_packet()
+
+            # Checking if packet wasn't damaged
+            if packet is None:
+                print_debug("Received invalid packet!")
+                continue
+
             print_debug("Received packet from {0}:{1} with flags {2}".format(ip, port, str(packet.flags)))
             connection = self.connection_manager.get_connection(ip, port)
 
-            if connection is None and (packet is None or not packet.flags.syn):
+            # Checking if first packet is SYN
+            if connection is None and not packet.flags.syn:
                 print_debug("Received invalid packet!")
                 continue
 

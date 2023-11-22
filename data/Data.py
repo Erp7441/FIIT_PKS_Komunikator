@@ -21,7 +21,7 @@ class Data:
 
     # TODO:: Add encoding?
     def encode(self):
-        return convert_bytes_to_str(self.value)
+        return self.value
 
     # TODO:: Add decoding?
     def decode(self, encoded_data: str):

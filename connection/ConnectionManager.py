@@ -100,16 +100,20 @@ class ConnectionManager:
     # Await packets
     ###############################################
     def await_packet(self):
+        # TODO:: Implement retry?
         data, addr = self.parent.socket.recvfrom(MTU)
         ip = addr[0]
         port = addr[1]
         packet = Packet().decode(data)
+        if packet is None:
+            return None, None, None
         return ip, port, packet
 
     def await_syn_ack(self, connection: Connection):
         ip, port, packet = self.await_packet()
 
         if (
+            packet is not None and
             connection.state == ConnectionState.SYN_SENT
             and packet.flags.syn and packet.flags.ack
             and connection.ip == ip and connection.port == port
@@ -125,6 +129,7 @@ class ConnectionManager:
         ip, port, packet = self.await_packet()
 
         if (
+            packet is not None and
             connection.state == ConnectionState.FIN_SENT
             and packet.flags.fin and packet.flags.ack
             and connection.ip == ip and connection.port == port

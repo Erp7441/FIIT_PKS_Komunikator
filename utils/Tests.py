@@ -10,9 +10,9 @@ class Tests:
     @staticmethod
     def encoding_tests():
         flags = Flags(syn=True, ack=True, fin=True, info=True)
-        encoded_flags = flags.encode_flags()
+        encoded_flags = flags.encode()
         print("{0:b}".format(encoded_flags))
-        flags.decode_flags(3)
+        flags.decode(3)
         pass
 
         file = File(select=True)
@@ -30,7 +30,7 @@ class Tests:
 
     @staticmethod
     def packet_tests():
-        packet = Packet(Flags(file=True), data=File())
+        packet = Packet(Flags(file=True), data=File(select=True))
         encoded_packet = packet.encode()
         packet2 = Packet()
 
