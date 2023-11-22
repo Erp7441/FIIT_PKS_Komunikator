@@ -24,14 +24,34 @@ def select_folder():
 
 
 ###############################################
-# Debug
+# Prints
 ###############################################
+def print_color(*args, color="white", **kwargs):
+    color_codes = {
+        'black': '30',
+        'red': '31',
+        'green': '32',
+        'yellow': '33',
+        'blue': '34',
+        'purple': '35',
+        'cyan': '36',
+        'white': '37'
+    }
+
+    if color not in color_codes:
+        raise ValueError(f"Invalid color: {color}")
+
+    color_code = color_codes[color]
+    message = " ".join(str(arg) for arg in args)
+    print(f"\033[{color_code}m{message}\033[0m", **kwargs)
+
+
 def print_debug(*args, **kwargs):
     if DEBUG:
         timestamp = datetime.now().strftime("%H:%M:%S")
         prefix = f"DEBUG [{timestamp}]: "
         message = " ".join(str(arg) for arg in args)
-        print(prefix + message, **kwargs)
+        print_color(prefix + message, color="yellow", **kwargs)
 
 
 ###############################################
@@ -66,4 +86,17 @@ def convert_any_to_bytes(value):
         return None
 
 
+###############################################
+# Object creation
+###############################################
+def create_settings():
+    # TODO:: Implement settings dictionary creation
+    # Settings
+    # Pseudo idea
+    # Provides variables with settings like
+    # Port number
+    # IP address
+    # Segment size
+    # Could be aggregated inside Sender or Receiver???
+    pass
 

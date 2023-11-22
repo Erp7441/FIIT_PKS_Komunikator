@@ -8,23 +8,14 @@ from utils.Constants import DEFAULT_PORT
 from utils.Utils import print_debug
 
 
-# Settings
-# Pseudo idea
-# Provides variables with settings like
-# Port number
-# IP address
-# Segment size
-# Could be aggregated inside Sender or Receiver???
-
-
 class Sender:
-    def __init__(self, ip: str, port: int = DEFAULT_PORT):
+    def __init__(self, ip: str, port: int = DEFAULT_PORT, settings: dict = None):
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
         self.connection_manager = SenderConnectionManager(self)
         self.ip = ip
         self.port = port
         self.establish_connection()
-        self.settings = None  # TODO:: Implement settings
+        self.settings = settings  # TODO:: Implement settings
 
     def _send_packet_(self, packet: Packet):
         print_debug("Sent packet to {0}:{1} server with data: {2}".format(self.ip, self.port, packet.data))

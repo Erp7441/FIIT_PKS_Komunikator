@@ -10,35 +10,23 @@ from utils.Constants import DEFAULT_PORT
 from utils.Utils import print_debug
 
 
-# TODO:: If first data packet is not INFO kill connection
+# TODO:: Implement Selective repeat ARQ
+# 1. Send X packets at once from client (add number of expected packets to INFO packet?).
+# 2. Await X packets on server.
+# 3. If one packet is broken. Take its order number (maybe SEQ but could be broken at this point) write it down to a bad packets list and send N
+# 4. Client will receive NACK and write down which packet broken
+# 5. After the communication ends (this needs to be done before fin ack). Await N wrong packets on server side
+# 6. After the communication ends (this needs to be done before fin ack). Send N wrong packets back to the server.
 
-# Settings
-# Pseudo idea
-# Provides variables with settings like
-# Port number
-# IP address
-# Segment size
-# Could be aggregated inside Sender or Receiver???
-
-# Pseudo idea
-# 1. Create communication object
-# 2. Handle opening of communication
-# if successful add it ot connection manager
-# 3. Receive INFO
-# 4. Setup communication according to the info
-# 5. Receive DATA packets
-# 6. Handle DATA packets in communication
-# 7. Receive FIN
-# 8. Close connection
 
 class Receiver:
-    def __init__(self, port: int = DEFAULT_PORT, ip: str = "0.0.0.0"):
+    def __init__(self, port: int = DEFAULT_PORT, ip: str = "0.0.0.0", settings: dict = None):
         self.connection_manager = ReceiverConnectionManager(self)
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
         self.ip = ip,
         self.port = port
         self.socket.bind((ip, port))
-        self.settings = None  # TODO:: Implement settings
+        self.settings = settings  # TODO:: Implement settings
 
         print("Waiting for connection...")
 
