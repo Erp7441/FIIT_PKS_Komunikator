@@ -45,13 +45,13 @@ class ConnectionManager:
         print_debug(connection.ip+":"+str(connection.port), "was removed!")
 
     def kill_connection(self, connection: Connection):
-        print_debug(connection.ip+":"+str(connection.port), "was killed!")
         rst_packet = Packet()
         rst_packet.flags.rst = True
         rst_packet.send_to(connection.ip, connection.port, self.parent.socket)
         self.remove_connection(connection)
         connection.keepalive_thread.stop()
         connection.state = ConnectionState.RESET
+        print_debug(connection.ip+":"+str(connection.port), "was killed!")
 
     def move_connection_to_active(self, connection: Connection):
         if connection in self.inactive_connections:
@@ -111,10 +111,10 @@ class ConnectionManager:
 
         try:
             data, addr = self.parent.socket.recvfrom(MTU)
-        except ConnectionResetError:
+        except (ConnectionResetError, TimeoutError):
             # If socket froze while waiting for packet kill connection
             if connection is not None:
-                self.kill_connection(connection)  # TODO:: Will you be able to send RST when socket timed out?
+                self.kill_connection(connection)
             return None, None, None
 
         ip = addr[0]

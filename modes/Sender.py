@@ -10,14 +10,13 @@ from utils.Utils import print_debug
 
 class Sender:
     def __init__(self, ip: str, port: int = DEFAULT_PORT, settings: dict = None):
+        self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
+        self.socket.settimeout(SENDER_SOCKET_TIMEOUT)
         self.connection_manager = SenderConnectionManager(self)
         self.ip = ip
         self.port = port
         self.establish_connection()
         self.settings = settings  # TODO:: Implement settings
-
-        self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
-        self.socket.settimeout(SENDER_SOCKET_TIMEOUT)
 
     def _send_packet_(self, packet: Packet):
         connection = self.connection_manager.get_connection(self.ip, self.port)
