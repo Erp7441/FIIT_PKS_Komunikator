@@ -24,9 +24,6 @@ class Connection:
         self.packets = []
         self.parent = parent
 
-        if syn_packet is not None:
-            self.add_packet(syn_packet)
-
         if parent.__class__.__name__ == "ReceiverConnectionManager":
             self._init_keep_alive_(keepalive_time, RECEIVER_KEEPALIVE_TIME, self.await_keep_alive)
         elif parent.__class__.__name__ == "SenderConnectionManager":

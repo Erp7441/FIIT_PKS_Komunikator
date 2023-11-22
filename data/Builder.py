@@ -54,7 +54,7 @@ def assemble(packets: list[Packet]):
     name = info.get('name')
 
     # Join together the packet data values
-    data = ''.join([packet.data for packet in packets])
+    data = b"".join([packet.data for packet in packets])
 
     # Decode the data
     if is_file:

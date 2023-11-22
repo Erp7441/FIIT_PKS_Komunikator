@@ -24,8 +24,8 @@ class Data:
         return self.value
 
     # TODO:: Add decoding?
-    def decode(self, encoded_data: str):
-        self.value = convert_str_to_bytes(encoded_data)
+    def decode(self, encoded_data: bytes):
+        self.value = encoded_data
         return self
 
     # Convert data bytes into string

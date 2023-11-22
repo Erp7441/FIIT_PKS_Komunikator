@@ -3,6 +3,8 @@ import socket as s
 from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
 from connection.ReceiverConnectionManager import ReceiverConnectionManager
+from data.Builder import assemble
+from data.File import File
 from packet.Packet import Packet
 from utils.Constants import DEFAULT_PORT
 from utils.Utils import print_debug
@@ -46,16 +48,11 @@ class Receiver:
         while True:
             ip, port, packet = self.connection_manager.await_packet()
 
-            # Checking if packet wasn't damaged
-            if packet is None:
-                print_debug("Received invalid packet!")
-                continue
-
             print_debug("Received packet from {0}:{1} with flags {2}".format(ip, port, str(packet.flags)))
             connection = self.connection_manager.get_connection(ip, port)
 
-            # Checking if first packet is SYN
-            if connection is None and not packet.flags.syn:
+            # Checking if packet was not damaged and if it is a first packet then it has to be a SYN
+            if packet is None or (connection is None and not packet.flags.syn):
                 print_debug("Received invalid packet!")
                 continue
 
@@ -93,7 +90,8 @@ class Receiver:
             ip, port = connection.ip, connection.port
             self.connection_manager.finish_closing_connection(packet, connection)
             print("Connection with", str(ip)+":"+str(port), "closed")
-            # TODO:: Start file reassembly
+
+            Receiver.reassemble_and_output_data(connection)
 
     ###############################################
     # Received data packet from client
@@ -103,7 +101,6 @@ class Receiver:
         connection.add_packet(packet)
         print_debug("Sent ACK packet to {0}:{1} client".format(connection.ip, connection.port))
         # TODO:: Implement sending of multiple ACKs here (server)
-        # TODO:: Implement CRC checking
         self.connection_manager.send_ack_packet(connection)
 
     @staticmethod
@@ -112,6 +109,16 @@ class Receiver:
             packet.flags.info or packet.flags.file or packet.flags.msg
             and connection is not None and connection.state == ConnectionState.ACTIVE
         )
+
+    @staticmethod
+    def reassemble_and_output_data(connection: Connection):
+        data = assemble(connection.packets)
+
+        if isinstance(data, File):
+            data.save("C:\\Users\\Martin\\Downloads")  # TODO:: Move path to settings
+        else:
+            print(str(data))
+
 
     def __str__(self):
         _str = "Receiver:\n"

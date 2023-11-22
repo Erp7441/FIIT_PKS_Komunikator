@@ -26,10 +26,11 @@ class ConnectionManager:
     # Connection
     ###############################################
     def get_connection(self, ip: str, port: int):
-        for connection in self.inactive_connections:
-            if connection.ip == ip and connection.port == port:
-                return connection
-        for connection in self.active_connections:
+        if ip is None or port is None:
+            return None
+
+        # Searches for connections in all lists
+        for connection in self.inactive_connections + self.active_connections:
             if connection.ip == ip and connection.port == port:
                 return connection
         return None
@@ -101,6 +102,7 @@ class ConnectionManager:
     ###############################################
     def await_packet(self):
         # TODO:: Implement retry?
+        # TODO:: Add try catch?
         data, addr = self.parent.socket.recvfrom(MTU)
         ip = addr[0]
         port = addr[1]
@@ -152,11 +154,3 @@ class ConnectionManager:
             _str += str(inactive_connection) + "\n"
 
         return _str
-
-
-    # Pseudo idea
-    # Hold list of active connections
-    # Each connection has its own thread manager???
-    # When new connection is created, it is added to the list
-    # When connection is closed, it is removed from the list
-    # Manage keepalive of connections (receiving SYN's every 5s) (its own thread)
