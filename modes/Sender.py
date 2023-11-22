@@ -4,7 +4,7 @@ from connection.SenderConnectionManager import SenderConnectionManager
 from data.Builder import disassemble
 from data.Data import Data
 from packet.Packet import Packet
-from utils.Constants import DEFAULT_PORT, SOCKET_TIMEOUT
+from utils.Constants import DEFAULT_PORT, SENDER_SOCKET_TIMEOUT
 from utils.Utils import print_debug
 
 
@@ -17,7 +17,7 @@ class Sender:
         self.settings = settings  # TODO:: Implement settings
 
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
-        self.socket.settimeout(SOCKET_TIMEOUT)
+        self.socket.settimeout(SENDER_SOCKET_TIMEOUT)
 
     def _send_packet_(self, packet: Packet):
         connection = self.connection_manager.get_connection(self.ip, self.port)

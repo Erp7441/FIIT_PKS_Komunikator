@@ -114,7 +114,7 @@ class ConnectionManager:
         except ConnectionResetError:
             # If socket froze while waiting for packet kill connection
             if connection is not None:
-                self.kill_connection(connection)
+                self.kill_connection(connection)  # TODO:: Will you be able to send RST when socket timed out?
             return None, None, None
 
         ip = addr[0]
