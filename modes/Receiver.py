@@ -28,7 +28,6 @@ class Receiver:
 
         # Socket initialization
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
-        # self.socket.settimeout(SOCKET_TIMEOUT)  # TODO:: Remove
         self.socket.bind((ip, port))
 
         print_color("Waiting for connection...", color="blue")
@@ -51,6 +50,9 @@ class Receiver:
             else:
                 self._handle_single_packet(ip, port, packet, connection)
 
+    ###############################################
+    # Handle packets from client
+    ###############################################
     def _handle_single_packet(self, ip: str, port: int, packet: Packet, connection: Connection = None):
 
         # Checking if packet was damaged. If so, write its order number to the list of bad packets
@@ -84,6 +86,37 @@ class Receiver:
         # Closing connection
         elif packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
             self.connection_manager.start_closing_connection(packet, connection)
+
+    def _handle_multiple_packets(self, first_packet, connection):
+        packets = [first_packet]
+        if first_packet.flags.fin:
+            print_debug("Handling last data packet", color="cyan")
+            self._handle_single_packet(connection.ip, connection.port, first_packet, connection)
+            print_debug("Handled last data packet", color="cyan")
+            return
+
+        print_debug("Awaiting {0} more packets from {1}:{2}".format(connection.batch_size - 1, connection.ip, connection.port))
+        for _ in range(connection.batch_size - 1):
+            ip, port, packet = self.connection_manager.await_packet()
+
+            if packet is None:
+                packets.append(None)
+                continue
+
+            print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
+            if ip != connection.ip or port != connection.port:
+                print_debug("Packet from {0}:{1} is not from {2}:{3}".format(ip, port, connection.ip, connection.port))
+                return None
+
+            packets.append(packet)
+            if packet.flags.fin:
+                break
+
+        for i, packet in enumerate(packets):
+            print_debug("Handling packet {0}".format(i), color="cyan")
+            self._handle_single_packet(connection.ip, connection.port, packet, connection)
+            print_debug("Handled packet {0}".format(i), color="cyan")
+
 
     ###############################################
     # Received ACK from client
@@ -153,30 +186,3 @@ class Receiver:
         if self.settings is not None:
             _str += "Settings: " + str(self.settings) + "\n"
         return _str
-
-    def _handle_multiple_packets(self, first_packet, connection):
-        packets = [first_packet]
-        if first_packet.flags.fin:
-            print_debug("Handling last data packet", color="cyan")
-            self._handle_single_packet(connection.ip, connection.port, first_packet, connection)
-            print_debug("Handled last data packet", color="cyan")
-            return
-
-        print_debug("Awaiting {0} more packets from {1}:{2}".format(connection.batch_size - 1, connection.ip, connection.port))
-        for _ in range(connection.batch_size - 1):
-            ip, port, packet = self.connection_manager.await_packet()
-
-            # TODO:: Handle reciving broken packet
-            print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
-            if ip != connection.ip or port != connection.port:
-                print_debug("Packet from {0}:{1} is not from {2}:{3}".format(ip, port, connection.ip, connection.port))
-                return None
-
-            packets.append(packet)
-            if packet.flags.fin:
-                break
-
-        for i, packet in enumerate(packets):
-            print_debug("Handling packet {0}".format(i), color="cyan")
-            self._handle_single_packet(connection.ip, connection.port, packet, connection)
-            print_debug("Handled packet {0}".format(i), color="cyan")
