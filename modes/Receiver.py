@@ -38,13 +38,17 @@ class Receiver:
         ###############################################
         while True:
             ip, port, packet = self.connection_manager.await_packet()
-
-            print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
             connection = self.connection_manager.get_connection(ip, port)
+
+            if packet is None:
+                print_debug("Received broken packet from {0}:{1}".format(ip, port))
+            else:
+                print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
 
             # Checking if packet was not damaged and if it is a first packet then it has to be a SYN
             if packet is None or (connection is None and not packet.flags.syn):
                 print_debug("Received invalid packet!")
+                self.connection_manager.send_nack_packet(connection)
                 continue
 
             # Begin establishing connection

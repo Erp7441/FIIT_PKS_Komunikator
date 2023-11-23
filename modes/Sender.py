@@ -5,7 +5,8 @@ from connection.SenderConnectionManager import SenderConnectionManager
 from data.Builder import disassemble
 from data.Data import Data
 from packet.Packet import Packet
-from utils.Constants import DEFAULT_PORT, SENDER_SOCKET_TIMEOUT
+from utils.Constants import DEFAULT_PORT, SENDER_SOCKET_TIMEOUT, RESEND_ATTEMPTS, SENDER_BAD_PACKETS_SEQ, \
+    SENDER_BAD_PACKETS_ATTEMPTS
 from utils.Utils import print_debug, print_debug_data
 
 
@@ -22,19 +23,34 @@ class Sender:
     def _send_packet_(self, packet: Packet):
         connection = self.connection_manager.get_connection(self.ip, self.port)
         if connection is None or connection.state != ConnectionState.ACTIVE:
-            return False
+            return None
 
-        packet.send_to(self.ip, self.port, self.socket)
+        for attempt in range(RESEND_ATTEMPTS):
+            if packet.seq in SENDER_BAD_PACKETS_SEQ and attempt < SENDER_BAD_PACKETS_ATTEMPTS-1:
+                packet.send_to_with_error(self.ip, self.port, self.socket)
+            elif packet.seq in SENDER_BAD_PACKETS_SEQ:
+                SENDER_BAD_PACKETS_SEQ.remove(packet.seq)
+                packet.send_to(self.ip, self.port, self.socket)
+            else:
+                packet.send_to(self.ip, self.port, self.socket)
 
-        print_debug_data("Sent packet to {0}:{1} server with data: {2}".format(self.ip, self.port, packet.data))
-        ip, port, packet = self.connection_manager.await_packet(connection)
+            print_debug("Sent packet SEQ {0} to {1}:{2} server (attempt {3})".format(packet.seq, self.ip, self.port, attempt+1))
+            ip, port, response = self.connection_manager.await_packet(connection)  # Awaiting ACK
 
-        # TODO:: Implement sending of multiple ACKs here (client)
-        # TODO:: How to handle faulty ACK?
-        if ip != self.ip or port != self.port or not packet.flags.ack:
-            self.connection_manager.kill_connection(connection)
-            return False
-        return True
+            # TODO:: Implement sending of multiple ACKs here (client)
+            # TODO:: How to handle faulty ACK?
+            if ip != self.ip or port != self.port:
+                break
+
+            if response.flags.ack:
+                return True  # If we received ACK, success
+            elif response.flags.nack:
+                continue  # If we received NACK, retry
+            else:
+                break  # If we received something else stop.
+
+        self.connection_manager.kill_connection(connection)
+        return None
 
     def establish_connection(self):
         # Send syn packet
@@ -62,8 +78,7 @@ class Sender:
         packets = disassemble(data)
         packet_count = len(packets)
         for i, packet in enumerate(packets):
-            if self._send_packet_(packet):
-                print_debug("Sending packet {0}/{1}".format(i+1, packet_count))
+            self._send_packet_(packet)
 
         self.close_connection()
 

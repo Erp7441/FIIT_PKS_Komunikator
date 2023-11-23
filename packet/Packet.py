@@ -17,6 +17,14 @@ class Packet:
         else:
             self.data = None if data is None else data.encode()
 
+    def encode_with_error(self):
+        encoded_seq = convert_int_to_bytes(self.seq, SEQ_SIZE)
+        encoded_data = b"" if self.data is None else self.data
+
+        encoded_packet = self.flags.encode() + encoded_seq + encoded_data
+        encoded_crc = convert_int_to_bytes(crc32(encoded_packet)-1, CRC_SIZE)
+        return encoded_packet + encoded_crc
+
     def encode(self):
         encoded_seq = convert_int_to_bytes(self.seq, SEQ_SIZE)
         encoded_data = b"" if self.data is None else self.data
@@ -45,6 +53,10 @@ class Packet:
     # TODO:: Should this class be responsible for this?
     def send_to(self, ip: str, port: int, socket):
         encoded_data_bytes = self.encode()
+        socket.sendto(encoded_data_bytes, (ip, port))
+
+    def send_to_with_error(self, ip: str, port: int, socket):
+        encoded_data_bytes = self.encode_with_error()
         socket.sendto(encoded_data_bytes, (ip, port))
 
     def __str__(self):

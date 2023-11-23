@@ -7,6 +7,8 @@ DEBUG_SHOW_DATA = False  # Show sent data in debug mode
 
 RESEND_ATTEMPTS = 3
 SENDER_SOCKET_TIMEOUT = 5  # Seconds
+SENDER_BAD_PACKETS_SEQ = [3, 8, 6, 7]
+SENDER_BAD_PACKETS_ATTEMPTS = 3
 
 SEQ_SIZE = 3  # Bytes
 CRC_SIZE = 4  # Bytes
