@@ -62,7 +62,7 @@ class ReceiverConnectionManager(ConnectionManager):
             if (
                 connection is not None and connection.batch_size > 1
             ):
-                self.parent.handle_multiple_packets(packet, connection)
+                self.parent.handle_multiple_packets(packet, connection, await_size=connection.bad_packets_count)
             else:
                 self.parent.handle_single_packet(ip, port, packet, connection)
 

@@ -10,15 +10,6 @@ from utils.Constants import DEFAULT_PORT
 from utils.Utils import print_debug, print_color
 
 
-# TODO:: Implement Selective repeat ARQ
-# 1. Send X packets at once from client (add number of expected packets to INFO packet?).
-# 2. Await X packets on server.
-# 3. If one packet is broken. Take its order number (maybe SEQ but could be broken at this point) write it down to a bad packets list and send N
-# 4. Client will receive NACK and write down which packet broken
-# 5. After the communication ends (this needs to be done before fin ack). Await N wrong packets on server side
-# 6. After the communication ends (this needs to be done before fin ack). Send N wrong packets back to the server.
-
-
 class Receiver:
     def __init__(self, port: int = DEFAULT_PORT, ip: str = "0.0.0.0", settings: dict = None):
         self.connection_manager = ReceiverConnectionManager(self)
@@ -40,7 +31,7 @@ class Receiver:
             ip, port, packet = self.connection_manager.await_packet()
             connection = self.connection_manager.get_connection(ip, port)
 
-            # Debug output (TODO:: Remove?)
+            # Debug output
             if packet is not None:
                 print_debug("Received a packet with flags {0} from {1}:{2}".format(str(packet.flags), ip, port))
             else:
@@ -93,14 +84,14 @@ class Receiver:
         elif packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
             self.connection_manager.start_closing_connection(packet, connection)
 
-    def handle_multiple_packets(self, first_packet, connection):
-        if first_packet is None:
-            print_debug(
-                "Received broken first packet of the batch! From {0}:{1}".format(connection.ip, connection.port),
-                color="orange"
-            )
+    def handle_multiple_packets(self, first_packet, connection, await_size=None):
+        # Await size is either equal to whole batch or less
+        # (if we are sending bad packets that are not the size of the whole batch)
+        if await_size is None or await_size > connection.batch_size - 1:
+            await_size = connection.batch_size - 1
 
         packets = [first_packet]
+        # If the first packet is a FIN (meaning that it's batch size of 1, handle it immediately and return)
         if first_packet is not None and first_packet.flags.fin:
             print_debug("Handling last data packet", color="cyan")
             self.handle_single_packet(connection.ip, connection.port, first_packet, connection)
@@ -108,14 +99,17 @@ class Receiver:
 
 
         print_debug("Awaiting {0} more packets from {1}:{2}".format(connection.batch_size - 1, connection.ip, connection.port))
-        for _ in range(connection.batch_size - 1):
+        for _ in range(await_size):
             ip, port, packet = self.connection_manager.await_packet()
 
+            # If: we received invalid packet. Add None to the list and handle it later.
             if packet is None:
                 packets.append(None)
                 continue
 
+            # Else:
             print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
+            # If packet is not from the same client. Stop
             if ip != connection.ip or port != connection.port:
                 print_debug("Packet from {0}:{1} is not from {2}:{3}".format(ip, port, connection.ip, connection.port))
                 return None
@@ -124,6 +118,7 @@ class Receiver:
             if packet.flags.fin:
                 break
 
+        # Handle received batch
         for i, packet in enumerate(packets):
             print_debug("Handling packet {0}".format(i), color="cyan")
             self.handle_single_packet(connection.ip, connection.port, packet, connection)
