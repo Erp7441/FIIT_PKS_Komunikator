@@ -75,6 +75,7 @@ class ConnectionManager:
     def send_syn_packet(self, connection: Connection):
         syn_packet = Packet()
         syn_packet.flags.syn = True
+        syn_packet.seq = connection.batch_size
         syn_packet.send_to(connection.ip, connection.port, self.parent.socket)
         connection.state = ConnectionState.SYN_SENT
         print_debug("Sent SYN packet to {0}:{1}".format(connection.ip, connection.port))

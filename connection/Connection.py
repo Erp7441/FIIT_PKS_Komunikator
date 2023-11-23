@@ -23,8 +23,12 @@ class Connection:
         self.state = None if syn_packet is None else ConnectionState.SYN_SENT
         self.packets = []
         self.parent = parent
-        self.batch_size = batch_size
         self.bad_packets_count = 0
+
+        if syn_packet is not None:
+            self.batch_size = syn_packet.seq
+        else:
+            self.batch_size = batch_size
 
         if parent.__class__.__name__ == "ReceiverConnectionManager":
             self._init_keep_alive_(keepalive_time, RECEIVER_KEEPALIVE_TIME, self.await_keep_alive)
