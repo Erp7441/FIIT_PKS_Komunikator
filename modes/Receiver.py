@@ -49,7 +49,7 @@ class Receiver:
             # If the batch size is bigger than one. Handle the rest of the packets.
             if (
                 connection is not None and connection.batch_size > 1
-                and self.check_if_received_data_packet(packet, connection)
+                and self.connection_manager.lock.locked()  # SYN ACK sequence is not running
             ):
                 self.handle_multiple_packets(packet, connection)
             else:
@@ -105,7 +105,7 @@ class Receiver:
             print_debug("Handling last data packet", color="cyan")
             self.handle_single_packet(connection.ip, connection.port, first_packet, connection)
             print_debug("Handled last data packet", color="cyan")
-            return
+
 
         print_debug("Awaiting {0} more packets from {1}:{2}".format(connection.batch_size - 1, connection.ip, connection.port))
         for _ in range(connection.batch_size - 1):
