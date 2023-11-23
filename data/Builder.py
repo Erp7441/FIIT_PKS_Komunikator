@@ -3,7 +3,7 @@ from json import dumps, loads
 from data.Data import Data
 from data.File import File
 from packet.Flags import Flags
-from packet.Packet import Packet
+from packet.Segment import Segment
 from utils.Constants import MAX_PAYLOAD_SIZE
 
 
@@ -23,7 +23,7 @@ def disassemble(data: Data):
     for seq, bytes_data in enumerate(split):
         # Create packets and append them to the list
         flags = Flags(file=is_file, msg=(not is_file))
-        packet = Packet(flags=flags, seq=seq+1, data=bytes_data)
+        packet = Segment(flags=flags, seq=seq + 1, data=bytes_data)
         packets.append(packet)
 
     info_dict = {
@@ -37,13 +37,13 @@ def disassemble(data: Data):
     # TODO:: Add encoding of info packet?
     encoded_dict = dumps(info_dict)
 
-    info_packet = Packet(Flags(info=True), data=encoded_dict)
+    info_packet = Segment(Flags(info=True), data=encoded_dict)
     packets.insert(0, info_packet)
 
     return packets
 
 
-def assemble(packets: list[Packet]):
+def assemble(packets: list[Segment]):
     # Get info about the data we'll be dealing with
     info_packet = packets.pop(0)
 

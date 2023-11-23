@@ -2,7 +2,7 @@ from time import sleep
 from typing import Callable
 
 from connection.ConnectionState import ConnectionState
-from packet.Packet import Packet
+from packet.Segment import Segment
 from utils.Constants import RECEIVER_KEEPALIVE_TIME, SENDER_KEEPALIVE_TIME, DEFAULT_KEEPALIVE_TIME
 from utils.KeepaliveThread import KeepaliveThread
 
@@ -31,7 +31,7 @@ class Connection:
         else:
             self._init_keep_alive_(keepalive_time, DEFAULT_KEEPALIVE_TIME)
 
-    def add_packet(self, packet: Packet):
+    def add_packet(self, packet: Segment):
         self.packets.append(packet)
         self.packets.sort(key=lambda seq: seq.seq)
 

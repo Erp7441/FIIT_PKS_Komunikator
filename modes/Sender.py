@@ -4,33 +4,38 @@ from connection.ConnectionState import ConnectionState
 from connection.SenderConnectionManager import SenderConnectionManager
 from data.Builder import disassemble
 from data.Data import Data
-from packet.Packet import Packet
-from utils.Constants import DEFAULT_PORT, SENDER_SOCKET_TIMEOUT, RESEND_ATTEMPTS, SENDER_BAD_PACKETS_SEQ, \
-    SENDER_BAD_PACKETS_ATTEMPTS
-from utils.Utils import print_debug, print_debug_data
+from data.File import File
+from packet.Segment import Segment
+from utils.Constants import DEFAULT_PORT, SENDER_SOCKET_TIMEOUT
+from utils.Settings import Settings
+from utils.Utils import print_debug, get_string_safely
 
 
 class Sender:
-    def __init__(self, ip: str, port: int = DEFAULT_PORT, settings: dict = None):
+    def __init__(self, ip: str = None, port: int = DEFAULT_PORT, settings: Settings = None):
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
-        self.socket.settimeout(SENDER_SOCKET_TIMEOUT)  # TODO:: Reconsider this method of timeout from server side
+        self.socket.settimeout(SENDER_SOCKET_TIMEOUT)
         self.connection_manager = SenderConnectionManager(self)
-        self.ip = ip
-        self.port = port
+        self.ip = ip if settings is None else settings.ip
+        self.port = port if settings is None else settings.port
         self.establish_connection()
-        self.settings = settings  # TODO:: Implement settings
+        self.settings = settings
 
-    def _send_packet_(self, packet: Packet):
+    def _send_packet_(self, packet: Segment):
         connection = self.connection_manager.get_connection(self.ip, self.port)
         if connection is None or connection.state != ConnectionState.ACTIVE:
             return None
 
-        for attempt in range(RESEND_ATTEMPTS):
-            if packet.seq in SENDER_BAD_PACKETS_SEQ and attempt < SENDER_BAD_PACKETS_ATTEMPTS-1:
+        bad_packets_seq = self.settings.bad_packets_seq
+        for attempt in range(self.settings.packet_resend_attempts):
+
+            if packet.seq in bad_packets_seq and attempt < self.settings.bad_packets_attempts-1:
                 packet.send_to_with_error(self.ip, self.port, self.socket)
-            elif packet.seq in SENDER_BAD_PACKETS_SEQ:
-                SENDER_BAD_PACKETS_SEQ.remove(packet.seq)
+
+            elif packet.seq in bad_packets_seq:
+                bad_packets_seq.remove(packet.seq)
                 packet.send_to(self.ip, self.port, self.socket)
+
             else:
                 packet.send_to(self.ip, self.port, self.socket)
 
@@ -97,6 +102,18 @@ class Sender:
             _str += "Settings: " + str(self.settings) + "\n"
         return _str
 
+    def send_file(self, path: str = None):
+        if path is None:
+            data = File(select=True)
+        else:
+            data = File(path=path)
+        self.send(data)
+
+    def send_message(self, message: str = None):
+        if message is None:
+            message = get_string_safely("Enter message: ", error_msg="Invalid message")
+        data = Data(message)
+        self.send(data)
 
     # Pseudo idea
     # Receive communication from assembler

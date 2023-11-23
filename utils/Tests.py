@@ -1,8 +1,8 @@
 from data.Data import Data
 from data.File import File
 from packet.Flags import Flags
-from packet.Packet import Packet
-from utils.Constants import MAX_PACKET_SIZE
+from packet.Segment import Segment
+from utils.Constants import MAX_SEGMENT_SIZE
 
 
 class Tests:
@@ -30,22 +30,22 @@ class Tests:
 
     @staticmethod
     def packet_tests():
-        packet = Packet(Flags(file=True), data=File(select=True))
+        packet = Segment(Flags(file=True), data=File(select=True))
         encoded_packet = packet.encode()
-        packet2 = Packet()
+        packet2 = Segment()
 
         decoded_packet = packet2.decode(encoded_packet)
         pass
 
     @staticmethod
     def packet_length_tests():
-        packet = Packet(Flags(file=True), data=File())
+        packet = Segment(Flags(file=True), data=File())
         encoded_packet = packet.encode()
 
-        while len(encoded_packet) != MAX_PACKET_SIZE:
+        while len(encoded_packet) != MAX_SEGMENT_SIZE:
             encoded_packet += '0'
 
-        packet2 = Packet().decode(encoded_packet)
+        packet2 = Segment().decode(encoded_packet)
 
         from modes.Sender import Sender
 
@@ -55,12 +55,12 @@ class Tests:
     @staticmethod
     def connection_tests_client():
         from modes.Sender import Sender
-        from packet.Packet import Packet
+        from packet.Segment import Segment
         from data.File import File
         from packet.Flags import Flags
 
         sender = Sender("192.168.48.128")
-        packet = Packet(Flags(file=True), data=File(select=True))
+        packet = Segment(Flags(file=True), data=File(select=True))
         sender._send_packet_(packet)
 
     @staticmethod
@@ -76,7 +76,7 @@ class Tests:
 
         sender = Sender("192.168.48.128")
         while True:
-            packet = Packet(Flags(file=True), data=File(select=True))
+            packet = Segment(Flags(file=True), data=File(select=True))
             sender._send_packet_(packet)
         # sender.close_connection()
 

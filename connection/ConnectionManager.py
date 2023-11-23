@@ -2,7 +2,7 @@ import threading
 
 from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
-from packet.Packet import Packet
+from packet.Segment import Segment
 from utils.Constants import MTU
 from utils.Utils import print_debug
 
@@ -52,7 +52,7 @@ class ConnectionManager:
         if connection.state == ConnectionState.CLOSED or connection.state == ConnectionState.RESET:
             print_debug("Connection with", connection.ip+":"+str(connection.port), "is already dead!")
             return
-        rst_packet = Packet()
+        rst_packet = Segment()
         rst_packet.flags.rst = True
         rst_packet.send_to(connection.ip, connection.port, self.parent.socket)
         self.remove_connection(connection)
@@ -73,21 +73,21 @@ class ConnectionManager:
     # Send packet (types)
     ###############################################
     def send_syn_packet(self, connection: Connection):
-        syn_packet = Packet()
+        syn_packet = Segment()
         syn_packet.flags.syn = True
         syn_packet.send_to(connection.ip, connection.port, self.parent.socket)
         connection.state = ConnectionState.SYN_SENT
         print_debug("Sent SYN packet to {0}:{1}".format(connection.ip, connection.port))
 
     def send_fin_packet(self, connection: Connection):
-        fin_packet = Packet()
+        fin_packet = Segment()
         fin_packet.flags.fin = True
         fin_packet.send_to(connection.ip, connection.port, self.parent.socket)
         connection.state = ConnectionState.FIN_SENT
         print_debug("Sent FIN packet to {0}:{1}".format(connection.ip, connection.port))
 
     def send_syn_ack_packet(self, connection: Connection):
-        syn_ack_packet = Packet()
+        syn_ack_packet = Segment()
         syn_ack_packet.flags.syn = True
         syn_ack_packet.flags.ack = True
         syn_ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
@@ -95,7 +95,7 @@ class ConnectionManager:
         print_debug("Sent SYN-ACK packet to {0}:{1}".format(connection.ip, connection.port))
 
     def send_fin_ack_packet(self, connection: Connection):
-        fin_ack_packet = Packet()
+        fin_ack_packet = Segment()
         fin_ack_packet.flags.fin = True
         fin_ack_packet.flags.ack = True
         fin_ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
@@ -103,13 +103,13 @@ class ConnectionManager:
         print_debug("Sent FIN-ACK packet to {0}:{1}".format(connection.ip, connection.port))
 
     def send_ack_packet(self, connection, seq: int = 0):
-        ack_packet = Packet(seq=seq)
+        ack_packet = Segment(seq=seq)
         ack_packet.flags.ack = True
         ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
         print_debug("Sent ACK packet to {0}:{1}".format(connection.ip, connection.port))
 
     def send_nack_packet(self, connection):
-        ack_packet = Packet()
+        ack_packet = Segment()
         ack_packet.flags.nack = True
         ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
         print_debug("Sent NACK packet to {0}:{1}".format(connection.ip, connection.port))
@@ -130,7 +130,7 @@ class ConnectionManager:
 
         ip = addr[0]
         port = addr[1]
-        packet = Packet().decode(data)
+        packet = Segment().decode(data)
 
         if packet is None or (connection is not None and connection.ip != ip and connection.port != port):
             # If packet is broken, return ip and port and None

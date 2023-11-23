@@ -1,9 +1,14 @@
 from datetime import datetime
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename, askdirectory
+import re
+from typing import Callable
 
 from utils.Constants import DEBUG, DEBUG_SHOW_DATA
 from utils.Constants import ENCODING
+
+import os
+from pathlib import Path
 
 
 ###############################################
@@ -106,17 +111,90 @@ def convert_any_to_bytes(value):
         return None
 
 
-###############################################
-# Object creation
-###############################################
-def create_settings():
-    # TODO:: Implement settings dictionary creation
-    # Settings
-    # Pseudo idea
-    # Provides variables with settings like
-    # Port number
-    # IP address
-    # Segment size
-    # Could be aggregated inside Sender or Receiver???
-    pass
+def is_valid_ipv4(ip):
+    ipv4_pattern = re.compile(
+        r"^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\."
+        r"(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\."
+        r"(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\."
+        r"(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$"
+    )
+    return bool(ipv4_pattern.match(ip))
 
+
+def get_integer_safely(prompt: str, default: int = 0, condition: Callable[[int], bool] = lambda x: True, error_msg: str = "") -> int:
+    while True:
+        try:
+            print_color(prompt, color="yellow", end="")
+            value = input()
+
+            if value is not None and value != "":
+                value = value.strip()
+                value = int(value)
+            else:
+                print_color(f"Using default value: {default}", color="yellow")
+                value = default
+
+            if not condition(value):
+                raise ValueError(error_msg)
+
+            return value
+        except ValueError as e:
+            print_color(f"Invalid input: {e}... Please try again.", color="red")
+
+
+def get_string_safely(prompt: str, default: str = "", condition: Callable[[str], bool] = lambda x: True, error_msg: str = "") -> str:
+    while True:
+        try:
+            print_color(prompt, color="yellow", end="")
+            value = input()
+
+            if value is not None and value != "":
+                value = value.strip()
+            else:
+                print_color(f"Using default value: {default}", color="yellow")
+                value = default
+
+            if not condition(value):
+                raise ValueError(error_msg)
+
+            return value
+        except ValueError as e:
+            print_color(f"Invalid input: {e}... Please try again.", color="red")
+
+
+def get_list_safely(prompt: str, default=None, unique=False) -> list:
+    if default is None:
+        default = []
+
+    while True:
+        try:
+            print_color(prompt, color="yellow", end="")
+            arr = input()
+
+            if arr is not None and arr != "":
+                arr = arr.strip()
+                arr = [int(x.strip()) for x in arr.split(',')]
+            else:
+                print_color(f"Using default list: {default}", color="yellow")
+                arr = default
+
+            if unique:
+                arr = list(set(arr))
+            return arr
+        except ValueError as e:
+            print_color(f"Invalid input: {e}... Please try again.", color="red")
+def get_downloads_folder():
+    user_home = str(Path.home())
+
+    # Check the operating system
+    if os.name == 'posix':  # Linux, macOS
+        return os.path.join(user_home, 'Downloads')
+    elif os.name == 'nt':  # Windows
+        return os.path.join(user_home, 'Downloads')
+    elif os.name == 'os2':  # OS/2
+        return os.path.join(user_home, 'Downloads')
+    elif os.name == 'ce':  # Windows CE
+        return os.path.join(user_home, 'Downloads')
+    else:
+        # Handle other operating systems
+        return None

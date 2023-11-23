@@ -5,8 +5,9 @@ from connection.ConnectionState import ConnectionState
 from connection.ReceiverConnectionManager import ReceiverConnectionManager
 from data.Builder import assemble
 from data.File import File
-from packet.Packet import Packet
+from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT
+from utils.Settings import Settings
 from utils.Utils import print_debug, print_color
 
 
@@ -20,10 +21,10 @@ from utils.Utils import print_debug, print_color
 
 
 class Receiver:
-    def __init__(self, port: int = DEFAULT_PORT, ip: str = "0.0.0.0", settings: dict = None):
+    def __init__(self, port: int = DEFAULT_PORT, ip: str = "0.0.0.0", settings: Settings = None):
         self.connection_manager = ReceiverConnectionManager(self)
-        self.ip = ip,
-        self.port = port
+        self.ip = ip if settings is None else settings.ip
+        self.port = port if settings is None else settings.port
         self.settings = settings  # TODO:: Implement settings
 
         # Socket initialization
@@ -74,7 +75,7 @@ class Receiver:
     ###############################################
     # Received ACK from client
     ###############################################
-    def received_ack(self, packet: Packet, connection: Connection):
+    def received_ack(self, packet: Segment, connection: Connection):
         # For establishing connection
         if connection.state == ConnectionState.SYN_ACK_SENT:
             self.connection_manager.finish_establish_connection(packet, connection)
@@ -85,30 +86,29 @@ class Receiver:
             self.connection_manager.finish_closing_connection(packet, connection)
             print_color("Connection with", str(ip)+":"+str(port), "closed", color="green")
 
-            Receiver.reassemble_and_output_data(connection)
+            self.reassemble_and_output_data(connection)
 
     ###############################################
     # Received data packet from client
     ###############################################
-    def received_data(self, packet: Packet, connection: Connection):
+    def received_data(self, packet: Segment, connection: Connection):
         print_debug("Received DATA packet from {0}:{1}".format(connection.ip, connection.port))
         connection.add_packet(packet)
         # TODO:: Implement sending of multiple ACKs here (server)
         self.connection_manager.send_ack_packet(connection)
 
     @staticmethod
-    def check_if_received_data_packet(packet: Packet, connection: Connection):
+    def check_if_received_data_packet(packet: Segment, connection: Connection):
         return (
             packet.flags.info or packet.flags.file or packet.flags.msg
             and connection is not None and connection.state == ConnectionState.ACTIVE
         )
 
-    @staticmethod
-    def reassemble_and_output_data(connection: Connection):
+    def reassemble_and_output_data(self, connection: Connection):
         data = assemble(connection.packets)
 
         if isinstance(data, File):
-            data.save("C:\\Users\\Martin\\Downloads")  # TODO:: Move path to settings
+            data.save(self.settings.downloads_dir)
         else:
             print_color(str(data), color="blue")
 

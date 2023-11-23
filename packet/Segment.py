@@ -5,7 +5,7 @@ from utils.Constants import FLAGS_SIZE, SEQ_SIZE, CRC_SIZE
 from utils.Utils import convert_int_to_bytes, convert_str_to_bytes, convert_bytes_to_int
 
 
-class Packet:
+class Segment:
     def __init__(self, flags: Flags = None, seq=0, data = None):
         self.flags = Flags() if flags is None else flags
         self.seq = seq
@@ -65,8 +65,6 @@ class Packet:
             _str += "Flags: " + str(self.flags) + "\n"
         if self.seq is not None:
             _str += "SEQ: " + str(self.seq) + "\n"
-        if self.crc is not None:
-            _str += "CRC: " + str(self.crc) + "\n"
         if self.data is not None:
             _str += "Data: " + str(self.data) + "\n"
         return _str
