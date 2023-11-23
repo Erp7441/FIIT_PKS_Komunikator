@@ -41,15 +41,12 @@ class Receiver:
             ip, port, packet = self.connection_manager.await_packet()
             print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
             connection = self.connection_manager.get_connection(ip, port)
-            self._handle_packet(ip, port, packet, connection)
 
             # If the batch size is bigger than one. Handle the rest of the packets.
             if connection is not None and connection.batch_size > 1:
-                print_debug("Awaiting {0} more packets from {1}:{2}".format(connection.batch_size - 1, ip, port))
-                for _ in range(connection.batch_size - 1):
-                    ip, port, packet = self.connection_manager.await_packet()
-                    print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
-                    self._handle_packet(ip, port, packet, connection)
+                self._handle_multiple_packets(packet, connection)
+            else:
+                self._handle_packet(ip, port, packet, connection)
 
     def _handle_packet(self, ip: str, port: int, packet: Packet, connection: Connection = None):
 
@@ -147,3 +144,18 @@ class Receiver:
         if self.settings is not None:
             _str += "Settings: " + str(self.settings) + "\n"
         return _str
+
+    def _handle_multiple_packets(self, first_packet, connection):
+        packets = [first_packet]
+
+        print_debug("Awaiting {0} more packets from {1}:{2}".format(connection.batch_size - 1, ip, port))
+        for _ in range(connection.batch_size - 1):
+            ip, port, packet = self.connection_manager.await_packet()
+            print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
+            if ip != first_packet.ip or port != first_packet.port:
+                print_debug("Packet from {0}:{1} is not from {2}:{3}".format(ip, port, first_packet.ip, first_packet.port))
+                return None
+            packets.append(packet)
+
+        for packet in packets:
+            self._handle_packet(packet.ip, packet.port, packet, connection)

@@ -6,7 +6,7 @@ DEBUG = True  # Debug mode
 DEBUG_SHOW_DATA = False  # Show sent data in debug mode
 
 GENERATE_BAD_PACKET = True  # TODO:: Move to settings
-WINDOW_SIZE = 4  # TODO:: Move to settings
+WINDOW_SIZE = 2  # TODO:: Move to settings
 
 RESEND_ATTEMPTS = 3
 SENDER_SOCKET_TIMEOUT = 5  # Seconds

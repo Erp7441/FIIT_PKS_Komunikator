@@ -15,43 +15,45 @@ class Sender:
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
         self.socket.settimeout(SENDER_SOCKET_TIMEOUT)  # TODO:: Reconsider this method of timeout from server side
         self.connection_manager = SenderConnectionManager(self)
-        self.ip = ip
-        self.port = port
-        self.establish_connection()
+        self._connection = None
+        self.establish_connection(ip, port)
         self.settings = settings  # TODO:: Implement settings
         self._bad_packets = []
 
     def _send_packet_(self, packet: Packet):
-        connection = self.connection_manager.get_connection(self.ip, self.port)
-        if connection is None or connection.state != ConnectionState.ACTIVE:
+        if self._connection is None or self._connection.state != ConnectionState.ACTIVE:
             return False
 
-        packet.send_to(self.ip, self.port, self.socket)
+        packet.send_to(self._connection.ip, self._connection.port, self.socket)
 
-        print_debug_data("Sent packet to {0}:{1} server with data: {2}".format(self.ip, self.port, packet.data))
-        ip, port, packet = self.connection_manager.await_packet(connection)
+        print_debug_data("Sent packet to {0}:{1} server with data: {2}".format(self._connection.ip, self._connection.port, packet.data))
+
+    def _await_ack_for_data(self):
+
+        ip, port, packet = self.connection_manager.await_packet(self._connection)
 
         # TODO:: Implement sending of multiple ACKs here (client)
         # TODO:: How to handle faulty ACK?
-        if ip != self.ip or port != self.port or not packet.flags.ack:
-            self.connection_manager.kill_connection(connection)
+        if ip != self._connection.ip or port != self._connection.port or not packet.flags.ack:
+            self.connection_manager.kill_connection(self._connection)
+            self._connection = None
             return False
 
         if packet.flags.nack:
-            print_debug("Received NACK packet from {0}:{1}".format(self.ip, self.port))
+            print_debug("Received NACK packet from {0}:{1}".format(self._connection.ip, self._connection.port))
             self._bad_packets.append(packet)
         return True
 
-    def establish_connection(self):
+    def establish_connection(self, ip, port):
         # Send syn packet
         # Wait for one response packet of SYN ACK
         # Send ack packet
         # Add to active connections
         if (
-            self.connection_manager is not None and self.ip is not None and self.port is not None and
-            self.connection_manager.get_connection(self.ip, self.port) is None
+            self.connection_manager is not None and ip is not None and port is not None and
+            self.connection_manager.get_connection(ip, port) is None
         ):
-            self.connection_manager.establish_connection(self.ip, self.port)
+            self._connection = self.connection_manager.establish_connection(ip, port)
 
     def close_connection(self):
         # Send fin packet
@@ -59,10 +61,11 @@ class Sender:
         # Send ack packet
         # Remove connection from connections
         if (
-            self.connection_manager is not None and self.ip is not None and self.port is not None and
-            self.connection_manager.get_connection(self.ip, self.port) is not None
+            self.connection_manager is not None and self._connection.ip is not None and self._connection.port is not None and
+            self.connection_manager.get_connection(self._connection.ip, self._connection.port) is not None
         ):
-            self.connection_manager.close_connection(self.ip, self.port)
+            self.connection_manager.close_connection(self._connection.ip, self._connection.port)
+            self._connection = None
 
     def send(self, data: Data):
         # Sending packets
@@ -70,8 +73,11 @@ class Sender:
         packet_count = len(packets)
 
         for i, packet in enumerate(packets):
-            if self._send_packet_(packet):
+            for _ in range(self._connection.batch_size):
+                self._send_packet_(packet)
                 print_debug("Sending packet {0}/{1}".format(i+1, packet_count))
+            for _ in range(self._connection.batch_size):
+                self._await_ack_for_data()
 
         self._resend_bad_packets()
 
