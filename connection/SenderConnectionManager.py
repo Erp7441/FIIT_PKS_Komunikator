@@ -1,7 +1,7 @@
 from connection.Connection import Connection
 from connection.ConnectionManager import ConnectionManager
 from connection.ConnectionState import ConnectionState
-from utils.Constants import RESEND_ATTEMPTS, WINDOW_SIZE
+from utils.Constants import RESEND_ATTEMPTS, SENDER_WINDOW_SIZE
 from utils.Utils import print_color, print_debug, print_debug_data
 
 
@@ -13,7 +13,7 @@ class SenderConnectionManager(ConnectionManager):
     # SECTION: Establishing connection (Sender)
     ###############################################
     def establish_connection(self, ip: str, port: int):
-        connection = Connection(ip, port, None, parent=self, batch_size=WINDOW_SIZE)
+        connection = Connection(ip, port, None, parent=self, batch_size=SENDER_WINDOW_SIZE)
         self.send_syn_packet(connection)
 
         if self.await_syn_ack(connection):

@@ -9,7 +9,7 @@ GENERATE_BAD_PACKET = True  # TODO:: Move to settings
 
 BAD_PACKETS_SEQ_NUMS = [3, 8, 13, 9]  # TODO:: Move to settings
 
-WINDOW_SIZE = 2  # TODO:: Move to settings
+SENDER_WINDOW_SIZE = 20  # TODO:: Move to settings
 
 RESEND_ATTEMPTS = 3
 SENDER_SOCKET_TIMEOUT = 5  # Seconds
