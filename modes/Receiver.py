@@ -151,9 +151,9 @@ class Receiver:
     def _handle_multiple_packets(self, first_packet, connection):
         packets = [first_packet]
         if first_packet.flags.fin:
-            print_debug("Handling final data packet", color="cyan")
+            print_debug("Handling last data packet", color="cyan")
             self._handle_packet(connection.ip, connection.port, first_packet, connection)
-            print_debug("Handled final data packet", color="cyan")
+            print_debug("Handled last data packet", color="cyan")
             return
 
         print_debug("Awaiting {0} more packets from {1}:{2}".format(connection.batch_size - 1, connection.ip, connection.port))
