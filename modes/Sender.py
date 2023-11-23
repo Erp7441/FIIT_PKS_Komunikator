@@ -4,6 +4,7 @@ from connection.ConnectionState import ConnectionState
 from connection.SenderConnectionManager import SenderConnectionManager
 from data.Builder import disassemble
 from data.Data import Data
+from packet.Flags import Flags
 from packet.Packet import Packet
 from utils.Constants import DEFAULT_PORT, SENDER_SOCKET_TIMEOUT
 from utils.Utils import print_debug, print_debug_data
@@ -18,6 +19,7 @@ class Sender:
         self.port = port
         self.establish_connection()
         self.settings = settings  # TODO:: Implement settings
+        self._bad_packets = []
 
     def _send_packet_(self, packet: Packet):
         connection = self.connection_manager.get_connection(self.ip, self.port)
@@ -34,6 +36,10 @@ class Sender:
         if ip != self.ip or port != self.port or not packet.flags.ack:
             self.connection_manager.kill_connection(connection)
             return False
+
+        if packet.flags.nack:
+            print_debug("Received NACK packet from {0}:{1}".format(self.ip, self.port))
+            self._bad_packets.append(packet)
         return True
 
     def establish_connection(self):
@@ -59,13 +65,33 @@ class Sender:
             self.connection_manager.close_connection(self.ip, self.port)
 
     def send(self, data: Data):
+        # Sending packets
         packets = disassemble(data)
         packet_count = len(packets)
+
         for i, packet in enumerate(packets):
             if self._send_packet_(packet):
                 print_debug("Sending packet {0}/{1}".format(i+1, packet_count))
 
+        self._resend_bad_packets()
+
         self.close_connection()
+
+    def _resend_bad_packets(self):
+        # Resending failed packets
+        # TODO:: Add attempts here for safety. If over 3 failed attempts, close connection
+        while len(self._bad_packets) != 0:
+            info_packet = Packet(Flags(info=True, nack=True))
+
+            # TODO:: Add attempts here for safety. If over 3 failed attempts, close connection
+            while not self._send_packet_(info_packet):
+                pass
+
+            bad_packets = self._bad_packets
+            self._bad_packets = []
+            for packet in bad_packets:
+                if self._send_packet_(packet):
+                    print_debug("Resending packet {0}".format(packet.seq))
 
     def __str__(self):
         _str = "Sender:\n"

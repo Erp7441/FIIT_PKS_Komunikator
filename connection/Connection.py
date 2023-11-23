@@ -17,12 +17,14 @@ from utils.KeepaliveThread import KeepaliveThread
 
 
 class Connection:
-    def __init__(self, ip: str, port: int, syn_packet=None, parent=None, keepalive_time=None):
+    def __init__(self, ip: str, port: int, syn_packet: Packet = None, parent=None, keepalive_time: int = None, batch_size: int = 1):
         self.ip = ip
         self.port = port
         self.state = None if syn_packet is None else ConnectionState.SYN_SENT
         self.packets = []
         self.parent = parent
+        self.batch_size = batch_size
+        self.bad_packets_count = 0
 
         if parent.__class__.__name__ == "ReceiverConnectionManager":
             self._init_keep_alive_(keepalive_time, RECEIVER_KEEPALIVE_TIME, self.await_keep_alive)

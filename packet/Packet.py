@@ -1,7 +1,7 @@
 from binascii import crc32
 
 from packet.Flags import Flags
-from utils.Constants import FLAGS_SIZE, SEQ_SIZE, CRC_SIZE
+from utils.Constants import FLAGS_SIZE, SEQ_SIZE, CRC_SIZE, GENERATE_BAD_PACKET
 from utils.Utils import convert_int_to_bytes, convert_str_to_bytes, convert_bytes_to_int
 
 
@@ -23,6 +23,10 @@ class Packet:
 
         encoded_packet = self.flags.encode() + encoded_seq + encoded_data
         encoded_crc = convert_int_to_bytes(crc32(encoded_packet), CRC_SIZE)
+
+        if GENERATE_BAD_PACKET is True and self.seq == 1:
+            encoded_crc = convert_int_to_bytes(crc32(encoded_packet) - 1, CRC_SIZE)
+
         return encoded_packet + encoded_crc
 
     def decode(self, data):

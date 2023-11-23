@@ -102,11 +102,17 @@ class ConnectionManager:
         connection.state = ConnectionState.FIN_ACK_SENT
         print_debug("Sent FIN-ACK packet to {0}:{1}".format(connection.ip, connection.port))
 
-    def send_ack_packet(self, connection):
-        ack_packet = Packet()
+    def send_ack_packet(self, connection, seq: int = 0):
+        ack_packet = Packet(seq=seq)
         ack_packet.flags.ack = True
         ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
         print_debug("Sent ACK packet to {0}:{1}".format(connection.ip, connection.port))
+
+    def send_nack_packet(self, connection):
+        ack_packet = Packet()
+        ack_packet.flags.nack = True
+        ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
+        print_debug("Sent NACK packet to {0}:{1}".format(connection.ip, connection.port))
 
     ###############################################
     # Await packets

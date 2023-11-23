@@ -5,6 +5,8 @@ DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS = 3
 DEBUG = True  # Debug mode
 DEBUG_SHOW_DATA = False  # Show sent data in debug mode
 
+GENERATE_BAD_PACKET = True  # TODO:: Move to settings
+
 RESEND_ATTEMPTS = 3
 SENDER_SOCKET_TIMEOUT = 5  # Seconds
 

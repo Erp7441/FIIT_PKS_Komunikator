@@ -37,35 +37,53 @@ class Receiver:
         # Receiver main loop
         ###############################################
         while True:
+            # Handling first packet of the batch
             ip, port, packet = self.connection_manager.await_packet()
-
             print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
             connection = self.connection_manager.get_connection(ip, port)
+            self._handle_packet(ip, port, packet, connection)
 
-            # Checking if packet was not damaged and if it is a first packet then it has to be a SYN
-            if packet is None or (connection is None and not packet.flags.syn):
-                print_debug("Received invalid packet!")
-                continue
+            # If the batch size is bigger than one. Handle the rest of the packets.
+            if connection is not None and connection.batch_size > 1:
+                print_debug("Awaiting {0} more packets from {1}:{2}".format(connection.batch_size - 1, ip, port))
+                for _ in range(connection.batch_size - 1):
+                    ip, port, packet = self.connection_manager.await_packet()
+                    print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
+                    self._handle_packet(ip, port, packet, connection)
 
-            # Begin establishing connection
-            if packet.flags.syn and connection is None:
-                self.connection_manager.start_establish_connection(packet, ip, port)
-            # Begin refreshing connection
-            elif packet.flags.syn and connection is not None:
-                print_debug("Received SYN packet from {0}:{1}. Refreshing connection...".format(connection.ip, connection.port))
-                self.connection_manager.refresh_keepalive(connection)
+    def _handle_packet(self, ip: str, port: int, packet: Packet, connection: Connection = None):
 
-            # Receive ACK from client
-            elif packet.flags.ack and connection is not None:
-                self.received_ack(packet, connection)
+        # Checking if packet was damaged. If so, write its order number to the list of bad packets
+        if connection is not None and packet is None:
+            print_debug("Received broken packet!")
+            self.connection_manager.send_nack_packet(connection)
+            connection.bad_packets_count += 1
+            return
 
-            # Received data packet
-            elif Receiver.check_if_received_data_packet(packet, connection):
-                self.received_data(packet, connection)
+        # Checking if first packet is SYN
+        if connection is None and not packet.flags.syn:
+            print_debug("Received invalid packet!")
+            return
 
-            # Closing connection
-            elif packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
-                self.connection_manager.start_closing_connection(packet, connection)
+        # Begin establishing connection
+        if packet.flags.syn and connection is None:
+            self.connection_manager.start_establish_connection(packet, ip, port)
+        # Begin refreshing connection
+        elif packet.flags.syn and connection is not None:
+            print_debug("Received SYN packet from {0}:{1}. Refreshing connection...".format(connection.ip, connection.port))
+            self.connection_manager.refresh_keepalive(connection)
+
+        # Receive ACK from client
+        elif packet.flags.ack and connection is not None:
+            self.received_ack(packet, connection)
+
+        # Received data packet
+        elif Receiver.check_if_received_data_packet(packet, connection):
+            self.received_data(packet, connection)
+
+        # Closing connection
+        elif packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
+            self.connection_manager.start_closing_connection(packet, connection)
 
     ###############################################
     # Received ACK from client
@@ -88,9 +106,17 @@ class Receiver:
     ###############################################
     def received_data(self, packet: Packet, connection: Connection):
         print_debug("Received DATA packet from {0}:{1}".format(connection.ip, connection.port))
-        connection.add_packet(packet)
+        self.connection_manager.send_ack_packet(connection, packet.seq)
+
+        if packet.flags.info and packet.flags.nack:
+            bad_packet_count = connection.bad_packets_count
+            connection.bad_packets_count = 0
+            for _ in range(bad_packet_count):
+                ip, port, packet = self.connection_manager.await_packet(connection)
+                self._handle_packet(ip, port, packet, connection)
+        else:
+            connection.add_packet(packet)
         # TODO:: Implement sending of multiple ACKs here (server)
-        self.connection_manager.send_ack_packet(connection)
 
     @staticmethod
     def check_if_received_data_packet(packet: Packet, connection: Connection):
