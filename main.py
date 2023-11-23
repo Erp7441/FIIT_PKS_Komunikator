@@ -5,6 +5,7 @@ from modes.Sender import Sender
 # 192.168.48.128 - Server
 # 192.168.48.129 - Client
 
+# TODO:: Fix bug there one good and one bad receives 2 acks (Two points of failure, Client is batch awaiting only acks, or server is sending only acks)
 # TODO:: Check if connection reset from server side works. (Case where client connection dies suddenly)
 
 if __name__ == "__main__":

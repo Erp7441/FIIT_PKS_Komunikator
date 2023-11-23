@@ -115,7 +115,7 @@ class SenderConnectionManager(ConnectionManager):
                 # Send single packet from batch
                 if not self.send_data_packet(packets[packet_index], connection):
                     return  # Connection is dead
-                print_debug("Sending packet {0}/{1}".format(packet_index+1, packet_count))
+                print_debug("Sending packet {0}/{1}".format(packet_index, packet_count))
                 packet_index += 1
                 sent_packets_this_batch += 1
 

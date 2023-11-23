@@ -1,7 +1,7 @@
 from binascii import crc32
 
 from packet.Flags import Flags
-from utils.Constants import FLAGS_SIZE, SEQ_SIZE, CRC_SIZE
+from utils.Constants import FLAGS_SIZE, SEQ_SIZE, CRC_SIZE, BAD_PACKETS_SEQ_NUMS
 from utils.Utils import convert_int_to_bytes, convert_str_to_bytes, convert_bytes_to_int, print_debug
 
 
@@ -53,7 +53,7 @@ class Packet:
         return self
 
     def send_to(self, ip: str, port: int, socket, with_error: bool = False):
-        if with_error and (self.seq == 3 or self.seq == 5):
+        if with_error and self.seq in BAD_PACKETS_SEQ_NUMS:
             print_debug("Sending broken packet with SEQ: {0}".format(self.seq))
             encoded_data_bytes = self.encode_with_error()
         else:
