@@ -25,6 +25,7 @@ def disassemble(data: Data):
         flags = Flags(file=is_file, msg=(not is_file))
         packet = Packet(flags=flags, seq=seq+1, data=bytes_data)
         packets.append(packet)
+    packets[-1].flags.fin = True  # Final data packet must have FIN flag
 
     info_dict = {
         "type": 'File' if is_file else 'Data',

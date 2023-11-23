@@ -29,20 +29,20 @@ class Sender:
         print_debug_data("Sent packet to {0}:{1} server with data: {2}".format(self._connection.ip, self._connection.port, packet.data))
 
     def _await_ack_for_data(self):
+        with self.connection_manager.lock:
+            ip, port, packet = self.connection_manager.await_packet(self._connection)
 
-        ip, port, packet = self.connection_manager.await_packet(self._connection)
+            # TODO:: Implement sending of multiple ACKs here (client)
+            # TODO:: How to handle faulty ACK?
+            if ip != self._connection.ip or port != self._connection.port or packet is None or not packet.flags.ack:
+                self.connection_manager.kill_connection(self._connection)
+                self._connection = None
+                return None
 
-        # TODO:: Implement sending of multiple ACKs here (client)
-        # TODO:: How to handle faulty ACK?
-        if ip != self._connection.ip or port != self._connection.port or not packet.flags.ack:
-            self.connection_manager.kill_connection(self._connection)
-            self._connection = None
-            return False
-
-        if packet.flags.nack:
-            print_debug("Received NACK packet from {0}:{1}".format(self._connection.ip, self._connection.port))
-            self._bad_packets.append(packet)
-        return True
+            if packet.flags.nack:
+                print_debug("Received NACK packet from {0}:{1}".format(self._connection.ip, self._connection.port))
+                self._bad_packets.append(packet)
+            return packet
 
     def establish_connection(self, ip, port):
         # Send syn packet
@@ -72,12 +72,23 @@ class Sender:
         packets = disassemble(data)
         packet_count = len(packets)
 
-        for i, packet in enumerate(packets):
+        k = 0
+        for i in range(0, len(packets), self._connection.batch_size):
+            sent_packets_this_batch = 0
             for _ in range(self._connection.batch_size):
-                self._send_packet_(packet)
-                print_debug("Sending packet {0}/{1}".format(i+1, packet_count))
-            for _ in range(self._connection.batch_size):
-                self._await_ack_for_data()
+                if k >= packet_count:
+                    break
+                self._send_packet_(packets[k])
+                print_debug("Sending packet {0}/{1}".format(k+1, packet_count))
+                k += 1
+                sent_packets_this_batch += 1
+
+            for j in range(sent_packets_this_batch):
+                ack_packet = self._await_ack_for_data()
+                print_debug("ACK with SEQ value {0} received".format(ack_packet.seq))
+                if ack_packet is None or ack_packet.seq != packets[k - sent_packets_this_batch + j].seq:
+                    print_debug("Broken or incorrect ACK packet received!", color="orange")
+
 
         self._resend_bad_packets()
 
