@@ -1,13 +1,13 @@
 import socket as s
 
 from connection.ConnectionState import ConnectionState
-from connection.SenderConnectionManager import SenderConnectionManager
+from connection.manager.SenderConnectionManager import SenderConnectionManager
 from data.Builder import disassemble
 from data.Data import Data
 from data.File import File
 from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT, SENDER_SOCKET_TIMEOUT
-from utils.Settings import Settings
+from cli.Settings import Settings
 from utils.Utils import print_debug, get_string_safely
 
 
@@ -21,7 +21,7 @@ class Sender:
         self.establish_connection()
         self.settings = settings
 
-    def _send_packet_(self, packet: Segment):
+    def _send_packet(self, packet: Segment):
         connection = self.connection_manager.get_connection(self.ip, self.port)
         if connection is None or connection.state != ConnectionState.ACTIVE:
             return None
@@ -43,7 +43,7 @@ class Sender:
             ip, port, response = self.connection_manager.await_packet(connection)  # Awaiting ACK
 
             # TODO:: Implement sending of multiple ACKs here (client)
-            # TODO:: How to handle faulty ACK?
+            # TODO:: How to handle faulty ACK? Not sure, can rensend? If server detects duplicate. Resend ack but not append?
             if ip != self.ip or port != self.port:
                 break
 
@@ -81,11 +81,24 @@ class Sender:
 
     def send(self, data: Data):
         packets = disassemble(data)
-        packet_count = len(packets)
         for i, packet in enumerate(packets):
-            self._send_packet_(packet)
+            self._send_packet(packet)
 
         self.close_connection()
+
+    def send_file(self, path: str = None):
+        # TODO:: Add  check for active connection to send methods
+        if path is None:
+            data = File(select=True)
+        else:
+            data = File(path=path)
+        self.send(data)
+
+    def send_message(self, message: str = None):
+        if message is None:
+            message = get_string_safely("Enter message: ", error_msg="Invalid message")
+        data = Data(message)
+        self.send(data)
 
     def __str__(self):
         _str = "Sender:\n"
@@ -101,22 +114,3 @@ class Sender:
         if self.settings is not None:
             _str += "Settings: " + str(self.settings) + "\n"
         return _str
-
-    def send_file(self, path: str = None):
-        if path is None:
-            data = File(select=True)
-        else:
-            data = File(path=path)
-        self.send(data)
-
-    def send_message(self, message: str = None):
-        if message is None:
-            message = get_string_safely("Enter message: ", error_msg="Invalid message")
-        data = Data(message)
-        self.send(data)
-
-    # Pseudo idea
-    # Receive communication from assembler
-    # Create some kind of main loop like in client for data sending
-    # Receive ACK per packet
-    # Handle errors by resending packets

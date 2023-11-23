@@ -34,7 +34,6 @@ def disassemble(data: Data):
         "total_size": len(data.value) if data.value is not None else 0
     }
 
-    # TODO:: Add encoding of info packet?
     encoded_dict = dumps(info_dict)
 
     info_packet = Segment(Flags(info=True), data=encoded_dict)
@@ -47,7 +46,6 @@ def assemble(packets: list[Segment]):
     # Get info about the data we'll be dealing with
     info_packet = packets.pop(0)
 
-    # TODO:: Add decoding of info packet?
     info = loads(info_packet.data)
 
     is_file = info.get('type') == 'File'

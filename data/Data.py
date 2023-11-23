@@ -1,7 +1,7 @@
-from binascii import crc32
-
 from utils.Utils import convert_bytes_to_str, convert_str_to_bytes, convert_any_to_bytes
 
+
+# TODO:: Add max size of 2MB limit
 
 class Data:
     def __init__(self, value=None):
@@ -15,16 +15,12 @@ class Data:
         else:
             self.value = convert_any_to_bytes(value)
 
-    # Calculates CRC32 of the data
-    def crc32(self):
-        return crc32(self.value)
-
-    # TODO:: Add encoding?
     def encode(self):
+        # TODO:: Add encryption? (Check Segment and Builder for a idea on how to)
         return self.value
 
-    # TODO:: Add decoding?
     def decode(self, encoded_data: bytes):
+        # TODO:: Add decryption? (Check Segment and Builder for a idea on how to)
         self.value = encoded_data
         return self
 

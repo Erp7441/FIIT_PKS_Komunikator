@@ -1,5 +1,5 @@
 from connection.Connection import Connection
-from connection.ConnectionManager import ConnectionManager
+from connection.manager.ConnectionManager import ConnectionManager
 from connection.ConnectionState import ConnectionState
 from utils.Utils import print_debug, print_color
 

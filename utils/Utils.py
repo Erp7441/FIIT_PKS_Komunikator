@@ -111,6 +111,9 @@ def convert_any_to_bytes(value):
         return None
 
 
+###############################################
+# Checks
+###############################################
 def is_valid_ipv4(ip):
     ipv4_pattern = re.compile(
         r"^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\."
@@ -121,6 +124,9 @@ def is_valid_ipv4(ip):
     return bool(ipv4_pattern.match(ip))
 
 
+###############################################
+# Getters
+###############################################
 def get_integer_safely(prompt: str, default: int = 0, condition: Callable[[int], bool] = lambda x: True, error_msg: str = "") -> int:
     while True:
         try:
@@ -183,6 +189,9 @@ def get_list_safely(prompt: str, default=None, unique=False) -> list:
             return arr
         except ValueError as e:
             print_color(f"Invalid input: {e}... Please try again.", color="red")
+
+
+# Gets current system downloads folder
 def get_downloads_folder():
     user_home = str(Path.home())
 
@@ -198,3 +207,11 @@ def get_downloads_folder():
     else:
         # Handle other operating systems
         return None
+
+
+# Reads file into a variable then closes it.
+def get_file_content(path: str):
+    file = open(path, 'rb')
+    content = file.read()
+    file.close()
+    return content

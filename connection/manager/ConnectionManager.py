@@ -134,7 +134,6 @@ class ConnectionManager:
 
         if packet is None or (connection is not None and connection.ip != ip and connection.port != port):
             # If packet is broken, return ip and port and None
-            # TODO:: Write down number of the broken packet to request it later
             return ip, port, None
         return ip, port, packet
 

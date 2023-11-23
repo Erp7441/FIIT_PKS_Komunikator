@@ -1,15 +1,17 @@
 from modes.Receiver import Receiver
 from modes.Sender import Sender
-from utils.Menu import Menu
-from utils.Settings import Settings
+from cli.Menu import Menu
+from cli.Settings import Settings
 
 
 # LAB IPs
 # 192.168.48.128 - Server
 # 192.168.48.129 - Client
 
-# TODO:: Check if connection reset from server side works. (Case where client connection dies suddenly)
+# TODO:: Check, refactor and comment connection, cli and main
 
+# TODO:: Check if connection reset from server side works. (Case where client connection dies suddenly)
+# TODO:: Add non debug outputs
 
 def run_receiver_mode():
     Receiver()
@@ -27,6 +29,7 @@ def run_sender_mode(settings):
 
 
 def show_sender_menu():
+    # TODO:: Make the menu and debug output work together
     sender_menu = Menu("Sender menu")
     settings = Settings()
 
@@ -37,6 +40,7 @@ def show_sender_menu():
 
 
 def run_test_mode():
+    # TODO:: Remove or make useful
     #from utils.Tests import Tests
     from utils.Tests import Tests
     #Tests.connection_tests_establishment_data()
@@ -46,6 +50,7 @@ def run_test_mode():
 
 
 if __name__ == "__main__":
+    # TODO:: Turn on / off debug mode
     menu = Menu("Main menu")
     menu.add_option("Run Receiver Mode", run_receiver_mode)
     menu.add_option("Run Sender Mode", show_sender_menu)

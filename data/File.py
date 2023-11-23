@@ -1,15 +1,7 @@
 from os.path import basename
 
 from data.Data import Data
-from utils.Utils import select_file
-
-
-# Reads file into a variable then closes it.
-def read_file(path, mode: str = 'rb'):
-    file = open(path, mode)
-    content = file.read()
-    file.close()
-    return content
+from utils.Utils import select_file, get_file_content
 
 
 class File(Data):
@@ -18,17 +10,15 @@ class File(Data):
             path = select_file()
 
         if path is not None:
-            super(File, self).__init__(read_file(path))
+            super(File, self).__init__(get_file_content(path))
             self.name = basename(path)
         else:
             super(File, self).__init__()
             self.name = name
 
-    # Encodes file into hexadecimal string
     def encode(self):
         return super(File, self).encode()
 
-    # Decodes hexadecimal string to data bytes (including name)
     def decode(self, encoded_data):
         return super(File, self).decode(encoded_data)
 

@@ -1,6 +1,6 @@
 from utils.Constants import DEFAULT_PORT, MAX_SEGMENT_SIZE, SENDER_BAD_PACKETS_SEQ, SENDER_BAD_PACKETS_ATTEMPTS, \
     RESEND_ATTEMPTS, NACK_RESPONSE_MULTIPLIER
-from utils.Menu import Menu
+from cli.Menu import Menu
 from utils.Utils import is_valid_ipv4, print_color, get_integer_safely, get_list_safely, get_string_safely, \
     get_downloads_folder
 

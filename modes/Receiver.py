@@ -2,22 +2,13 @@ import socket as s
 
 from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
-from connection.ReceiverConnectionManager import ReceiverConnectionManager
+from connection.manager.ReceiverConnectionManager import ReceiverConnectionManager
 from data.Builder import assemble
 from data.File import File
 from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT
-from utils.Settings import Settings
+from cli.Settings import Settings
 from utils.Utils import print_debug, print_color
-
-
-# TODO:: Implement Selective repeat ARQ
-# 1. Send X packets at once from client (add number of expected packets to INFO packet?).
-# 2. Await X packets on server.
-# 3. If one packet is broken. Take its order number (maybe SEQ but could be broken at this point) write it down to a bad packets list and send N
-# 4. Client will receive NACK and write down which packet broken
-# 5. After the communication ends (this needs to be done before fin ack). Await N wrong packets on server side
-# 6. After the communication ends (this needs to be done before fin ack). Send N wrong packets back to the server.
 
 
 class Receiver:
@@ -25,22 +16,24 @@ class Receiver:
         self.connection_manager = ReceiverConnectionManager(self)
         self.ip = ip if settings is None else settings.ip
         self.port = port if settings is None else settings.port
-        self.settings = settings  # TODO:: Implement settings
+        self.settings = settings
 
         # Socket initialization
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
-        # self.socket.settimeout(SOCKET_TIMEOUT)  # TODO:: Remove
         self.socket.bind((ip, port))
+
+        # TODO:: Print settings here
+        # TODO:: Exit while on pressing enter
 
         print_color("Waiting for connection...", color="blue")
 
-        ###############################################
         # Receiver main loop
-        ###############################################
         while True:
+            # Receiving packet from client
             ip, port, packet = self.connection_manager.await_packet()
             connection = self.connection_manager.get_connection(ip, port)
 
+            # Debug output
             if packet is None:
                 print_debug("Received broken packet from {0}:{1}".format(ip, port))
             else:
@@ -65,16 +58,17 @@ class Receiver:
                 self.received_ack(packet, connection)
 
             # Received data packet
-            elif Receiver.check_if_received_data_packet(packet, connection):
+            elif (
+                packet.flags.info or packet.flags.file or packet.flags.msg
+                and connection is not None and connection.state == ConnectionState.ACTIVE
+            ):
                 self.received_data(packet, connection)
 
             # Closing connection
             elif packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
                 self.connection_manager.start_closing_connection(packet, connection)
 
-    ###############################################
     # Received ACK from client
-    ###############################################
     def received_ack(self, packet: Segment, connection: Connection):
         # For establishing connection
         if connection.state == ConnectionState.SYN_ACK_SENT:
@@ -88,25 +82,18 @@ class Receiver:
 
             self.reassemble_and_output_data(connection)
 
-    ###############################################
     # Received data packet from client
-    ###############################################
     def received_data(self, packet: Segment, connection: Connection):
         print_debug("Received DATA packet from {0}:{1}".format(connection.ip, connection.port))
         connection.add_packet(packet)
         # TODO:: Implement sending of multiple ACKs here (server)
         self.connection_manager.send_ack_packet(connection)
 
-    @staticmethod
-    def check_if_received_data_packet(packet: Segment, connection: Connection):
-        return (
-            packet.flags.info or packet.flags.file or packet.flags.msg
-            and connection is not None and connection.state == ConnectionState.ACTIVE
-        )
-
+    # Build data using builder function and output them to the system
     def reassemble_and_output_data(self, connection: Connection):
         data = assemble(connection.packets)
 
+        # TODO:: Check if download dir is present if not download it to user directory or to current directory
         if isinstance(data, File):
             data.save(self.settings.downloads_dir)
         else:

@@ -5,6 +5,8 @@ from packet.Segment import Segment
 from utils.Constants import MAX_SEGMENT_SIZE
 
 
+# TODO:: Remove when not needed or refactor to be useful?
+
 class Tests:
 
     @staticmethod
@@ -50,7 +52,7 @@ class Tests:
         from modes.Sender import Sender
 
         sender = Sender("192.168.48.128")
-        sender._send_packet_(packet2)
+        sender._send_packet(packet2)
 
     @staticmethod
     def connection_tests_client():
@@ -61,7 +63,7 @@ class Tests:
 
         sender = Sender("192.168.48.128")
         packet = Segment(Flags(file=True), data=File(select=True))
-        sender._send_packet_(packet)
+        sender._send_packet(packet)
 
     @staticmethod
     def connection_tests_establishment():
@@ -77,7 +79,7 @@ class Tests:
         sender = Sender("192.168.48.128")
         while True:
             packet = Segment(Flags(file=True), data=File(select=True))
-            sender._send_packet_(packet)
+            sender._send_packet(packet)
         # sender.close_connection()
 
 
