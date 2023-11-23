@@ -113,7 +113,6 @@ class ConnectionManager:
     ###############################################
     def await_packet(self, connection: Connection = None):
         # TODO:: Implement retry?
-        # TODO:: Implement timeout
 
         try:
             data, addr = self.parent.socket.recvfrom(MTU)
