@@ -43,7 +43,10 @@ class Receiver:
             connection = self.connection_manager.get_connection(ip, port)
 
             # If the batch size is bigger than one. Handle the rest of the packets.
-            if connection is not None and connection.batch_size > 1:
+            if (
+                connection is not None and connection.batch_size > 1
+                and self.check_if_received_data_packet(packet, connection)
+            ):
                 self._handle_multiple_packets(packet, connection)
             else:
                 self._handle_packet(ip, port, packet, connection)
@@ -118,7 +121,7 @@ class Receiver:
     @staticmethod
     def check_if_received_data_packet(packet: Packet, connection: Connection):
         return (
-            packet.flags.info or packet.flags.file or packet.flags.msg
+            packet is not None and packet.flags.info or packet.flags.file or packet.flags.msg
             and connection is not None and connection.state == ConnectionState.ACTIVE
         )
 
@@ -147,15 +150,27 @@ class Receiver:
 
     def _handle_multiple_packets(self, first_packet, connection):
         packets = [first_packet]
+        if first_packet.flags.fin:
+            print_debug("Handling final data packet", color="cyan")
+            self._handle_packet(connection.ip, connection.port, first_packet, connection)
+            print_debug("Handled final data packet", color="cyan")
+            return
 
-        print_debug("Awaiting {0} more packets from {1}:{2}".format(connection.batch_size - 1, ip, port))
+        print_debug("Awaiting {0} more packets from {1}:{2}".format(connection.batch_size - 1, connection.ip, connection.port))
         for _ in range(connection.batch_size - 1):
             ip, port, packet = self.connection_manager.await_packet()
-            print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
-            if ip != first_packet.ip or port != first_packet.port:
-                print_debug("Packet from {0}:{1} is not from {2}:{3}".format(ip, port, first_packet.ip, first_packet.port))
-                return None
-            packets.append(packet)
 
-        for packet in packets:
-            self._handle_packet(packet.ip, packet.port, packet, connection)
+            # TODO:: Handle reciving broken packet
+            print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
+            if ip != connection.ip or port != connection.port:
+                print_debug("Packet from {0}:{1} is not from {2}:{3}".format(ip, port, connection.ip, connection.port))
+                return None
+
+            packets.append(packet)
+            if packet.flags.fin:
+                break
+
+        for i, packet in enumerate(packets):
+            print_debug("Handling packet {0}".format(i), color="cyan")
+            self._handle_packet(connection.ip, connection.port, packet, connection)
+            print_debug("Handled packet {0}".format(i), color="cyan")
