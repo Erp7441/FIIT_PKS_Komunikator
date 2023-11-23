@@ -16,8 +16,8 @@ class KeepaliveThread(Thread):
         print_debug("Started keepalive thread")
 
     def run(self):
-        # Modified run to use the stop event
-        while True:
+        # Modified run
+        while self.is_alive():
             try:
                 if self._target is not None:
                     print_debug("Running keepalive thread target...")
@@ -38,7 +38,6 @@ class KeepaliveThread(Thread):
                 print_debug("Could not stop keepalive thread", color="orange")
                 print_debug(e, color="orange")
                 return
-
 
         print_debug("Stopped keepalive thread")
 

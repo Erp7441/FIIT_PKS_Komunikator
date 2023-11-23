@@ -45,7 +45,7 @@ class Connection:
             sleep(1)
 
         # If refreshing connection was not successful. Kill it
-        if not self.parent.refresh_keepalive(self):
+        if not self.parent.refresh_keepalive(self) and self.keepalive_thread.is_alive():
             self.parent.kill_connection(self)
 
 
@@ -59,7 +59,7 @@ class Connection:
             sleep(1)
 
         # If connection keep alive time is 0. Kill it.
-        if self.current_keepalive_time <= 0:
+        if self.current_keepalive_time <= 0 and self.keepalive_thread.is_alive():
             self.parent.kill_connection(self)
 
 
