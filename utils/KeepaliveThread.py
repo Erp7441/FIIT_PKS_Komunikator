@@ -9,6 +9,7 @@ class KeepaliveThread(Thread):
         self._target = target
         self._args = args if args is not None else ()
         self._kwargs = kwargs if kwargs is not None else {}
+        self._stop_event = Event()
 
     def start(self):
         print_debug("Starting keepalive thread...")
@@ -17,7 +18,7 @@ class KeepaliveThread(Thread):
 
     def run(self):
         # Modified run
-        while self.is_alive():
+        while not self.is_stopped():
             try:
                 if self._target is not None:
                     print_debug("Running keepalive thread target...")
@@ -27,17 +28,8 @@ class KeepaliveThread(Thread):
 
     def stop(self):
         print_debug("Stopping keepalive thread...")
-
-        if hasattr(self, '_tstate_lock'):
-            try:
-                self._tstate_lock.release()
-                if hasattr(self, '_stop'):
-                    self._stop()
-                self.join()
-            except Exception as e:
-                print_debug("Could not stop keepalive thread", color="orange")
-                print_debug(e, color="orange")
-                return
-
+        self._stop_event.set()
         print_debug("Stopped keepalive thread")
 
+    def is_stopped(self):
+        return self._stop_event.is_set()

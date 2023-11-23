@@ -35,33 +35,34 @@ class Connection:
         self.packets.append(packet)
         self.packets.sort(key=lambda seq: seq.seq)
 
+    # Wait for "keepalive_time" seconds
+    def _count_down(self):
+        for _ in range(self.keepalive_time, 0, -1):
+            if self.keepalive_thread.is_stopped():
+                return False  # Exit the loop when thread stop is detected
+            self.current_keepalive_time -= 1
+            sleep(1)
+        return True  # Count down finished
+
     ###############################################
     # Client (sender) keep alive
     ###############################################
     def keep_alive(self):
-        # Wait for 5s
-        for _ in range(self.keepalive_time, 0, -1):
-            self.current_keepalive_time -= 1
-            sleep(1)
-
+        if not self._count_down():
+            return
         # If refreshing connection was not successful. Kill it
-        if not self.parent.refresh_keepalive(self) and self.keepalive_thread.is_alive():
+        if not self.keepalive_thread.is_stopped() and not self.parent.refresh_keepalive(self):
             self.parent.kill_connection(self)
-
 
     ###############################################
     # Server (receiver) keep alive
     ###############################################
     def await_keep_alive(self):
-        # Wait for 5s
-        for _ in range(self.keepalive_time, 0, -1):
-            self.current_keepalive_time -= 1
-            sleep(1)
-
+        if not self._count_down():
+            return
         # If connection keep alive time is 0. Kill it.
-        if self.current_keepalive_time <= 0 and self.keepalive_thread.is_alive():
+        if not self.keepalive_thread.is_stopped() and self.current_keepalive_time <= 0:
             self.parent.kill_connection(self)
-
 
     ###############################################
     # Keep alive init
