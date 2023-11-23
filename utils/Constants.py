@@ -5,7 +5,7 @@ DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS = 3
 DEBUG = True  # Debug mode
 DEBUG_SHOW_DATA = False  # Show sent data in debug mode
 
-GENERATE_BAD_PACKET = False  #TODO:: Test ARQ  # TODO:: Move to settings
+GENERATE_BAD_PACKET = True  #TODO:: Test ARQ  # TODO:: Move to settings
 WINDOW_SIZE = 2  # TODO:: Move to settings
 
 RESEND_ATTEMPTS = 3

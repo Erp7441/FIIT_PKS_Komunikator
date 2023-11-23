@@ -49,9 +49,9 @@ class Receiver:
             ):
                 self._handle_multiple_packets(packet, connection)
             else:
-                self._handle_packet(ip, port, packet, connection)
+                self._handle_single_packet(ip, port, packet, connection)
 
-    def _handle_packet(self, ip: str, port: int, packet: Packet, connection: Connection = None):
+    def _handle_single_packet(self, ip: str, port: int, packet: Packet, connection: Connection = None):
 
         # Checking if packet was damaged. If so, write its order number to the list of bad packets
         if connection is not None and packet is None:
@@ -108,12 +108,18 @@ class Receiver:
         print_debug("Received DATA packet from {0}:{1}".format(connection.ip, connection.port))
         self.connection_manager.send_ack_packet(connection, packet.seq)
 
-        if packet.flags.info and packet.flags.nack:
+        if packet.flags.fin and (packet.flags.file or packet.flags.msg) and connection.bad_packets_count > 0:
             bad_packet_count = connection.bad_packets_count
             connection.bad_packets_count = 0
             for _ in range(bad_packet_count):
                 ip, port, packet = self.connection_manager.await_packet(connection)
-                self._handle_packet(ip, port, packet, connection)
+                # If the batch size is bigger than one. Handle the rest of the packets.
+                if (
+                    connection is not None and connection.batch_size > 1
+                ):
+                    self._handle_multiple_packets(packet, connection)
+                else:
+                    self._handle_single_packet(ip, port, packet, connection)
         else:
             connection.add_packet(packet)
         # TODO:: Implement sending of multiple ACKs here (server)
@@ -152,7 +158,7 @@ class Receiver:
         packets = [first_packet]
         if first_packet.flags.fin:
             print_debug("Handling last data packet", color="cyan")
-            self._handle_packet(connection.ip, connection.port, first_packet, connection)
+            self._handle_single_packet(connection.ip, connection.port, first_packet, connection)
             print_debug("Handled last data packet", color="cyan")
             return
 
@@ -172,5 +178,5 @@ class Receiver:
 
         for i, packet in enumerate(packets):
             print_debug("Handling packet {0}".format(i), color="cyan")
-            self._handle_packet(connection.ip, connection.port, packet, connection)
+            self._handle_single_packet(connection.ip, connection.port, packet, connection)
             print_debug("Handled packet {0}".format(i), color="cyan")

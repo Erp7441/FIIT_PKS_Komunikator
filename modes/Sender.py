@@ -67,13 +67,11 @@ class Sender:
             self.connection_manager.close_connection(self._connection.ip, self._connection.port)
             self._connection = None
 
-    def send(self, data: Data):
-        # Sending packets
-        packets = disassemble(data)
+    def _batch_send(self, packets: list[Packet]):
         packet_count = len(packets)
 
         k = 0
-        for i in range(0, len(packets), self._connection.batch_size):
+        for _ in range(0, len(packets), self._connection.batch_size):
             sent_packets_this_batch = 0
             for _ in range(self._connection.batch_size):
                 if k >= packet_count:
@@ -89,9 +87,11 @@ class Sender:
                 if ack_packet is None or ack_packet.seq != packets[k - sent_packets_this_batch + j].seq:
                     print_debug("Broken or incorrect ACK packet received!", color="orange")
 
-
+    def send(self, data: Data):
+        # Sending packets
+        packets = disassemble(data)
+        self._batch_send(packets)
         self._resend_bad_packets()
-
         self.close_connection()
 
     def _resend_bad_packets(self):
@@ -106,9 +106,7 @@ class Sender:
 
             bad_packets = self._bad_packets
             self._bad_packets = []
-            for packet in bad_packets:
-                if self._send_packet_(packet):
-                    print_debug("Resending packet {0}".format(packet.seq))
+            self._batch_send(bad_packets)
 
     def __str__(self):
         _str = "Sender:\n"
