@@ -60,6 +60,10 @@ class ReceiverConnectionManager(ConnectionManager):
     #############################################################
     def refresh_keepalive(self, connection: Connection):
         with (self.lock):
+            if connection.state == ConnectionState.CLOSED or connection.state == ConnectionState.RESET:
+                print_debug("Failed to refresh keepalive state! Connection is already closed", color="red")
+                return False
+
             self.send_syn_ack_packet(connection)
             ip, port, packet = self.await_packet(connection)
             if (

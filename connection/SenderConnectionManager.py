@@ -24,15 +24,15 @@ class SenderConnectionManager(ConnectionManager):
     # Closing connection (sender)
     ###############################################
     def close_connection(self, ip: str, port: int):
-        connection = self.get_connection(ip, port)
-        if connection is None:
-            print_debug("Connection with {0}:{1} does not exist!".format(ip, port))
-            return
-        elif connection.state is ConnectionState.CLOSED or connection.state is ConnectionState.RESET:
-            print_debug("Connection with {0}:{1} is already closed!".format(ip, port))
-            return
-
         with self.lock:
+            connection = self.get_connection(ip, port)
+            if connection is None:
+                print_debug("Connection with {0}:{1} does not exist!".format(ip, port))
+                return
+            elif connection.state is ConnectionState.CLOSED or connection.state is ConnectionState.RESET:
+                print_debug("Connection with {0}:{1} is already closed!".format(ip, port))
+                return
+
             self.send_fin_packet(connection)
 
             if self.await_fin_ack(connection):
@@ -44,6 +44,10 @@ class SenderConnectionManager(ConnectionManager):
     ###############################################
     def refresh_keepalive(self, connection: Connection):
         with self.lock:
+            if connection.state == ConnectionState.CLOSED or connection.state == ConnectionState.RESET:
+                print_debug("Failed to refresh keepalive state! Connection is already closed", color="red")
+                return False
+
             self.send_syn_packet(connection)
             if self.await_syn_ack(connection):
                 connection.current_keepalive_time = connection.keepalive_time

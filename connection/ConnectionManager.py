@@ -36,11 +36,15 @@ class ConnectionManager:
         return None
 
     def remove_connection(self, connection: Connection):
+        if connection is None:
+            print_debug("Connection does not exist!")
+            return
+
+        connection.keepalive_thread.stop()
         if connection in self.inactive_connections:
             self.inactive_connections.remove(connection)
         elif connection in self.active_connections:
             self.active_connections.remove(connection)
-        connection.keepalive_thread.stop()
         connection.state = ConnectionState.CLOSED
         print_debug("Connection with", connection.ip+":"+str(connection.port), "was removed!")
 
@@ -52,7 +56,6 @@ class ConnectionManager:
         rst_packet.flags.rst = True
         rst_packet.send_to(connection.ip, connection.port, self.parent.socket)
         self.remove_connection(connection)
-        connection.keepalive_thread.stop()
         connection.state = ConnectionState.RESET
         print_debug("Connection with", connection.ip+":"+str(connection.port), "was killed!")
 
@@ -144,7 +147,7 @@ class ConnectionManager:
             connection.state = ConnectionState.ACTIVE
             return True
         else:
-            self.kill_connection(connection)
+            self.kill_connection(connection)  # Is technically a duplicate call in case await packet times out
         return False
 
     def await_fin_ack(self, connection: Connection):
@@ -160,7 +163,7 @@ class ConnectionManager:
             self.send_ack_packet(connection)
             return True
         else:
-            self.kill_connection(connection)
+            self.kill_connection(connection)  # Is technically a duplicate call in case await packet times out
         return False
 
     def __str__(self):

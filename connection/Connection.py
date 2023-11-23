@@ -39,29 +39,29 @@ class Connection:
     # Client (sender) keep alive
     ###############################################
     def keep_alive(self):
-        while self.state == ConnectionState.ACTIVE:
-            # Wait for 5s
-            for _ in range(self.keepalive_time, 0, -1):
-                self.current_keepalive_time -= 1
-                sleep(1)
+        # Wait for 5s
+        for _ in range(self.keepalive_time, 0, -1):
+            self.current_keepalive_time -= 1
+            sleep(1)
 
-            # If refreshing connection was not successful. Kill it
-            if not self.parent.refresh_keepalive(self):
-                self.parent.kill_connection(self)
+        # If refreshing connection was not successful. Kill it
+        if not self.parent.refresh_keepalive(self):
+            self.parent.kill_connection(self)
+
 
     ###############################################
     # Server (receiver) keep alive
     ###############################################
     def await_keep_alive(self):
-        while self.state == ConnectionState.ACTIVE:
-            # Wait for 5s
-            for _ in range(self.keepalive_time, 0, -1):
-                self.current_keepalive_time -= 1
-                sleep(1)
+        # Wait for 5s
+        for _ in range(self.keepalive_time, 0, -1):
+            self.current_keepalive_time -= 1
+            sleep(1)
 
-            # If connection keep alive time is 0. Kill it.
-            if self.current_keepalive_time <= 0:
-                self.parent.kill_connection(self)
+        # If connection keep alive time is 0. Kill it.
+        if self.current_keepalive_time <= 0:
+            self.parent.kill_connection(self)
+
 
     ###############################################
     # Keep alive init

@@ -2,7 +2,7 @@ from datetime import datetime
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename, askdirectory
 
-from utils.Constants import DEBUG
+from utils.Constants import DEBUG, DEBUG_SHOW_DATA
 from utils.Constants import ENCODING
 
 
@@ -69,6 +69,10 @@ def print_debug(*args, color="yellow", **kwargs):
         message = " ".join(str(arg) for arg in args)
         print_color(prefix + message, color=color, **kwargs)
 
+
+def print_debug_data(*args, color="yellow", **kwargs):
+    if DEBUG_SHOW_DATA:
+        print_debug(args, color=color, **kwargs)
 
 ###############################################
 # Conversions
