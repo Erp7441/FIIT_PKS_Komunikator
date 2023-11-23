@@ -38,28 +38,34 @@ class Receiver:
         while True:
             # Handling first packet of the batch
             ip, port, packet = self.connection_manager.await_packet()
-            print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
             connection = self.connection_manager.get_connection(ip, port)
+
+            # Debug output (TODO:: Remove?)
+            if packet is not None:
+                print_debug("Received a packet with flags {0} from {1}:{2}".format(str(packet.flags), ip, port))
+            else:
+                print_debug("Received a broken packet from {0}:{1}!".format(ip, port))
 
             # If the batch size is bigger than one. Handle the rest of the packets.
             if (
                 connection is not None and connection.batch_size > 1
                 and self.check_if_received_data_packet(packet, connection)
             ):
-                self._handle_multiple_packets(packet, connection)
+                self.handle_multiple_packets(packet, connection)
             else:
-                self._handle_single_packet(ip, port, packet, connection)
+                self.handle_single_packet(ip, port, packet, connection)
 
     ###############################################
     # Handle packets from client
     ###############################################
-    def _handle_single_packet(self, ip: str, port: int, packet: Packet, connection: Connection = None):
+    def handle_single_packet(self, ip: str, port: int, packet: Packet, connection: Connection = None):
 
         # Checking if packet was damaged. If so, write its order number to the list of bad packets
-        if connection is not None and packet is None:
+        if packet is None:
             print_debug("Received broken packet!")
-            self.connection_manager.send_nack_packet(connection)
-            connection.bad_packets_count += 1
+            if connection is not None:
+                self.connection_manager.send_nack_packet(connection)
+                connection.bad_packets_count += 1
             return
 
         # Checking if first packet is SYN
@@ -87,11 +93,17 @@ class Receiver:
         elif packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
             self.connection_manager.start_closing_connection(packet, connection)
 
-    def _handle_multiple_packets(self, first_packet, connection):
+    def handle_multiple_packets(self, first_packet, connection):
+        if first_packet is None:
+            print_debug(
+                "Received broken first packet of the batch! From {0}:{1}".format(connection.ip, connection.port),
+                color="orange"
+            )
+
         packets = [first_packet]
-        if first_packet.flags.fin:
+        if first_packet is not None and first_packet.flags.fin:
             print_debug("Handling last data packet", color="cyan")
-            self._handle_single_packet(connection.ip, connection.port, first_packet, connection)
+            self.handle_single_packet(connection.ip, connection.port, first_packet, connection)
             print_debug("Handled last data packet", color="cyan")
             return
 
@@ -114,9 +126,8 @@ class Receiver:
 
         for i, packet in enumerate(packets):
             print_debug("Handling packet {0}".format(i), color="cyan")
-            self._handle_single_packet(connection.ip, connection.port, packet, connection)
+            self.handle_single_packet(connection.ip, connection.port, packet, connection)
             print_debug("Handled packet {0}".format(i), color="cyan")
-
 
     ###############################################
     # Received ACK from client
@@ -141,27 +152,17 @@ class Receiver:
         print_debug("Received DATA packet from {0}:{1}".format(connection.ip, connection.port))
         self.connection_manager.send_ack_packet(connection, packet.seq)
 
+        connection.add_packet(packet)
         if packet.flags.fin and (packet.flags.file or packet.flags.msg) and connection.bad_packets_count > 0:
-            bad_packet_count = connection.bad_packets_count
-            connection.bad_packets_count = 0
-            for _ in range(bad_packet_count):
-                ip, port, packet = self.connection_manager.await_packet(connection)
-                # If the batch size is bigger than one. Handle the rest of the packets.
-                if (
-                    connection is not None and connection.batch_size > 1
-                ):
-                    self._handle_multiple_packets(packet, connection)
-                else:
-                    self._handle_single_packet(ip, port, packet, connection)
-        else:
-            connection.add_packet(packet)
+            self.connection_manager.receive_resent_packets(connection)
+
         # TODO:: Implement sending of multiple ACKs here (server)
 
     @staticmethod
     def check_if_received_data_packet(packet: Packet, connection: Connection):
         return (
-            packet is not None and packet.flags.info or packet.flags.file or packet.flags.msg
-            and connection is not None and connection.state == ConnectionState.ACTIVE
+            packet is not None and (packet.flags.info or packet.flags.file or packet.flags.msg
+            and connection is not None and connection.state == ConnectionState.ACTIVE)
         )
 
     @staticmethod

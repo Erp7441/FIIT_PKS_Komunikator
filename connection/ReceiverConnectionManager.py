@@ -55,6 +55,21 @@ class ReceiverConnectionManager(ConnectionManager):
 
         # TODO:: ACK wont be received within 5 seconds, kill connection?
 
+    def receive_resent_packets(self, connection: Connection):
+        # TODO:: Add attempts
+        while connection.bad_packets_count > 0:
+            connection.bad_packets_count = 0
+
+            ip, port, packet = self.await_packet(connection)
+
+            # If the batch size is bigger than one. Handle the rest of the packets.
+            if (
+                connection is not None and connection.batch_size > 1
+            ):
+                self.parent.handle_multiple_packets(packet, connection)
+            else:
+                self.parent.handle_single_packet(ip, port, packet, connection)
+
     #############################################################
     # Received SYN for refreshing the connection keepalive state
     #############################################################
