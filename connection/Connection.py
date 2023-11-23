@@ -24,6 +24,7 @@ class Connection:
         self.packets = []
         self.parent = parent
         self.bad_packets_count = 0
+        self.bad_packets = []
 
         if syn_packet is not None:
             self.batch_size = syn_packet.seq
@@ -40,6 +41,10 @@ class Connection:
     def add_packet(self, packet: Packet):
         self.packets.append(packet)
         self.packets.sort(key=lambda seq: seq.seq)
+
+    def add_bad_packet(self, packet: Packet):
+        self.bad_packets.append(packet)
+        self.bad_packets.sort(key=lambda seq: seq.seq)
 
     # Wait for "keepalive_time" seconds
     def _count_down(self):

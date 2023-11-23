@@ -50,7 +50,7 @@ class Tests:
         from modes.Sender import Sender
 
         sender = Sender("192.168.48.128")
-        sender._send_packet_(packet2)
+        # sender._send_packet(packet2) # Doesnt exist anymore
 
     @staticmethod
     def connection_tests_client():
@@ -61,7 +61,7 @@ class Tests:
 
         sender = Sender("192.168.48.128")
         packet = Packet(Flags(file=True), data=File(select=True))
-        sender._send_packet_(packet)
+        # sender._send_packet(packet) # Doesnt exist anymore
 
     @staticmethod
     def connection_tests_establishment():
@@ -77,7 +77,7 @@ class Tests:
         sender = Sender("192.168.48.128")
         while True:
             packet = Packet(Flags(file=True), data=File(select=True))
-            sender._send_packet_(packet)
+            sender.connection_manager.send_data_packet(packet)
         # sender.close_connection()
 
 

@@ -1,8 +1,8 @@
 from binascii import crc32
 
 from packet.Flags import Flags
-from utils.Constants import FLAGS_SIZE, SEQ_SIZE, CRC_SIZE, GENERATE_BAD_PACKET
-from utils.Utils import convert_int_to_bytes, convert_str_to_bytes, convert_bytes_to_int
+from utils.Constants import FLAGS_SIZE, SEQ_SIZE, CRC_SIZE
+from utils.Utils import convert_int_to_bytes, convert_str_to_bytes, convert_bytes_to_int, print_debug
 
 
 class Packet:
@@ -17,15 +17,21 @@ class Packet:
         else:
             self.data = None if data is None else data.encode()
 
+    def encode_with_error(self):
+        encoded_seq = convert_int_to_bytes(self.seq, SEQ_SIZE)
+        encoded_data = b"" if self.data is None else self.data
+
+        encoded_packet = self.flags.encode() + encoded_seq + encoded_data
+        encoded_crc = convert_int_to_bytes(crc32(encoded_packet)-1, CRC_SIZE)
+
+        return encoded_packet + encoded_crc
+
     def encode(self):
         encoded_seq = convert_int_to_bytes(self.seq, SEQ_SIZE)
         encoded_data = b"" if self.data is None else self.data
 
         encoded_packet = self.flags.encode() + encoded_seq + encoded_data
         encoded_crc = convert_int_to_bytes(crc32(encoded_packet), CRC_SIZE)
-
-        if GENERATE_BAD_PACKET is True and self.seq == 1:
-            encoded_crc = convert_int_to_bytes(crc32(encoded_packet) - 1, CRC_SIZE)
 
         return encoded_packet + encoded_crc
 
@@ -46,9 +52,13 @@ class Packet:
         self.data = data_header
         return self
 
-    # TODO:: Should this class be responsible for this?
-    def send_to(self, ip: str, port: int, socket):
-        encoded_data_bytes = self.encode()
+    def send_to(self, ip: str, port: int, socket, with_error: bool = False):
+        if with_error and (self.seq == 3 or self.seq == 5):
+            print_debug("Sending broken packet with SEQ: {0}".format(self.seq))
+            encoded_data_bytes = self.encode_with_error()
+        else:
+            encoded_data_bytes = self.encode()
+
         socket.sendto(encoded_data_bytes, (ip, port))
 
     def __str__(self):
