@@ -14,6 +14,7 @@ from cli.Settings import Settings
 # TODO:: Add non debug outputs
 
 def run_receiver_mode():
+    # TODO:: Add menu with options
     Receiver()
 
 
