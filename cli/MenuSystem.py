@@ -22,12 +22,12 @@ def run_sender_mode(settings):
 
 def run_test_mode():
     # TODO:: Remove or make useful
-    #from utils.Tests import Tests
+    # from utils.Tests import Tests
     from utils.Tests import Tests
-    #Tests.connection_tests_establishment_data()
-    Tests.data_resassembly_test()
-    #Tests.packet_tests()
-    #Tests.test_string_conversion()
+    # Tests.connection_tests_establishment_data()
+    Tests.data_assembly_test()
+    # Tests.packet_tests()
+    # Tests.test_string_conversion()
 
 
 def show_sender_menu():

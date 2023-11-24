@@ -6,7 +6,7 @@ from utils.Utils import convert_int_to_bytes, convert_str_to_bytes, convert_byte
 
 
 class Segment:
-    def __init__(self, flags: Flags = None, seq=0, data = None):
+    def __init__(self, flags: Flags = None, seq=0, data=None):
         self.flags = Flags() if flags is None else flags
         self.seq = seq
 

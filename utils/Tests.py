@@ -82,9 +82,8 @@ class Tests:
             sender._send_packet(packet)
         # sender.close_connection()
 
-
     @staticmethod
-    def data_resassembly_test():
+    def data_assembly_test():
         # from data.Builder import disassemble, assemble
         # data = File(select=True)
         # packets = disassemble(data)

@@ -10,6 +10,9 @@ from cli.MenuSystem import show_main_menu
 # TODO:: Check if connection reset from server side works. (Case where client connection dies suddenly)
 # TODO:: Add non debug outputs
 
+# TODO:: Test what if NACK is received during SYN-ACK sequence
+
+
 if __name__ == "__main__":
     show_main_menu()
 

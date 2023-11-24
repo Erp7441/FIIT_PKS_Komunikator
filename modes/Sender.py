@@ -43,7 +43,7 @@ class Sender:
             ip, port, response = self.connection_manager.await_packet(connection)  # Awaiting ACK
 
             # TODO:: Implement sending of multiple ACKs here (client)
-            # TODO:: How to handle faulty ACK? Not sure, can rensend? If server detects duplicate. Resend ack but not append?
+            # TODO:: How to handle faulty ACK? Not sure, can resend? If server detects duplicate. Resend ack but not append?
             if ip != self.ip or port != self.port:
                 break
 
@@ -58,10 +58,6 @@ class Sender:
         return None
 
     def establish_connection(self):
-        # Send syn packet
-        # Wait for one response packet of SYN ACK
-        # Send ack packet
-        # Add to active connections
         if (
             self.connection_manager is not None and self.ip is not None and self.port is not None and
             self.connection_manager.get_connection(self.ip, self.port) is None
@@ -69,10 +65,6 @@ class Sender:
             self.connection_manager.establish_connection(self.ip, self.port)
 
     def close_connection(self):
-        # Send fin packet
-        # Wait for one response packet of FINACK
-        # Send ack packet
-        # Remove connection from connections
         if (
             self.connection_manager is not None and self.ip is not None and self.port is not None and
             self.connection_manager.get_connection(self.ip, self.port) is not None

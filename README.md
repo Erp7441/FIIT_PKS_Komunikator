@@ -5,7 +5,7 @@ Navrhnite a implementujte program s použitím vlastného protokolu nad protok
 - [ ] ConnectionManager - Manges connection between two nodes
 - [ ] Communication - Piece of communication between two nodes (consists of packets [fragments])
 - [x] Packet - Self explanatory. Headers + Data
-- [x] Data - This is a interface which will provide a unified methods for encrypting data
+- [x] Data - This is an interface which will provide a unified methods for encrypting data
 - [x] File (Data) - Data type
 - [x] Message (Data) - Data type
 - [ ] Receiver - Mode of the communicator

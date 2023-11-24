@@ -1,5 +1,5 @@
 class Menu:
-    def __init__(self, title:str = ""):
+    def __init__(self, title: str = ""):
         self.options = []  # List of tuples (label, function)
         self.title = title
 

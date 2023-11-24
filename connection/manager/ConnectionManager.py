@@ -58,11 +58,9 @@ class ConnectionManager:
             return
 
         # Sends RST packet to the other end so signalize connection termination
-        rst_packet = Segment()
-        rst_packet.flags.rst = True
-        rst_packet.send_to(connection.ip, connection.port, self.parent.socket)
-        self.remove_connection(connection)
+        self.send_rst_packet(connection)
         connection.state = ConnectionState.RESET
+        self.remove_connection(connection)
         print_debug("Connection with", connection.ip+":"+str(connection.port), "was killed!")
 
     def move_connection_to_active(self, connection: Connection):
@@ -125,6 +123,13 @@ class ConnectionManager:
         nack_packet.send_to(connection.ip, connection.port, self.parent.socket)
         print_debug("Sent NACK packet to {0}:{1}".format(connection.ip, connection.port))
         return nack_packet
+
+    def send_rst_packet(self, connection):
+        rst_packet = Segment()
+        rst_packet.flags.rst = True
+        rst_packet.send_to(connection.ip, connection.port, self.parent.socket)
+        print_debug("Sent RST packet to {0}:{1}".format(connection.ip, connection.port))
+        return rst_packet
 
     ###############################################
     # Await packets
