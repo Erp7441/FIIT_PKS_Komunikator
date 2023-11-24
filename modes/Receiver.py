@@ -1,5 +1,7 @@
 import socket as s
 
+from keyboard import is_pressed
+
 from cli.Settings import Settings
 from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
@@ -9,6 +11,7 @@ from data.File import File
 from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT
 from utils.Utils import print_debug, print_color
+from threading import Thread
 
 
 class Receiver:
@@ -21,7 +24,17 @@ class Receiver:
         # Socket initialization
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
         self.socket.bind((ip, port))
+        self.thread = Thread(target=self.run)
+        self.thread.start()  # Running on a separate thread
 
+        # When user presses esc then kill the thread
+        while True:
+            if is_pressed("esc"):
+                print_color("Exiting receiver...", color="blue")
+                self.thread.join(timeout=0)
+                break
+
+    def run(self):
         # TODO:: Print settings here
         # TODO:: Exit while on pressing enter
 

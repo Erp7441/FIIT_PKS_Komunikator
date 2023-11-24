@@ -1,7 +1,10 @@
+from keyboard import is_pressed
+
 from cli.Menu import Menu
 from cli.Settings import Settings
 from modes.Receiver import Receiver
 from modes.Sender import Sender
+from utils.Utils import print_color
 
 
 def run_receiver_mode():
