@@ -1,5 +1,6 @@
 import socket as s
 
+from cli.Settings import Settings
 from connection.ConnectionState import ConnectionState
 from connection.manager.SenderConnectionManager import SenderConnectionManager
 from data.Builder import disassemble
@@ -7,7 +8,6 @@ from data.Data import Data
 from data.File import File
 from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT, SENDER_SOCKET_TIMEOUT
-from cli.Settings import Settings
 from utils.Utils import print_debug, get_string_safely
 
 

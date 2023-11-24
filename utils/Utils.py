@@ -1,14 +1,13 @@
+import os
+import re
 from datetime import datetime
+from pathlib import Path
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename, askdirectory
-import re
 from typing import Callable
 
 from utils.Constants import DEBUG, DEBUG_SHOW_DATA
 from utils.Constants import ENCODING
-
-import os
-from pathlib import Path
 
 
 ###############################################

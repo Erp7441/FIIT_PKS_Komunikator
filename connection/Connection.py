@@ -2,18 +2,9 @@ from time import sleep
 from typing import Callable
 
 from connection.ConnectionState import ConnectionState
+from connection.KeepaliveThread import KeepaliveThread
 from packet.Segment import Segment
 from utils.Constants import RECEIVER_KEEPALIVE_TIME, SENDER_KEEPALIVE_TIME, DEFAULT_KEEPALIVE_TIME
-from connection.KeepaliveThread import KeepaliveThread
-
-
-# Comm
-# Pseudo idea
-# Gets splited data in packets
-# Evaluate packets order and crc32
-# Two things will be required in here
-# Get next packet - gets next packet in communication for sending
-# Get last packet - gets last packet in communication for resending in case of error
 
 
 class Connection:
@@ -24,6 +15,7 @@ class Connection:
         self.packets = []
         self.parent = parent
 
+        # Selecting keepalive method based on parent class
         if parent.__class__.__name__ == "ReceiverConnectionManager":
             self._init_keep_alive_(keepalive_time, RECEIVER_KEEPALIVE_TIME, self.await_keep_alive)
         elif parent.__class__.__name__ == "SenderConnectionManager":
@@ -31,6 +23,7 @@ class Connection:
         else:
             self._init_keep_alive_(keepalive_time, DEFAULT_KEEPALIVE_TIME)
 
+    # Add packet and sort the list
     def add_packet(self, packet: Segment):
         self.packets.append(packet)
         self.packets.sort(key=lambda seq: seq.seq)
@@ -49,7 +42,7 @@ class Connection:
     ###############################################
     def keep_alive(self):
         if not self._count_down():
-            return
+            return  # Exit when thread stop is detected
         # If refreshing connection was not successful. Kill it
         if not self.keepalive_thread.is_stopped() and not self.parent.refresh_keepalive(self):
             self.parent.kill_connection(self)
@@ -59,7 +52,7 @@ class Connection:
     ###############################################
     def await_keep_alive(self):
         if not self._count_down():
-            return
+            return  # Exit when thread stop is detected
         # If connection keep alive time is 0. Kill it.
         if not self.keepalive_thread.is_stopped() and self.current_keepalive_time <= 0:
             self.parent.kill_connection(self)
@@ -67,7 +60,7 @@ class Connection:
     ###############################################
     # Keep alive init
     ###############################################
-    def _init_keep_alive_(self, keepalive_time=None, default_keepalive_time=None, keep_alive_method: Callable = None):
+    def _init_keep_alive_(self, keepalive_time=None, default_keepalive_time=DEFAULT_KEEPALIVE_TIME, keep_alive_method: Callable = None):
         # Initialize sender keepalive time
         if keepalive_time is None:
             self.keepalive_time = default_keepalive_time

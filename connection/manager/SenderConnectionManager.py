@@ -1,6 +1,6 @@
 from connection.Connection import Connection
-from connection.manager.ConnectionManager import ConnectionManager
 from connection.ConnectionState import ConnectionState
+from connection.manager.ConnectionManager import ConnectionManager
 from utils.Utils import print_debug, print_color
 
 
@@ -13,11 +13,11 @@ class SenderConnectionManager(ConnectionManager):
     ###############################################
     def establish_connection(self, ip: str, port: int):
         connection = Connection(ip, port, None, parent=self)
-        self.send_syn_packet(connection)
-
-        if self.await_syn_ack(connection):
+        self.send_syn_packet(connection)  # SYN
+        if self.await_syn_ack(connection):  # SYN-ACK
             self.active_connections.append(connection)
             print_color("Connection with", connection.ip+":"+str(connection.port), "established", color='green')
+            # TODO:: Send ACK? (like in keepalive)
         return connection
 
     ###############################################
@@ -26,6 +26,8 @@ class SenderConnectionManager(ConnectionManager):
     def close_connection(self, ip: str, port: int):
         with self.lock:
             connection = self.get_connection(ip, port)
+
+            # Check if connection is valid
             if connection is None:
                 print_debug("Connection with {0}:{1} does not exist!".format(ip, port))
                 return
@@ -33,11 +35,11 @@ class SenderConnectionManager(ConnectionManager):
                 print_debug("Connection with {0}:{1} is already closed!".format(ip, port))
                 return
 
-            self.send_fin_packet(connection)
-
-            if self.await_fin_ack(connection):
+            self.send_fin_packet(connection)  # FIN
+            if self.await_fin_ack(connection):  # FIN-ACK
                 self.remove_connection(connection)
                 print_color("Connection with", connection.ip+":"+str(connection.port), "closed", color='green')
+                # TODO:: Send ACK? (like in keepalive)
 
     ###############################################
     # Keep alive sequence
@@ -48,10 +50,10 @@ class SenderConnectionManager(ConnectionManager):
                 print_debug("Failed to refresh keepalive state! Connection is already closed", color="red")
                 return False
 
-            self.send_syn_packet(connection)
-            if self.await_syn_ack(connection):
-                connection.current_keepalive_time = connection.keepalive_time
-                self.send_ack_packet(connection)
+            self.send_syn_packet(connection)  # SYN
+            if self.await_syn_ack(connection):  # SYN-ACK
+                connection.current_keepalive_time = connection.keepalive_time  # Refresh keepalive timer
+                self.send_ack_packet(connection)  # ACK
                 connection.state = ConnectionState.ACTIVE
                 print_debug("Refreshed keepalive state!")
                 return True

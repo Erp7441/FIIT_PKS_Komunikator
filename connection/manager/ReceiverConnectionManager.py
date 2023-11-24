@@ -1,6 +1,6 @@
 from connection.Connection import Connection
-from connection.manager.ConnectionManager import ConnectionManager
 from connection.ConnectionState import ConnectionState
+from connection.manager.ConnectionManager import ConnectionManager
 from utils.Utils import print_debug
 
 
@@ -21,6 +21,7 @@ class ReceiverConnectionManager(ConnectionManager):
             self.send_syn_ack_packet(connection)
 
     def finish_establish_connection(self, packet, connection: Connection):
+        # TODO:: Move to a single method?
         if packet.flags.ack and connection and connection.state == ConnectionState.SYN_ACK_SENT:
             print_debug("Received ACK packet from {0}:{1}. Connection established!".format(connection.ip, connection.port))
             # If we received ack after syn ack. Move communication to active list
@@ -34,6 +35,7 @@ class ReceiverConnectionManager(ConnectionManager):
     # Closing connection (receiver)
     ###############################################
     def start_closing_connection(self, packet, connection: Connection):
+        # TODO:: Move to a single method?
         with self.lock:
             if packet.flags.fin and connection is not None:
                 print_debug("Received FIN packet from {0}:{1}".format(connection.ip, connection.port))

@@ -1,5 +1,6 @@
 import socket as s
 
+from cli.Settings import Settings
 from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
 from connection.manager.ReceiverConnectionManager import ReceiverConnectionManager
@@ -7,7 +8,6 @@ from data.Builder import assemble
 from data.File import File
 from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT
-from cli.Settings import Settings
 from utils.Utils import print_debug, print_color
 
 

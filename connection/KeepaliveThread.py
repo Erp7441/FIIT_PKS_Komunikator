@@ -24,6 +24,7 @@ class KeepaliveThread(Thread):
                     print_debug("Running keepalive thread target...")
                     self._target(*self._args, **self._kwargs)
             except Exception as e:
+                # Running target function failed
                 print_debug(e, color="orange")
 
     def stop(self):
