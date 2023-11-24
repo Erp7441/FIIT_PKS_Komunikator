@@ -1,5 +1,6 @@
 import socket as s
 from threading import Thread
+from time import sleep
 
 from keyboard import is_pressed
 
@@ -30,6 +31,7 @@ class Receiver:
 
         # When user presses esc then kill the thread
         while True:
+            sleep(1)  # Slows down the loop
             if is_pressed("esc"):
                 print_color("Exiting receiver...", color="blue")
                 self.close()
