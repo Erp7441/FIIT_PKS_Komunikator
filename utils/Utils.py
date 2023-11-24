@@ -124,6 +124,10 @@ def is_valid_ipv4(ip):
     return bool(ipv4_pattern.match(ip))
 
 
+def is_valid_confirmation(string: str):
+    return string.lower() == "y" or string.lower() == "yes" or string.lower() == "n" or string.lower() == "no"
+
+
 ###############################################
 # Getters
 ###############################################

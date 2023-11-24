@@ -23,11 +23,11 @@ class Settings:
         self.get_ip()
         self.get_port()
         self.get_segment_size()
-        self._initialized = True
 
     def get_ip(self):
         self.ip = get_string_safely("Please enter IP address: ", DEFAULT_PORT, lambda x: is_valid_ipv4(x),
                                     "Invalid IP address")
+        self._initialized = True
 
     def get_port(self):
         self.port = get_integer_safely(
