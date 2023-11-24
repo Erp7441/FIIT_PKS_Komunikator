@@ -18,11 +18,11 @@ class Sender:
         self.connection_manager = SenderConnectionManager(self)
         self.ip = ip if settings is None else settings.ip
         self.port = port if settings is None else settings.port
-        self.establish_connection()
         self.settings = settings
+        self.establish_connection()
 
     def _send_packet(self, packet: Segment):
-        connection = self.connection_manager.get_connection(self.ip, self.port)
+        connection = self.get_current_connection()
         if connection is None or connection.state != ConnectionState.ACTIVE:
             return None
 
@@ -60,14 +60,14 @@ class Sender:
     def establish_connection(self):
         if (
             self.connection_manager is not None and self.ip is not None and self.port is not None and
-            self.connection_manager.get_connection(self.ip, self.port) is None
+            self.get_current_connection() is None
         ):
             self.connection_manager.establish_connection(self.ip, self.port)
 
     def close_connection(self):
         if (
             self.connection_manager is not None and self.ip is not None and self.port is not None and
-            self.connection_manager.get_connection(self.ip, self.port) is not None
+            self.get_current_connection() is not None
         ):
             self.connection_manager.close_connection(self.ip, self.port)
 
@@ -112,3 +112,7 @@ class Sender:
         if self.settings is not None:
             _str += "Settings: " + str(self.settings) + "\n"
         return _str
+
+    def get_current_connection(self):
+        if self.connection_manager is not None:
+            return self.connection_manager.get_connection(self.ip, self.port)

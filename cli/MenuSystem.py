@@ -1,5 +1,3 @@
-from keyboard import is_pressed
-
 from cli.Menu import Menu
 from cli.Settings import Settings
 from modes.Receiver import Receiver
@@ -20,7 +18,14 @@ def run_sender_mode(settings):
     sender_sub_menu = Menu("Sender sub menu")
     sender_sub_menu.add_option("Send file", lambda: sender.send_file())
     sender_sub_menu.add_option("Send message", lambda: sender.send_message())
-    sender_sub_menu.display(on_close_function=lambda: sender.close())
+    sender_sub_menu.display(
+        run_functions=[
+            lambda: print_color(sender.get_current_connection().stats(), color="blue")
+        ],
+        on_close_functions=[
+            lambda: sender.close()
+        ]
+    )
 
 
 def run_test_mode():

@@ -73,9 +73,11 @@ class Connection:
         self.keepalive_thread = KeepaliveThread(target=keep_alive_method)
         self.keepalive_thread.start()
 
-    def __str__(self):
-        _str = "Connection:\n"
-
+    ###############################################
+    # Output
+    ###############################################
+    def stats(self):
+        _str = ""
         if self.ip is not None:
             _str += "IP: " + str(self.ip) + "\n"
         if self.port is not None:
@@ -83,6 +85,11 @@ class Connection:
 
         if self.state is not None:
             _str += "State: " + str(self.state) + "\n"
+        return _str
+
+    def __str__(self):
+        _str = "Connection:\n"
+        _str += self.stats()
 
         if self.current_keepalive_time is not None:
             _str += "Current keepalive time: " + str(self.current_keepalive_time) + "\n"

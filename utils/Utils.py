@@ -219,3 +219,11 @@ def get_file_content(path: str):
     content = file.read()
     file.close()
     return content
+
+
+def get_confirmation(prompt: str):
+    return get_string_safely(
+        prompt,
+        error_msg="Invalid input",
+        condition=lambda x: is_valid_confirmation(x)
+    )

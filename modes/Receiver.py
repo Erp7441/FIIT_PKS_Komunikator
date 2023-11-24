@@ -1,4 +1,5 @@
 import socket as s
+from threading import Thread
 
 from keyboard import is_pressed
 
@@ -11,7 +12,6 @@ from data.File import File
 from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT
 from utils.Utils import print_debug, print_color
-from threading import Thread
 
 
 class Receiver:

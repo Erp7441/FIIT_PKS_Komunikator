@@ -9,9 +9,16 @@ class Menu:
     def add_option(self, label, function):
         self.options.append((label, function))
 
-    def display(self, on_close_function=None):
+    def display(self, run_functions: list[callable] = None, on_close_functions: list[callable] = None):
         while True:
             print(self.title)
+
+            if run_functions is not None:
+                try:
+                    for function in run_functions:
+                        function()
+                except Exception as e:
+                    print_debug(f"Error in run_function: {e}", color="red")
 
             # Print options
             for i, option in enumerate(self.options, 1):
@@ -32,9 +39,10 @@ class Menu:
                 selected_option = self.options[choice - 1]
                 selected_option[1]()
             elif choice == len(self.options) + 1:
-                if on_close_function is not None:
+                if on_close_functions is not None:
                     try:
-                        on_close_function()
+                        for function in on_close_functions:
+                            function()
                     except Exception as e:
                         print_debug(f"Error in on_close_function: {e}", color="red")
                 return  # Exit option was selected
