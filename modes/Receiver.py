@@ -24,6 +24,7 @@ class Receiver:
         # Socket initialization
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
         self.socket.bind((ip, port))
+        self.socket_closed = False  # Flag to check if socket is closed
         self.thread = Thread(target=self.run)
         self.thread.start()  # Running on a separate thread
 
@@ -31,12 +32,12 @@ class Receiver:
         while True:
             if is_pressed("esc"):
                 print_color("Exiting receiver...", color="blue")
-                self.thread.join(timeout=0)
+                self.close()
                 break
 
     def run(self):
-        # TODO:: Print settings here
-        # TODO:: Exit while on pressing enter
+        if self.settings is not None:
+            print(self.settings)
 
         print_color("Waiting for connection...", color="blue")
 
@@ -46,6 +47,10 @@ class Receiver:
             ip, port, packet = self.connection_manager.await_packet()
             connection = self.connection_manager.get_connection(ip, port)
 
+            # Socket was closed. Exiting main loop
+            if self.socket_closed:
+                break
+
             # Debug output
             if packet is None:
                 print_debug("Received broken packet from {0}:{1}".format(ip, port))
@@ -54,7 +59,6 @@ class Receiver:
 
             # Checking if packet was not damaged and if it is a first packet then it has to be a SYN
             if packet is None or (connection is None and not packet.flags.syn):
-                print_debug("Received invalid packet!")
                 self.connection_manager.send_nack_packet(connection)
                 continue
 
@@ -93,7 +97,10 @@ class Receiver:
             self.connection_manager.finish_closing_connection(packet, connection)
             print_color("Connection with", str(ip)+":"+str(port), "closed", color="green")
 
-            self.reassemble_and_output_data(connection)
+            if connection.packets is not None and len(connection.packets) > 1:
+                self.reassemble_and_output_data(connection)
+            else:
+                print_color("No data received from {0}:{1}".format(ip, port), color="blue")
 
     # Received data packet from client
     def received_data(self, packet: Segment, connection: Connection):
@@ -107,10 +114,17 @@ class Receiver:
         data = assemble(connection.packets)
 
         # TODO:: Check if download dir is present if not download it to user directory or to current directory
+        # TODO:: Check if settings exists?
         if isinstance(data, File):
             data.save(self.settings.downloads_dir)
         else:
             print_color(str(data), color="blue")
+
+    def close(self):
+        self.socket.shutdown(s.SHUT_RDWR)
+        self.socket_closed = True
+        self.socket.close()
+        self.thread.join(timeout=0)
 
     def __str__(self):
         _str = "Receiver:\n"

@@ -1,3 +1,6 @@
+from utils.Utils import print_debug
+
+
 class Menu:
     def __init__(self, title: str = ""):
         self.options = []  # List of tuples (label, function)
@@ -6,7 +9,7 @@ class Menu:
     def add_option(self, label, function):
         self.options.append((label, function))
 
-    def display(self):
+    def display(self, on_close_function=None):
         while True:
             print(self.title)
 
@@ -29,6 +32,11 @@ class Menu:
                 selected_option = self.options[choice - 1]
                 selected_option[1]()
             elif choice == len(self.options) + 1:
+                if on_close_function is not None:
+                    try:
+                        on_close_function()
+                    except Exception as e:
+                        print_debug(f"Error in on_close_function: {e}", color="red")
                 return  # Exit option was selected
             else:
                 print("Invalid choice. Please enter a valid number.")

@@ -139,7 +139,7 @@ class ConnectionManager:
 
         try:
             data, addr = self.parent.socket.recvfrom(MTU)
-        except (ConnectionResetError, TimeoutError):
+        except OSError:
             # If socket froze while waiting for packet kill connection
             if connection is not None:
                 self.kill_connection(connection)

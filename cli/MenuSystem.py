@@ -20,7 +20,7 @@ def run_sender_mode(settings):
     sender_sub_menu = Menu("Sender sub menu")
     sender_sub_menu.add_option("Send file", lambda: sender.send_file())
     sender_sub_menu.add_option("Send message", lambda: sender.send_message())
-    sender_sub_menu.display()
+    sender_sub_menu.display(on_close_function=lambda: sender.close())
 
 
 def run_test_mode():
@@ -38,7 +38,7 @@ def show_sender_menu():
     sender_menu = Menu("Sender menu")
     settings = Settings()
 
-    sender_menu.add_option("Run", lambda: run_sender_mode(settings))
+    sender_menu.add_option("Connect", lambda: run_sender_mode(settings))
     sender_menu.add_option("Show settings", lambda: print("Current settings:\n" + str(settings)))
     sender_menu.add_option("Modify settings", lambda: settings.modify_settings())
     sender_menu.display()

@@ -75,8 +75,8 @@ class Sender:
         packets = disassemble(data)
         for i, packet in enumerate(packets):
             self._send_packet(packet)
-
-        self.close_connection()  # TODO:: Close connection upon hitting exit in sender sub menu
+        self.close_connection()  # Closing connection upon sending all the data so the server may assemble them
+        self.establish_connection()  # Reestablishing connection for sending more data
 
     def send_file(self, path: str = None):
         # TODO:: Add  check for active connection to send methods
@@ -91,6 +91,12 @@ class Sender:
             message = get_string_safely("Enter message: ", error_msg="Invalid message")
         data = Data(message)
         self.send(data)
+
+    def close(self):
+        print_debug("Exiting sender...")
+        self.close_connection()
+        self.socket.shutdown(s.SHUT_RDWR)
+        self.socket.close()
 
     def __str__(self):
         _str = "Sender:\n"
