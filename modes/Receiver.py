@@ -16,7 +16,7 @@ class Receiver:
         self.connection_manager = ReceiverConnectionManager(self)
         self.ip = ip if settings is None else settings.ip
         self.port = port if settings is None else settings.port
-        self.settings = settings
+        self.settings = settings  # TODO:: BIG Implement settings into receiver
 
         # Socket initialization
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)

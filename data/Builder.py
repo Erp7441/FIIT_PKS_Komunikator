@@ -4,14 +4,16 @@ from data.Data import Data
 from data.File import File
 from packet.Flags import Flags
 from packet.Segment import Segment
-from utils.Constants import MAX_PAYLOAD_SIZE
-
-
-# TODO:: Add max size of 2MB limit before disassembly
+from utils.Constants import MAX_PAYLOAD_SIZE, MAX_FILE_SIZE
+from utils.Utils import print_color
 
 
 def disassemble(data: Data):
     is_file = isinstance(data, File)
+
+    if len(data.value) > MAX_FILE_SIZE:
+        print_color("Data is too large! Max size is " + str(MAX_FILE_SIZE / 1024**2) + " MB", color="red")
+        return []
 
     # Encode the data
     encoded_data = data.encode()

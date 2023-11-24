@@ -15,6 +15,9 @@ SENDER_BAD_PACKETS_SEQ = [3, 8, 6, 7]  # SEQ numbers
 SENDER_BAD_PACKETS_ATTEMPTS = 3  # Tries
 NACK_RESPONSE_MULTIPLIER = 5  # Packets
 
+# File
+MAX_FILE_SIZE = 2097152  # Bytes
+
 ###############################################
 # DEBUG
 ###############################################

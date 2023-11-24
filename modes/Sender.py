@@ -76,7 +76,7 @@ class Sender:
         for i, packet in enumerate(packets):
             self._send_packet(packet)
 
-        self.close_connection()
+        self.close_connection()  # TODO:: Close connection upon hitting exit in sender sub menu
 
     def send_file(self, path: str = None):
         # TODO:: Add  check for active connection to send methods
