@@ -9,7 +9,7 @@ class KeepaliveThread(Thread):
         self._target = target
         self._args = args if args is not None else ()
         self._kwargs = kwargs if kwargs is not None else {}
-        self._stop_event = Event()  # TODO:: Do I need this? (Needed it in the past from server side)
+        self._stop_event = Event()
 
     def start(self):
         print_debug("Starting keepalive thread...")
@@ -30,7 +30,6 @@ class KeepaliveThread(Thread):
     def stop(self):
         print_debug("Stopping keepalive thread...")
         self._stop_event.set()
-        self.join(timeout=0)
         print_debug("Stopped keepalive thread")
 
     def is_stopped(self):
