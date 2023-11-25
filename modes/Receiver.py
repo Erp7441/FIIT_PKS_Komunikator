@@ -11,7 +11,7 @@ from data.Builder import assemble
 from data.File import File
 from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT
-from utils.Utils import print_debug, print_color
+from utils.Utils import print_debug, print_color, select_folder
 
 
 class Receiver:
@@ -116,8 +116,10 @@ class Receiver:
         # TODO:: Check if download dir is present if not download it to user directory or to current directory
         # TODO:: Check if settings exists?
         if isinstance(data, File):
-            # data.save(self.settings.downloads_dir)
-            data.save("C:\\Users\\Martin\\Downloads")
+            if self.settings is None:
+                data.save(select_folder("Please select folder where to save file"))
+            else:
+                data.save(self.settings.downloads_dir)
         else:
             print_color(str(data), color="blue")
 

@@ -13,17 +13,17 @@ from utils.Constants import ENCODING
 ###############################################
 # Dialog windows
 ###############################################
-def select_file():
+def select_file(title="Select file"):
     root = Tk()
     root.withdraw()  # Hides the root window
-    file = askopenfilename(title="Select file")  # Opens a file dialog
+    file = askopenfilename(title=title)  # Opens a file dialog
     return None if len(file) == 0 else file
 
 
-def select_folder():
+def select_folder(title="Select folder"):
     root = Tk()
     root.withdraw()  # Hides the root window
-    folder = askdirectory(title="Select folder")  # Opens a file dialog
+    folder = askdirectory(title=title)  # Opens a file dialog
     return None if len(folder) == 0 else folder
 
 

@@ -2,15 +2,19 @@ from cli.Menu import Menu
 from cli.Settings import Settings
 from modes.Receiver import Receiver
 from modes.Sender import Sender
+from utils.Constants import DEFAULT_SERVER_IP
 from utils.Utils import print_color
 
 
-def run_receiver_mode():
-    # TODO:: Add menu with options
-    Receiver()
+def run_receiver_mode(settings: Settings):
+    if settings.ip is None:
+        settings.get_ip()
+    if settings.downloads_dir is None:
+        settings.get_downloads_folder()
+    Receiver(settings=settings)
 
 
-def run_sender_mode(settings):
+def run_sender_mode(settings: Settings):
     if settings.ip is None:
         settings.get_ip()
     sender = Sender(settings=settings)
@@ -49,10 +53,21 @@ def show_sender_menu():
     sender_menu.display()
 
 
+def show_receiver_menu():
+    # TODO:: Make the menu and debug output work together
+    receiver_menu = Menu("Receiver menu")
+    settings = Settings(ip=DEFAULT_SERVER_IP)
+
+    receiver_menu.add_option("Start", lambda: run_receiver_mode(settings))
+    receiver_menu.add_option("Show settings", lambda: print("Current settings:\n" + str(settings)))
+    receiver_menu.add_option("Modify settings", lambda: settings.modify_settings())
+    receiver_menu.display()
+
+
 def show_main_menu():
     # TODO:: Turn on / off debug mode
     main_menu = Menu("Main menu")
-    main_menu.add_option("Run Receiver Mode", run_receiver_mode)
+    main_menu.add_option("Run Receiver Mode", show_receiver_menu)
     main_menu.add_option("Run Sender Mode", show_sender_menu)
     main_menu.add_option("Run Test Mode", run_test_mode)
     main_menu.display()

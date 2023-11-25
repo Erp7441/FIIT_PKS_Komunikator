@@ -3,6 +3,7 @@
 ###############################################
 ENCODING = 'utf-8'
 DEFAULT_PORT = 33333
+DEFAULT_SERVER_IP = "0.0.0.0"
 RESEND_ATTEMPTS = 3  # Tries
 
 # Keepalive
