@@ -117,3 +117,7 @@ class Sender:
     def get_current_connection(self):
         if self.connection_manager is not None:
             return self.connection_manager.get_connection(self.ip, self.port)
+
+    def swap_roles(self):
+        # TODO:: BIG MAKE SWAP ROLES
+        pass

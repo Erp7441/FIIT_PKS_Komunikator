@@ -3,7 +3,7 @@ from cli.Settings import Settings
 from modes.Receiver import Receiver
 from modes.Sender import Sender
 from utils.Constants import DEFAULT_SERVER_IP
-from utils.Utils import print_color
+from utils.Utils import print_color, get_confirmation, toggle_debug_mode, get_debug_mode
 
 
 def run_receiver_mode(settings: Settings):
@@ -22,6 +22,7 @@ def run_sender_mode(settings: Settings):
     sender_sub_menu = Menu("Sender sub menu")
     sender_sub_menu.add_option("Send file", lambda: sender.send_file())
     sender_sub_menu.add_option("Send message", lambda: sender.send_message())
+    sender_sub_menu.add_option("Swap roles", lambda: sender.swap_roles())
     sender_sub_menu.display(
         run_functions=[
             lambda: print_color(sender.get_current_connection().stats(), color="blue")
@@ -65,9 +66,10 @@ def show_receiver_menu():
 
 
 def show_main_menu():
-    # TODO:: Turn on / off debug mode
+    get_debug_mode()
     main_menu = Menu("Main menu")
     main_menu.add_option("Run Receiver Mode", show_receiver_menu)
     main_menu.add_option("Run Sender Mode", show_sender_menu)
     main_menu.add_option("Run Test Mode", run_test_mode)
+    main_menu.add_option("Toggle Debug Output", toggle_debug_mode)
     main_menu.display()

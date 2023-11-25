@@ -19,7 +19,7 @@ class Receiver:
         self.connection_manager = ReceiverConnectionManager(self)
         self.ip = ip if settings is None else settings.ip
         self.port = port if settings is None else settings.port
-        self.settings = settings  # TODO:: BIG Implement settings into receiver
+        self.settings = settings
 
         # Socket initialization
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
@@ -113,8 +113,6 @@ class Receiver:
     def reassemble_and_output_data(self, connection: Connection):
         data = assemble(connection.packets)
 
-        # TODO:: Check if download dir is present if not download it to user directory or to current directory
-        # TODO:: Check if settings exists?
         if isinstance(data, File):
             if self.settings is None:
                 data.save(select_folder("Please select folder where to save file"))

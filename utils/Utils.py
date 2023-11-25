@@ -6,8 +6,13 @@ from tkinter import Tk
 from tkinter.filedialog import askopenfilename, askdirectory
 from typing import Callable
 
-from utils.Constants import DEBUG, DEBUG_SHOW_DATA
-from utils.Constants import ENCODING
+from utils.Constants import ENCODING, DEBUG, DEBUG_SHOW_DATA
+
+###############################################
+# Global variables
+###############################################
+debug = DEBUG  # Debug mode
+debug_show_data = DEBUG_SHOW_DATA  # Show sent data in debug mode
 
 
 ###############################################
@@ -67,7 +72,7 @@ def print_color(*args, color="white", **kwargs):
 
 
 def print_debug(*args, color="yellow", **kwargs):
-    if DEBUG:
+    if debug:
         timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
         prefix = f"DEBUG [{timestamp}]: "
         message = " ".join(str(arg) for arg in args)
@@ -75,7 +80,7 @@ def print_debug(*args, color="yellow", **kwargs):
 
 
 def print_debug_data(*args, color="yellow", **kwargs):
-    if DEBUG_SHOW_DATA:
+    if debug_show_data:
         print_debug(args, color=color, **kwargs)
 
 
@@ -227,3 +232,33 @@ def get_confirmation(prompt: str):
         error_msg="Invalid input",
         condition=lambda x: is_valid_confirmation(x)
     )
+
+
+def get_debug_mode(output=True):
+    if output:
+        if debug:
+            print_color("Debug output: Enabled", color="green")
+        else:
+            print_color("Debug output: Disabled", color="red")
+        if debug_show_data:
+            print_color("Debug output with data values: Enabled", color="green")
+        else:
+            print_color("Debug output with data values: Disabled", color="red")
+    return debug, debug_show_data
+
+
+###############################################
+# Setters
+################################################
+def toggle_debug_mode():
+    global debug
+    debug = not debug
+
+    if debug:
+        global debug_show_data
+        debug_show_data = get_confirmation("Do you want to enable debug output with data values? (y/n): ") == "y"
+    else:
+        debug_show_data = False
+
+    return get_debug_mode()
+

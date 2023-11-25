@@ -3,7 +3,6 @@ from cli.MenuSystem import show_main_menu
 # 192.168.48.128 - Server
 # 192.168.48.129 - Client
 
-# TODO:: BIG MAKE SWAP ROLES
 # TODO:: Add non debug outputs
 
 if __name__ == "__main__":
