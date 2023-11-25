@@ -136,7 +136,7 @@ def is_valid_confirmation(string: str):
 ###############################################
 # Getters
 ###############################################
-def get_integer_safely(prompt: str, default: int = 0, condition: Callable[[int], bool] = lambda x: True, error_msg: str = "") -> int:
+def get_integer_safely(prompt: str, default: int = 0, condition: Callable[[int], bool] = lambda x: True, error_msg: str = "", verbose: bool = True) -> int:
     while True:
         try:
             print_color(prompt, color="yellow", end="")
@@ -146,7 +146,8 @@ def get_integer_safely(prompt: str, default: int = 0, condition: Callable[[int],
                 value = value.strip()
                 value = int(value)
             else:
-                print_color(f"Using default value: {default}", color="yellow")
+                if verbose:
+                    print_color(f"Using default value: {default}", color="yellow")
                 value = default
 
             if not condition(value):
@@ -154,7 +155,11 @@ def get_integer_safely(prompt: str, default: int = 0, condition: Callable[[int],
 
             return value
         except ValueError as e:
-            print_color(f"Invalid input: {e}... Please try again.", color="red")
+            if error_msg is not None and error_msg != "":
+                print_color(f"Invalid input: \"{e}\"", color="red")
+            else:
+                print_color("Invalid input", color="red")
+
 
 
 def get_string_safely(prompt: str, default: str = "", condition: Callable[[str], bool] = lambda x: True, error_msg: str = "") -> str:

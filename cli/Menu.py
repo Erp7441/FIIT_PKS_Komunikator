@@ -1,4 +1,4 @@
-from utils.Utils import print_debug
+from utils.Utils import print_debug, get_integer_safely
 
 
 class Menu:
@@ -12,13 +12,8 @@ class Menu:
     def display(self, run_functions: list[callable] = None, on_close_functions: list[callable] = None):
         while True:
             print(self.title)
-
-            if run_functions is not None:
-                try:
-                    for function in run_functions:
-                        function()
-                except Exception as e:
-                    print_debug(f"Error in run_function: {e}", color="red")
+            # Execute all run functions before printing options
+            Menu._execute_functions(run_functions)
 
             # Print options
             for i, option in enumerate(self.options, 1):
@@ -27,24 +22,30 @@ class Menu:
             # Exit option is last element of the menu (static creation)
             print(f"{len(self.options) + 1}. Exit")
 
-            choice = input("Enter your choice: ")
+            # Get int from user
+            choice = get_integer_safely(
+                "Enter your choice: ",
+                error_msg="Please enter a valid number.",
+                condition=lambda x: 1 <= x <= len(self.options) + 1,
+                verbose=False
+            )
 
-            try:
-                choice = int(choice)
-            except ValueError:
-                print("Invalid choice. Please enter a number.")
-                continue
-
+            # If an option from the list was selected
             if 1 <= choice <= len(self.options):
                 selected_option = self.options[choice - 1]
-                selected_option[1]()
+                Menu._execute_functions([selected_option[1]])
+
+            # Last option
             elif choice == len(self.options) + 1:
-                if on_close_functions is not None:
-                    try:
-                        for function in on_close_functions:
-                            function()
-                    except Exception as e:
-                        print_debug(f"Error in on_close_function: {e}", color="red")
+                # Execute all exit functions before quitting
+                Menu._execute_functions(on_close_functions)
                 return  # Exit option was selected
-            else:
-                print("Invalid choice. Please enter a valid number.")
+
+    @staticmethod
+    def _execute_functions(functions):
+        if functions is not None:
+            try:
+                for function in functions:
+                    function()
+            except Exception as e:
+                print_debug(f"Error in function: {e}", color="red")
