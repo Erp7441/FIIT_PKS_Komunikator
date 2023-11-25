@@ -4,7 +4,8 @@ from typing import Callable
 from connection.ConnectionState import ConnectionState
 from connection.KeepaliveThread import KeepaliveThread
 from packet.Segment import Segment
-from utils.Constants import RECEIVER_KEEPALIVE_TIME, SENDER_KEEPALIVE_TIME, DEFAULT_KEEPALIVE_TIME
+from utils.Constants import RECEIVER_KEEPALIVE_TIME, SENDER_KEEPALIVE_TIME, DEFAULT_KEEPALIVE_TIME, \
+    DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS
 
 
 class Connection:
@@ -14,6 +15,7 @@ class Connection:
         self.state = None if syn_packet is None else ConnectionState.SYN_SENT
         self.packets = []
         self.parent = parent
+        self.keepalive_attempts = DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS
 
         # Selecting keepalive method based on parent class
         if parent.__class__.__name__ == "ReceiverConnectionManager":
@@ -43,9 +45,14 @@ class Connection:
     def keep_alive(self):
         if not self._count_down():
             return  # Exit when thread stop is detected
-        # If refreshing connection was not successful. Kill it
+        # If refreshing connection was not successful. Kill it if attempts are exhausted.
         if not self.keepalive_thread.is_stopped() and not self.parent.refresh_keepalive(self):
-            self.parent.kill_connection(self)
+            if self.keepalive_attempts != 1:
+                self.keepalive_attempts -= 1
+            else:
+                self.parent.kill_connection(self)
+        else:
+            self.keepalive_attempts = DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS
 
     ###############################################
     # Server (receiver) keep alive
@@ -53,9 +60,15 @@ class Connection:
     def await_keep_alive(self):
         if not self._count_down():
             return  # Exit when thread stop is detected
-        # If connection keep alive time is 0. Kill it.
+        # If connection keep alive time is 0. Kill it if attempts are exhausted.
         if not self.keepalive_thread.is_stopped() and self.current_keepalive_time <= 0:
-            self.parent.kill_connection(self)
+            if self.keepalive_attempts != 1:
+                self.keepalive_attempts -= 1
+            else:
+                self.parent.kill_connection(self)
+        else:
+            self.keepalive_attempts = DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS
+
 
     ###############################################
     # Keep alive init

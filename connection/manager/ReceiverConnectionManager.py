@@ -71,8 +71,8 @@ class ReceiverConnectionManager(ConnectionManager):
                 connection.state = ConnectionState.ACTIVE
                 print_debug("Refreshed keepalive state of client!", color="green")
                 return True
-            print_debug("Failed to refresh keepalive state!", color="red")
-            return False
+        print_debug("Failed to refresh keepalive state!", color="red")
+        return False
 
     def __str__(self):
         return "Receiver " + super().__str__()

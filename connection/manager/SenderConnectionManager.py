@@ -49,7 +49,7 @@ class SenderConnectionManager(ConnectionManager):
                 return False
 
             self.send_syn_packet(connection)  # SYN
-            if self.await_syn_ack(connection):  # Awaiting SYN-ACK and sending ACK
+            if self.await_syn_ack(connection, kill_on_fail=False):  # Awaiting SYN-ACK and sending ACK
                 connection.current_keepalive_time = connection.keepalive_time  # Refresh keepalive timer
                 connection.state = ConnectionState.ACTIVE
                 print_debug("Refreshed keepalive state!", color='green')
@@ -59,4 +59,3 @@ class SenderConnectionManager(ConnectionManager):
 
     def __str__(self):
         return "Sender " + super().__str__()
-

@@ -22,7 +22,7 @@ MAX_FILE_SIZE = 2097152  # Bytes
 ###############################################
 # DEBUG
 ###############################################
-DEBUG = False  # Debug mode
+DEBUG = True  # Debug mode  # TODO:: BIG DISABLE
 DEBUG_SHOW_DATA = False  # Show sent data in debug mode
 
 ###############################################

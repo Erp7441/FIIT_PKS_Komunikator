@@ -134,14 +134,14 @@ class ConnectionManager:
     ###############################################
     # Await packets
     ###############################################
-    def await_packet(self, connection: Connection = None):
+    def await_packet(self, connection: Connection = None, kill_on_fail: bool = True):
         # TODO:: Implement retry?
 
         try:
             data, addr = self.parent.socket.recvfrom(MTU)
         except OSError:
             # If socket froze while waiting for packet kill connection
-            if connection is not None:
+            if connection is not None and kill_on_fail:
                 self.kill_connection(connection)
             return None, None, None
 
@@ -154,8 +154,8 @@ class ConnectionManager:
             return ip, port, None
         return ip, port, packet
 
-    def await_syn_ack(self, connection: Connection):
-        ip, port, packet = self.await_packet(connection)
+    def await_syn_ack(self, connection: Connection, kill_on_fail: bool = True):
+        ip, port, packet = self.await_packet(connection, kill_on_fail)
 
         if (
             packet is not None and
@@ -167,12 +167,12 @@ class ConnectionManager:
             self.send_ack_packet(connection)
             connection.state = ConnectionState.ACTIVE
             return True
-        else:
+        elif kill_on_fail:
             self.kill_connection(connection)  # Is technically a duplicate call in case await packet times out
         return False
 
-    def await_fin_ack(self, connection: Connection):
-        ip, port, packet = self.await_packet(connection)
+    def await_fin_ack(self, connection: Connection, kill_on_fail: bool = True):
+        ip, port, packet = self.await_packet(connection, kill_on_fail)
 
         if (
             packet is not None and
@@ -183,7 +183,7 @@ class ConnectionManager:
             print_debug("Received FIN-ACK packet from {0}:{1}".format(connection.ip, connection.port))
             self.send_ack_packet(connection)
             return True
-        else:
+        elif kill_on_fail:
             self.kill_connection(connection)  # Is technically a duplicate call in case await packet times out
         return False
 
