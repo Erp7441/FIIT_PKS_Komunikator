@@ -153,25 +153,35 @@ class Receiver:
         return _str
 
     def received_swp(self, connection):
-        with self.connection_manager.lock:
+        # Ack for SWP packet
+        self.connection_manager.send_ack_packet(connection)
+
+        # Receiving client info packet
+        _, _, client_info_packet = self.connection_manager.await_packet(connection)
+        if client_info_packet.flags.info:
+            # Sending ACK for client info packet
             self.connection_manager.send_ack_packet(connection)
-            _, _, client_info_packet = self.connection_manager.await_packet(connection)
+        else:
+            self.connection_manager.kill_connection(connection)
+            return
 
-            if client_info_packet.flags.info:
-                # Sending ACK for client info packet
-                self.connection_manager.send_ack_packet(connection)
+        # Preparing server info packet
+        info_packet = Segment(data=self.settings.encode())
+        info_packet.flags.info = True
 
-                # Sending server info packet
-                info_packet = Segment(data=self.settings.encode())
-                info_packet.flags.info = True
-                if self.connection_manager.send_data_packet(connection, info_packet) is False:
-                    self.connection_manager.kill_connection(connection)
-                    return
+        # Sending server info packet receiving ACK
+        if self.connection_manager.send_data_packet(connection, info_packet) is False:
+            self.connection_manager.kill_connection(connection)
+            return
 
-                from cli.MenuSystem import run_sender_mode
-                run_sender_mode(self.settings)
-                exit(0)
+        settings = Settings().decode(client_info_packet.data)
+        settings.ip = connection.ip  # We want to connect to the other end
 
+        self.connection_manager.kill_connection(connection)
+        self.close()
 
-            else:
-                self.connection_manager.kill_connection(connection)
+        from cli.MenuSystem import run_sender_mode
+        run_sender_mode(settings)
+
+        print_debug("Exiting...")
+        exit(0)
