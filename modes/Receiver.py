@@ -2,6 +2,7 @@ import socket as s
 from threading import Thread
 from time import sleep
 
+import keyboard
 from keyboard import is_pressed
 
 from cli.Settings import Settings
@@ -26,16 +27,13 @@ class Receiver:
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
         self.socket.bind((ip, port))
         self.socket_closed = False  # Flag to check if socket is closed
-        self.thread = Thread(target=self.run)
-        self.thread.start()  # Running on a separate thread
 
         # When user presses esc then kill the thread
-        while True:
-            sleep(1)  # Slows down the loop
-            if is_pressed("esc"):
-                print_color("Exiting receiver...", color="blue")
-                self.close()
-                break
+        keyboard.hook_key("esc", callback=lambda event: self.close(event))
+        self._exit_thread = Thread(target=keyboard.wait, args=("esc",))
+        self._exit_thread.start()
+
+        self.run()
 
     def run(self):
         if self.settings is not None:
@@ -53,38 +51,40 @@ class Receiver:
             if self.socket_closed:
                 break
 
-            # Debug output
             if packet is None:
                 print_debug("Received broken packet from {0}:{1}".format(ip, port))
+                if connection is not None:
+                    self.connection_manager.send_nack_packet(connection)
             else:
                 print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
 
-            # Checking if packet was not damaged and if it is a first packet then it has to be a SYN
-            if packet is None or (connection is None and not packet.flags.syn):
-                self.connection_manager.send_nack_packet(connection)
+            # Checking if first packet is SYN
+            if packet is not None and connection is None and not packet.flags.syn:
+                print_debug("Received invalid first packet from {0}:{1}".format(ip, port))
                 continue
 
             # Begin establishing connection
-            if packet.flags.syn and connection is None:
+            if packet is not None and packet.flags.syn and connection is None:
                 self.connection_manager.start_establish_connection(packet, ip, port)
             # Begin refreshing connection
-            elif packet.flags.syn and connection is not None:
+            elif packet is not None and packet.flags.syn and connection is not None:
                 print_debug("Received SYN packet from {0}:{1}. Refreshing connection...".format(connection.ip, connection.port))
                 self.connection_manager.refresh_keepalive(connection)
 
             # Receive ACK from client
-            elif packet.flags.ack and connection is not None:
+            elif packet is not None and packet.flags.ack and connection is not None:
                 self.received_ack(packet, connection)
 
             # Received data packet
             elif (
-                packet.flags.info or packet.flags.file or packet.flags.msg
+                packet is not None and
+                (packet.flags.info or packet.flags.file or packet.flags.msg)
                 and connection is not None and connection.state == ConnectionState.ACTIVE
             ):
                 self.received_data(packet, connection)
 
             # Closing connection
-            elif packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
+            elif packet is not None and packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
                 self.connection_manager.start_closing_connection(packet, connection)
 
     # Received ACK from client
@@ -118,15 +118,21 @@ class Receiver:
         # TODO:: Check if download dir is present if not download it to user directory or to current directory
         # TODO:: Check if settings exists?
         if isinstance(data, File):
-            data.save(self.settings.downloads_dir)
+            # data.save(self.settings.downloads_dir)
+            data.save("C:\\Users\\Martin\\Downloads")
         else:
             print_color(str(data), color="blue")
 
-    def close(self):
-        self.socket.shutdown(s.SHUT_RDWR)
+    def close(self, event=None):
+        print_color("Exiting receiver...", color="blue")
+        for connection in self.connection_manager.active_connections + self.connection_manager.inactive_connections:
+            self.connection_manager.kill_connection(connection)
         self.socket_closed = True
+        self.socket.shutdown(s.SHUT_RDWR)
         self.socket.close()
-        self.thread.join(timeout=0)
+        if event is not None and isinstance(event, keyboard.KeyboardEvent):
+            keyboard.unhook_all()
+            self._exit_thread.join(timeout=0)
 
     def __str__(self):
         _str = "Receiver:\n"

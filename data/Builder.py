@@ -41,8 +41,6 @@ def disassemble(data: Data):
     info_packet = Segment(Flags(info=True), data=encoded_dict)
     packets.insert(0, info_packet)
 
-    # TODO:: add fin to last packet so you dont have to reestablish the connection but can reassemble the data
-
     return packets
 
 
