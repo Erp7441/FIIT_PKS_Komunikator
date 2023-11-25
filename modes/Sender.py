@@ -88,7 +88,6 @@ class Sender:
             return self.connection_manager.get_connection(self.ip, self.port)
 
     def swap_roles(self):
-        # TODO:: BIG MAKE SWAP ROLES
         connection = self.get_current_connection()
 
         swp_packet = Segment()
@@ -118,6 +117,6 @@ class Sender:
                         run_receiver_mode(settings)  # Start server mode
 
                         print_debug("Exiting...")
-                        exit(0)
+                        exit(0)  # TODO:: What to do here? Somehow go to the main menu?
 
             self.connection_manager.kill_connection(connection)
