@@ -3,7 +3,7 @@ from cli.Settings import Settings
 from modes.Receiver import Receiver
 from modes.Sender import Sender
 from utils.Constants import DEFAULT_SERVER_IP
-from utils.Utils import print_color, get_confirmation, toggle_debug_mode, get_debug_mode
+from utils.Utils import print_color, toggle_debug_mode, get_debug_mode
 
 
 def run_receiver_mode(settings: Settings):
