@@ -184,4 +184,3 @@ class Receiver:
         run_sender_mode(settings)
 
         print_debug("Exiting from SWP (Receiver)...")
-

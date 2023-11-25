@@ -114,7 +114,7 @@ class Sender:
                         self.close()
 
                         from cli.MenuSystem import run_receiver_mode
-                        run_receiver_mode(settings, back_to_main_menu=True)  # Start server mode
+                        run_receiver_mode(settings)  # Start server mode
 
                         print_debug("Exiting from SWP (Sender)...")
 
