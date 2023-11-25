@@ -183,5 +183,5 @@ class Receiver:
         from cli.MenuSystem import run_sender_mode
         run_sender_mode(settings)
 
-        print_debug("Exiting...")
-        exit(0)
+        print_debug("Exiting from SWP (Receiver)...")
+
