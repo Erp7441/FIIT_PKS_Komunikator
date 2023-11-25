@@ -53,6 +53,7 @@ class Receiver:
                 print_debug("Received broken packet from {0}:{1}".format(ip, port))
                 if connection is not None:
                     self.connection_manager.send_nack_packet(connection)
+                    # TODO:: Excpect multiple packets
             else:
                 print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
 
