@@ -1,9 +1,7 @@
 import socket as s
 from threading import Thread
-from time import sleep
 
 import keyboard
-from keyboard import is_pressed
 
 from cli.Settings import Settings
 from connection.Connection import Connection
@@ -28,7 +26,7 @@ class Receiver:
         self.socket.bind((ip, port))
         self.socket_closed = False  # Flag to check if socket is closed
 
-        # When user presses esc then kill the thread
+        # When user presses esc then exit receiver
         keyboard.hook_key("esc", callback=lambda event: self.close(event))
         self._exit_thread = Thread(target=keyboard.wait, args=("esc",))
         self._exit_thread.start()
