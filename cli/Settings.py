@@ -2,7 +2,7 @@ from cli.Menu import Menu
 from utils.Constants import DEFAULT_PORT, MAX_SEGMENT_SIZE, SENDER_BAD_PACKETS_SEQ, SENDER_BAD_PACKETS_ATTEMPTS, \
     RESEND_ATTEMPTS, NACK_RESPONSE_MULTIPLIER
 from utils.Utils import is_valid_ipv4, get_integer_safely, get_list_safely, get_string_safely, \
-    get_downloads_folder, select_folder
+    get_downloads_folder, select_folder, convert_bytes_to_str, convert_str_to_bytes
 
 
 class Settings:
@@ -97,3 +97,25 @@ class Settings:
                f"Packet resend attempts: {self.packet_resend_attempts}\n" \
                f"NACK response multiplier: {self.nack_response_multiplier}\n" \
                f"Downloads folder: {self.downloads_dir}"
+
+    def encode(self):
+        _str = (
+            str(self.ip) + ';'
+            + str(self.port) + ';'
+            + str(self.segment_size) + ';'
+            + str(self.bad_packets_seq) + ';'
+            + str(self.bad_packets_attempts) + ';'
+            + str(self.packet_resend_attempts) + ';'
+            + str(self.nack_response_multiplier) + ';'
+        )
+        return convert_str_to_bytes(_str)
+
+    def decode(self, data):
+        data = convert_bytes_to_str(data).split(';')
+        self.ip = data[0]
+        self.port = data[1]
+        self.segment_size = data[2]
+        self.bad_packets_seq = data[3]
+        self.bad_packets_attempts = data[4]
+        self.packet_resend_attempts = data[5]
+        self.nack_response_multiplier = data[6]

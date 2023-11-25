@@ -131,6 +131,41 @@ class ConnectionManager:
         print_debug("Sent RST packet to {0}:{1}".format(connection.ip, connection.port))
         return rst_packet
 
+    def send_data_packet(self, connection,  packet: Segment):
+        if connection is None or connection.state != ConnectionState.ACTIVE:
+            return None
+
+        bad_packets_seq = self.parent.settings.bad_packets_seq
+        for attempt in range(self.parent.settings.packet_resend_attempts):
+
+            if packet.seq in bad_packets_seq and attempt < self.parent.settings.bad_packets_attempts-1:
+                packet.send_to_with_error(connection.ip, connection.port, self.parent.socket)
+
+            elif packet.seq in bad_packets_seq:
+                bad_packets_seq.remove(packet.seq)
+                packet.send_to(connection.ip, connection.port, self.parent.socket)
+
+            else:
+                packet.send_to(connection.ip, connection.port, self.parent.socket)
+
+            print_debug("Sent packet SEQ {0} to {1}:{2} server (attempt {3})".format(packet.seq, connection.ip, connection.port, attempt+1))
+            ip, port, response = self.await_packet(connection)  # Awaiting ACK
+
+            # TODO:: Implement sending of multiple ACKs here (client)
+            # TODO:: How to handle faulty ACK? Not sure, can resend? If server detects duplicate. Resend ack but not append?
+            if ip != connection.ip or port != connection.port:
+                break
+
+            if response.flags.ack:
+                return True  # If we received ACK, success
+            elif response.flags.nack:
+                continue  # If we received NACK, retry
+            else:
+                break  # If we received something else stop.
+
+        self.kill_connection(connection)
+        return None
+
     ###############################################
     # Await packets
     ###############################################

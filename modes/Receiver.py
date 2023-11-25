@@ -81,6 +81,12 @@ class Receiver:
             ):
                 self.received_data(packet, connection)
 
+            elif (
+                packet is not None and packet.flags.swp and
+                connection is not None and connection.state == ConnectionState.ACTIVE
+            ):
+                self.received_swp(connection)
+
             # Closing connection
             elif packet is not None and packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
                 self.connection_manager.start_closing_connection(packet, connection)
@@ -145,3 +151,27 @@ class Receiver:
         if self.settings is not None:
             _str += "Settings: " + str(self.settings) + "\n"
         return _str
+
+    def received_swp(self, connection):
+        with self.connection_manager.lock:
+            self.connection_manager.send_ack_packet(connection)
+            _, _, client_info_packet = self.connection_manager.await_packet(connection)
+
+            if client_info_packet.flags.info:
+                # Sending ACK for client info packet
+                self.connection_manager.send_ack_packet(connection)
+
+                # Sending server info packet
+                info_packet = Segment(data=self.settings.encode())
+                info_packet.flags.info = True
+                if self.connection_manager.send_data_packet(connection, info_packet) is False:
+                    self.connection_manager.kill_connection(connection)
+                    return
+
+                from cli.MenuSystem import run_sender_mode
+                run_sender_mode(self.settings)
+                exit(0)
+
+
+            else:
+                self.connection_manager.kill_connection(connection)

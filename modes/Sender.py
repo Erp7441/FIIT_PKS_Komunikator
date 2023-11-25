@@ -21,42 +21,7 @@ class Sender:
         self.settings = settings
         self.establish_connection()
 
-    def _send_packet(self, packet: Segment):
-        with self.connection_manager.lock:
-            connection = self.get_current_connection()
-            if connection is None or connection.state != ConnectionState.ACTIVE:
-                return None
 
-            bad_packets_seq = self.settings.bad_packets_seq
-            for attempt in range(self.settings.packet_resend_attempts):
-
-                if packet.seq in bad_packets_seq and attempt < self.settings.bad_packets_attempts-1:
-                    packet.send_to_with_error(self.ip, self.port, self.socket)
-
-                elif packet.seq in bad_packets_seq:
-                    bad_packets_seq.remove(packet.seq)
-                    packet.send_to(self.ip, self.port, self.socket)
-
-                else:
-                    packet.send_to(self.ip, self.port, self.socket)
-
-                print_debug("Sent packet SEQ {0} to {1}:{2} server (attempt {3})".format(packet.seq, self.ip, self.port, attempt+1))
-                ip, port, response = self.connection_manager.await_packet(connection)  # Awaiting ACK
-
-                # TODO:: Implement sending of multiple ACKs here (client)
-                # TODO:: How to handle faulty ACK? Not sure, can resend? If server detects duplicate. Resend ack but not append?
-                if ip != self.ip or port != self.port:
-                    break
-
-                if response.flags.ack:
-                    return True  # If we received ACK, success
-                elif response.flags.nack:
-                    continue  # If we received NACK, retry
-                else:
-                    break  # If we received something else stop.
-
-            self.connection_manager.kill_connection(connection)
-            return None
 
     def establish_connection(self):
         if (
@@ -73,14 +38,18 @@ class Sender:
             self.connection_manager.close_connection(self.ip, self.port)
 
     def send(self, data: Data):
+        connection = self.get_current_connection()
+        if connection is None:
+            print_debug("No connection to send data to", color="orange")
+            return
+
         packets = disassemble(data)
         for i, packet in enumerate(packets):
-            self._send_packet(packet)
+            self.connection_manager.send_data_packet(connection, packet)
         self.close_connection()  # Closing connection upon sending all the data so the server may assemble them
         self.establish_connection()  # Reestablishing connection for sending more data
 
     def send_file(self, path: str = None):
-        # TODO:: Add  check for active connection to send methods
         if path is None:
             data = File(select=True)
         else:
@@ -120,4 +89,33 @@ class Sender:
 
     def swap_roles(self):
         # TODO:: BIG MAKE SWAP ROLES
-        pass
+        connection = self.get_current_connection()
+
+        with self.connection_manager.lock:
+            # Sending SWP
+            swp_packet = Segment()
+            swp_packet.flags.swp = True
+
+            # Received ACK
+            if self.connection_manager.send_data_packet(connection, swp_packet) is True:
+                # Sending settings
+                client_info_packet = Segment(data=self.get_current_connection().settings.encode())
+                client_info_packet.flags.info = True
+
+
+                # Received ACK
+                if self.connection_manager.send_data_packet(connection, client_info_packet) is True:
+                    # Receive server settings
+                    _, _, packet = self.connection_manager.await_packet()
+
+                    if packet is not None and packet.flags.info:
+                        settings = Settings().decode(packet.data)
+                        self.close()
+                        # Start server mode
+                        from cli.MenuSystem import run_receiver_mode
+                        run_receiver_mode(settings)
+                        exit(0)
+                    else:
+                        self.connection_manager.kill_connection(self.get_current_connection())
+            else:
+                self.connection_manager.kill_connection(self.get_current_connection())
