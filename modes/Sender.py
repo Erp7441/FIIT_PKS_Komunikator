@@ -91,31 +91,33 @@ class Sender:
         # TODO:: BIG MAKE SWAP ROLES
         connection = self.get_current_connection()
 
+        swp_packet = Segment()
+        swp_packet.flags.swp = True
+        client_info_packet = Segment(data=self.settings.encode())
+        client_info_packet.flags.info = True
+
         with self.connection_manager.lock:
-            # Sending SWP
-            swp_packet = Segment()
-            swp_packet.flags.swp = True
-
-            # Received ACK
+            # Sending SWP Received ACK
             if self.connection_manager.send_data_packet(connection, swp_packet) is True:
-                # Sending settings
-                client_info_packet = Segment(data=self.get_current_connection().settings.encode())
-                client_info_packet.flags.info = True
-
-
-                # Received ACK
+                # Sending settings Received ACK
                 if self.connection_manager.send_data_packet(connection, client_info_packet) is True:
                     # Receive server settings
                     _, _, packet = self.connection_manager.await_packet()
 
+                    # Send ACK for server settings
+                    self.connection_manager.send_ack_packet(connection)
+
+                    # Decode server settings and swap roles
                     if packet is not None and packet.flags.info:
                         settings = Settings().decode(packet.data)
+
+                        self.connection_manager.kill_connection(connection)
                         self.close()
-                        # Start server mode
+
                         from cli.MenuSystem import run_receiver_mode
-                        run_receiver_mode(settings)
+                        run_receiver_mode(settings)  # Start server mode
+
+                        print_debug("Exiting...")
                         exit(0)
-                    else:
-                        self.connection_manager.kill_connection(self.get_current_connection())
-            else:
-                self.connection_manager.kill_connection(self.get_current_connection())
+
+            self.connection_manager.kill_connection(connection)

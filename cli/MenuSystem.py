@@ -3,10 +3,11 @@ from cli.Settings import Settings
 from modes.Receiver import Receiver
 from modes.Sender import Sender
 from utils.Constants import DEFAULT_SERVER_IP
-from utils.Utils import print_color, toggle_debug_mode, get_debug_mode
+from utils.Utils import print_color, toggle_debug_mode, get_debug_mode, print_debug
 
 
 def run_receiver_mode(settings: Settings):
+    print_debug("Starting receiver mode...")
     if settings.ip is None:
         settings.get_ip()
     if settings.downloads_dir is None:
@@ -15,6 +16,7 @@ def run_receiver_mode(settings: Settings):
 
 
 def run_sender_mode(settings: Settings):
+    print_debug("Starting sender mode...")
     if settings.ip is None:
         settings.get_ip()
     sender = Sender(settings=settings)

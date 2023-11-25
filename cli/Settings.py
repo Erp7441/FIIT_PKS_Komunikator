@@ -3,6 +3,7 @@ from utils.Constants import DEFAULT_PORT, MAX_SEGMENT_SIZE, SENDER_BAD_PACKETS_S
     RESEND_ATTEMPTS, NACK_RESPONSE_MULTIPLIER
 from utils.Utils import is_valid_ipv4, get_integer_safely, get_list_safely, get_string_safely, \
     get_downloads_folder, select_folder, convert_bytes_to_str, convert_str_to_bytes
+from ast import literal_eval
 
 
 class Settings:
@@ -113,9 +114,10 @@ class Settings:
     def decode(self, data):
         data = convert_bytes_to_str(data).split(';')
         self.ip = data[0]
-        self.port = data[1]
-        self.segment_size = data[2]
-        self.bad_packets_seq = data[3]
-        self.bad_packets_attempts = data[4]
-        self.packet_resend_attempts = data[5]
-        self.nack_response_multiplier = data[6]
+        self.port = int(data[1])
+        self.segment_size = int(data[2])
+        self.bad_packets_seq = literal_eval(data[3])
+        self.bad_packets_attempts = int(data[4])
+        self.packet_resend_attempts = int(data[5])
+        self.nack_response_multiplier = int(data[6])
+        return self
