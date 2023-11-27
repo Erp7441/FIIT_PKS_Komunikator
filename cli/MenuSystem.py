@@ -12,8 +12,11 @@ def run_receiver_mode(settings: Settings):
         settings.get_ip()
     if settings.downloads_dir is None:
         settings.get_downloads_folder()
-    Receiver(settings=settings)
-
+    receiver = Receiver(settings=settings)
+    try:
+        receiver.close()
+    except Exception:
+        pass
 
 def run_sender_mode(settings: Settings):
     print_debug("Starting sender mode...")
@@ -33,6 +36,11 @@ def run_sender_mode(settings: Settings):
             lambda: sender.close()
         ]
     )
+
+    try:
+        sender.close()
+    except Exception:
+        pass
 
 
 def run_test_mode():

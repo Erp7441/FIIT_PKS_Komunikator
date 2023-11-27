@@ -42,12 +42,29 @@ class Sender:
             print_debug("No connection to send data to", color="orange")
             return
 
+        stopped = False
+        dead = False
+
         packets = disassemble(data)
         for i, packet in enumerate(packets):
 
+            # If connection is dead, return
+            if dead:
+                return
+
             # Stop sending while connection is not active
             while connection.state != ConnectionState.ACTIVE:
+                stopped = True
+                # If connection was killed while waiting for it to become active, break waiting loop and mark it as dead
+                if connection.state == ConnectionState.CLOSED or connection.state == ConnectionState.RESET:
+                    dead = True
+                    break
                 sleep(1)
+
+            # If we were stopped in previous iteration, send the last packet again
+            if stopped:
+                self.connection_manager.send_data_packet(connection, packets[i-1])
+                stopped = False
 
             self.connection_manager.send_data_packet(connection, packet)
         self.close_connection()  # Closing connection upon sending all the data so the server may assemble them

@@ -45,6 +45,14 @@ def disassemble(data: Data):
 
 
 def assemble(packets: list[Segment]):
+    seen_seq = set()
+    filtered_packets = []
+    for packet in packets:
+        if packet.seq not in seen_seq:
+            filtered_packets.append(packet)
+            seen_seq.add(packet.seq)
+    packets = filtered_packets
+
     # Get info about the data we'll be dealing with
     info_packet = packets.pop(0)
 
