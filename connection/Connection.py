@@ -6,6 +6,7 @@ from connection.KeepaliveThread import KeepaliveThread
 from packet.Segment import Segment
 from utils.Constants import RECEIVER_KEEPALIVE_TIME, SENDER_KEEPALIVE_TIME, DEFAULT_KEEPALIVE_TIME, \
     DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS
+from utils.Utils import print_debug
 
 
 class Connection:
@@ -47,6 +48,7 @@ class Connection:
             return  # Exit when thread stop is detected
         # If refreshing connection was not successful. Kill it if attempts are exhausted.
         if not self.keepalive_thread.is_stopped() and not self.parent.refresh_keepalive(self):
+            print_debug("Keepalive failed. Attempts left: ", self.keepalive_attempts)
             if self.keepalive_attempts != 1:
                 self.keepalive_attempts -= 1
             else:
@@ -62,6 +64,7 @@ class Connection:
             return  # Exit when thread stop is detected
         # If connection keep alive time is 0. Kill it if attempts are exhausted.
         if not self.keepalive_thread.is_stopped() and self.current_keepalive_time <= 0:
+            print_debug("Keepalive failed. Attempts left: ", self.keepalive_attempts)
             if self.keepalive_attempts != 1:
                 self.keepalive_attempts -= 1
             else:

@@ -1,4 +1,5 @@
 import socket as s
+from time import sleep
 
 from cli.Settings import Settings
 from connection.ConnectionState import ConnectionState
@@ -20,8 +21,6 @@ class Sender:
         self.port = port if settings is None else settings.port
         self.settings = settings
         self.establish_connection()
-
-
 
     def establish_connection(self):
         if (
@@ -45,6 +44,11 @@ class Sender:
 
         packets = disassemble(data)
         for i, packet in enumerate(packets):
+
+            # Stop sending while connection is not active
+            while connection.state != ConnectionState.ACTIVE:
+                sleep(1)
+
             self.connection_manager.send_data_packet(connection, packet)
         self.close_connection()  # Closing connection upon sending all the data so the server may assemble them
         self.establish_connection()  # Reestablishing connection for sending more data

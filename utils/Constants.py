@@ -1,14 +1,15 @@
 ###############################################
 # Communication
 ###############################################
+# Keepalive
+DEFAULT_KEEPALIVE_TIME = 5  # Seconds
+DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS = 3  # Tries
+
+# Communication
 ENCODING = 'utf-8'
 DEFAULT_PORT = 33333
 DEFAULT_SERVER_IP = "0.0.0.0"
 RESEND_ATTEMPTS = 3  # Tries
-
-# Keepalive
-DEFAULT_KEEPALIVE_TIME = 5  # Seconds
-DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS = 3  # Tries
 
 # Sender
 SENDER_SOCKET_TIMEOUT = 5  # Seconds
