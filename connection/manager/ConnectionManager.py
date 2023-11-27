@@ -149,7 +149,7 @@ class ConnectionManager:
                 packet.send_to(connection.ip, connection.port, self.parent.socket)
 
             print_debug("Sent packet SEQ {0} to {1}:{2} server (attempt {3})".format(packet.seq, connection.ip, connection.port, attempt+1))
-            ip, port, response = self.await_packet(connection)  # Awaiting ACK
+            ip, port, response = self.await_packet(connection, kill_on_fail=False)  # Awaiting ACK
 
             # TODO:: Implement sending of multiple ACKs here (client)
             # TODO:: How to handle faulty ACK? Not sure, can resend? If server detects duplicate. Resend ack but not append?
