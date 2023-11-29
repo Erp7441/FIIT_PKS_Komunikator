@@ -122,6 +122,7 @@ class Receiver:
 
         if isinstance(data, File):
             if self.settings is None:
+                # TODO:: Print fragment size and number of fragments
                 data.save(select_folder("Please select folder where to save file"))
             else:
                 data.save(self.settings.downloads_dir)

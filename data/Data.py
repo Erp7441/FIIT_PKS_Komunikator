@@ -13,7 +13,7 @@ class Data:
         else:
             self.value = convert_any_to_bytes(value)
 
-    def encode(self):
+    def encode(self, encoding: bool = False):
         # TODO:: Add encryption? (Check Segment and Builder for a idea on how to)
         return self.value
 

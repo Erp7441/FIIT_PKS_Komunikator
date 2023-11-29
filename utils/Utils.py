@@ -6,7 +6,7 @@ from tkinter import Tk
 from tkinter.filedialog import askopenfilename, askdirectory
 from typing import Callable
 
-from utils.Constants import ENCODING, DEBUG, DEBUG_SHOW_DATA
+from utils.Constants import ENCODING, DEBUG, DEBUG_SHOW_DATA, ENCODED_DATA_STEP
 
 ###############################################
 # Global variables
@@ -161,7 +161,6 @@ def get_integer_safely(prompt: str, default: int = 0, condition: Callable[[int],
                 print_color("Invalid input", color="red")
 
 
-
 def get_string_safely(prompt: str, default: str = "", condition: Callable[[str], bool] = lambda x: True, error_msg: str = "") -> str:
     while True:
         try:
@@ -250,6 +249,40 @@ def get_debug_mode(output=True):
         else:
             print_color("Debug output with data values: Disabled", color="red")
     return debug, debug_show_data
+
+
+def get_encoded_data(data: bytes, step: int = ENCODED_DATA_STEP, right: bool = True):
+    result = b""
+
+    # Example of usage TODO:: Remove
+    # from utils.Utils import get_encoded_data, convert_str_to_bytes, convert_bytes_to_str
+    # string = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"
+    # bytes_string = convert_str_to_bytes(string)
+    # data, step, right = get_encoded_data(bytes_string, 3, False)
+    # print(convert_bytes_to_str(data))
+
+    # Direction of encoding
+    if not right:
+        step = -step
+
+    for i, char in enumerate(data):
+        if chr(char).isalpha():
+            # Offset for reaching the letters in ASCII table (either lower or upper case)
+            offset = ord('A') if chr(char).isupper() else ord('a')
+
+            # New character index within the ASCII table
+            new_char_index = (int(char) - offset + step) % 26 + offset
+
+            # Convert the new character index back to a character
+            new_char = chr(new_char_index)
+
+            # Encode the new character and append
+            encoded_char = new_char.encode(ENCODING)
+            result += encoded_char
+        else:
+            result += convert_str_to_bytes(chr(char))
+
+    return result, step, right
 
 
 ###############################################

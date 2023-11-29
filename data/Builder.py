@@ -4,11 +4,11 @@ from data.Data import Data
 from data.File import File
 from packet.Flags import Flags
 from packet.Segment import Segment
-from utils.Constants import MAX_PAYLOAD_SIZE, MAX_FILE_SIZE, MAX_SEGMENT_SIZE, FLAGS_SIZE, CRC_SIZE, SEQ_SIZE
+from utils.Constants import MAX_FILE_SIZE, MAX_SEGMENT_SIZE, FLAGS_SIZE, CRC_SIZE, SEQ_SIZE
 from utils.Utils import print_color
 
 
-def disassemble(data: Data, segment_size: int = MAX_SEGMENT_SIZE):
+def disassemble(data: Data, segment_size: int = MAX_SEGMENT_SIZE) -> list[Segment]:
     is_file = isinstance(data, File)
     payload_size = segment_size - SEQ_SIZE - CRC_SIZE - FLAGS_SIZE
 

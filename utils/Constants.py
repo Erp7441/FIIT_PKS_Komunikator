@@ -49,3 +49,9 @@ MAX_PAYLOAD_SIZE = MAX_SEGMENT_SIZE - SEQ_SIZE - CRC_SIZE - FLAGS_SIZE  # Bytes
 
 RECEIVER_KEEPALIVE_TIME = DEFAULT_KEEPALIVE_TIME + 1  # Seconds (Integer)
 SENDER_KEEPALIVE_TIME = DEFAULT_KEEPALIVE_TIME  # Seconds (Integer)
+
+###############################################
+# Encoding
+###############################################
+ENCODE_DATA = True
+ENCODED_DATA_STEP = 3  # Bytes
