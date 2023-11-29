@@ -23,10 +23,12 @@ class File(Data):
         return super(File, self).decode(encoded_data)
 
     # Saves current file object to a folder
-    def save(self, folder_path):
-        file_path = folder_path + "/" + self.name
-        print_color("Saving " + self.name + " to " + file_path, color="green")
+    def save(self, folder_path: str = "."):
+        if folder_path is None:
+            folder_path = "."
         try:
+            file_path = folder_path + "/" + self.name
+            print_color("Saving " + self.name + " to " + file_path, color="green")
             with open(file_path, 'wb') as f:
                 f.write(self.value)
         except Exception as e:
