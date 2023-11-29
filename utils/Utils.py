@@ -265,7 +265,7 @@ def get_encoded_data(data: bytes, step: int = ENCODED_DATA_STEP, right: bool = T
     if not right:
         step = -step
 
-    for i, char in enumerate(data):
+    for char in data:
         if chr(char).isalpha():
             # Offset for reaching the letters in ASCII table (either lower or upper case)
             offset = ord('A') if chr(char).isupper() else ord('a')
