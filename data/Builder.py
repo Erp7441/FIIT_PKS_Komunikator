@@ -4,12 +4,13 @@ from data.Data import Data
 from data.File import File
 from packet.Flags import Flags
 from packet.Segment import Segment
-from utils.Constants import MAX_PAYLOAD_SIZE, MAX_FILE_SIZE
+from utils.Constants import MAX_PAYLOAD_SIZE, MAX_FILE_SIZE, MAX_SEGMENT_SIZE, FLAGS_SIZE, CRC_SIZE, SEQ_SIZE
 from utils.Utils import print_color
 
 
-def disassemble(data: Data):
+def disassemble(data: Data, segment_size: int = MAX_SEGMENT_SIZE):
     is_file = isinstance(data, File)
+    payload_size = segment_size - SEQ_SIZE - CRC_SIZE - FLAGS_SIZE
 
     if len(data.value) > MAX_FILE_SIZE:
         print_color("Data is too large! Max size is " + str(MAX_FILE_SIZE / 1024**2) + " MB", color="red")
@@ -19,7 +20,7 @@ def disassemble(data: Data):
     encoded_data = data.encode()
 
     # Split encoded data into groups of size
-    split = [encoded_data[i:i + MAX_PAYLOAD_SIZE] for i in range(0, len(encoded_data), MAX_PAYLOAD_SIZE)]
+    split = [encoded_data[i:i + payload_size] for i in range(0, len(encoded_data), payload_size)]
 
     packets = []
     for seq, bytes_data in enumerate(split):

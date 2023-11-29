@@ -45,7 +45,7 @@ class Sender:
         stopped = False
         dead = False
 
-        packets = disassemble(data)
+        packets = disassemble(data, self.settings.segment_size)
         for i, packet in enumerate(packets):
 
             # If connection is dead, return
