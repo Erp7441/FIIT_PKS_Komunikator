@@ -1,7 +1,7 @@
 from os.path import basename
 
 from data.Data import Data
-from utils.Utils import select_file, get_file_content
+from utils.Utils import select_file, get_file_content, print_color
 
 
 class File(Data):
@@ -24,8 +24,13 @@ class File(Data):
 
     # Saves current file object to a folder
     def save(self, folder_path):
-        with open(folder_path + "/" + self.name, 'wb') as f:
-            f.write(self.value)
+        file_path = folder_path + "/" + self.name
+        print_color("Saving " + self.name + " to " + file_path, color="green")
+        try:
+            with open(file_path, 'wb') as f:
+                f.write(self.value)
+        except Exception as e:
+            print_color("Error saving file: " + str(e), color="red")
 
     def __str__(self):
         return "NAME: " + self.name + "\n" + "DATA: " + super().__str__()
