@@ -18,6 +18,7 @@ def run_receiver_mode(settings: Settings):
     except Exception:
         pass
 
+
 def run_sender_mode(settings: Settings):
     print_debug("Starting sender mode...")
     if settings.ip is None:
@@ -41,17 +42,6 @@ def run_sender_mode(settings: Settings):
         sender.close()
     except Exception:
         pass
-
-
-def run_test_mode():
-    # TODO:: Remove or make useful
-    # from utils.Tests import Tests
-    from utils.Tests import Tests
-    # Tests.connection_tests_establishment_data()
-    Tests.data_assembly_test()
-    # Tests.packet_tests()
-    # Tests.test_string_conversion()
-
 
 def show_sender_menu():
     # TODO:: Make the menu and debug output work together
@@ -80,7 +70,6 @@ def show_main_menu():
     main_menu = Menu("Main menu")
     main_menu.add_option("Run Receiver Mode", show_receiver_menu)
     main_menu.add_option("Run Sender Mode", show_sender_menu)
-    main_menu.add_option("Run Test Mode", run_test_mode)
     main_menu.add_option("Toggle Debug Output", toggle_debug_mode)
     main_menu.display()
     # TODO:: Resolve hanging on main menu when swapped roles trying to exit the program
