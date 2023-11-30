@@ -1,9 +1,10 @@
+from ast import literal_eval
+
 from cli.Menu import Menu
 from utils.Constants import DEFAULT_PORT, MAX_SEGMENT_SIZE, SENDER_BAD_PACKETS_SEQ, SENDER_BAD_PACKETS_ATTEMPTS, \
-    RESEND_ATTEMPTS, NACK_RESPONSE_MULTIPLIER
+    RESEND_ATTEMPTS, NACK_RESPONSE_MULTIPLIER, ENCODE_DICT
 from utils.Utils import is_valid_ipv4, get_integer_safely, get_list_safely, get_string_safely, \
-    get_downloads_folder, select_folder, convert_bytes_to_str, convert_str_to_bytes
-from ast import literal_eval
+    get_downloads_folder, select_folder, convert_bytes_to_str, convert_str_to_bytes, get_confirmation
 
 
 class Settings:
@@ -70,6 +71,23 @@ class Settings:
     def get_downloads_folder(self):
         self.downloads_dir = select_folder("Please select downloads folder")
 
+    def get_encoded_data(self):
+        new_encode_dict = {}
+
+        encode_data = get_confirmation("Enable encoding of data? (y/n): ") == "y"
+        if encode_data:
+            new_encode_dict["encode_data"] = True
+            new_encode_dict["encoded_data_step"] = get_integer_safely("Please enter encoded data step: ", 3)
+            new_encode_dict["right"] = get_string_safely(
+                "Please enter encoded data direction: ",
+                "right",
+                lambda x: x in ["right", "left"],
+                "Please enter 'right' or 'left'"
+            ) == "right"
+
+            for key, value in new_encode_dict.items():
+                ENCODE_DICT[key] = value
+
     def modify_settings(self):
         if self._initialized is False:
             self.get_all()
@@ -86,6 +104,9 @@ class Settings:
         modify_menu.add_option("Packet resend attempts", lambda: self.get_packet_resend_attempts())
         modify_menu.add_option("NACK response multiplier", lambda: self.get_nack_response_multiplier())
         modify_menu.add_option("Download folder", lambda: self.get_downloads_folder())
+
+        if ENCODE_DICT.get("encode_data_show_menu_option", False):
+            modify_menu.add_option("Encode data", lambda: self.get_encoded_data())
 
         modify_menu.display()
 
@@ -109,6 +130,11 @@ class Settings:
             + str(self.packet_resend_attempts) + ';'
             + str(self.nack_response_multiplier) + ';'
         )
+
+        if ENCODE_DICT.get("encode_data", False):
+            _str += "ENCODE" + ';'
+            _str += str(ENCODE_DICT["encoded_data_step"]) + ';'
+            _str += str(ENCODE_DICT["right"]) + ';'
         return convert_str_to_bytes(_str)
 
     def decode(self, data):
@@ -120,4 +146,9 @@ class Settings:
         self.bad_packets_attempts = int(data[4])
         self.packet_resend_attempts = int(data[5])
         self.nack_response_multiplier = int(data[6])
+
+        if data[7] == "ENCODE":
+            ENCODE_DICT["encode_data"] = True
+            ENCODE_DICT["encoded_data_step"] = int(data[8])
+            ENCODE_DICT["right"] = True if data[9] == "True" else False
         return self

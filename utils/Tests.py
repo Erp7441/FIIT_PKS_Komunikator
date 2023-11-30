@@ -37,6 +37,7 @@ class Tests:
         packet2 = Segment()
 
         decoded_packet = packet2.decode(encoded_packet)
+        decoded_data = Data().decode(decoded_packet.data)
         pass
 
     @staticmethod

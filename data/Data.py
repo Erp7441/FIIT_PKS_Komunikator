@@ -1,4 +1,5 @@
-from utils.Utils import convert_bytes_to_str, convert_str_to_bytes, convert_any_to_bytes
+from utils.Constants import ENCODE_DICT
+from utils.Utils import convert_bytes_to_str, convert_str_to_bytes, convert_any_to_bytes, get_enc_data
 
 
 class Data:
@@ -13,13 +14,16 @@ class Data:
         else:
             self.value = convert_any_to_bytes(value)
 
-    def encode(self, encoding: bool = False):
-        # TODO:: Add encryption? (Check Segment and Builder for a idea on how to)
+    def encode(self):
+        if ENCODE_DICT.get("encode_data", False):
+            return get_enc_data(self.value, ENCODE_DICT.get("step", 3), ENCODE_DICT.get("right", True))[0]
         return self.value
 
     def decode(self, encoded_data: bytes):
-        # TODO:: Add decryption? (Check Segment and Builder for a idea on how to)
-        self.value = encoded_data
+        if ENCODE_DICT.get("encode_data", False):
+            self.value = get_enc_data(encoded_data, -ENCODE_DICT.get("step", 3), ENCODE_DICT.get("right", True))[0]
+        else:
+            self.value = encoded_data
         return self
 
     # Convert data bytes into string
