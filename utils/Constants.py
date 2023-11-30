@@ -53,6 +53,7 @@ SENDER_KEEPALIVE_TIME = DEFAULT_KEEPALIVE_TIME  # Seconds (Integer)
 ###############################################
 # Encoding dictionary
 ###############################################
+# Not needed to be set on server side, it gets transmitted to server via info packet
 ENCODE_DICT = {
     "encode_data": False,
     "encode_data_show_menu_option": False,
