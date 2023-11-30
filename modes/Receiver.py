@@ -126,10 +126,6 @@ class Receiver:
     def reassemble_and_output_data(self, connection: Connection):
         data = assemble(connection.packets)
 
-        fragment_size = connection.packets[0].get("fragment_size", None)
-        fragments_len = len(connection.packets) - 1
-        print_color("Reassembled {0} fragments of size {1} from {2}:{3}".format(fragments_len, fragment_size, connection.ip, connection.port), color="green")
-
         if isinstance(data, File):
             if self.settings is None:
                 # TODO:: Print fragment size and number of fragments

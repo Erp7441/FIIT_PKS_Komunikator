@@ -74,6 +74,7 @@ def assemble(packets: list[Segment]):
         for key, value in encoded_data_dict.items():
             ENCODE_DICT[key] = value
 
+    print_color("Reassembled {0} fragments of size {1}".format(len(packets), info.get('fragment_size')), color="green")
     # Decode the data
     if is_file:
         return File(name=name).decode(data)
