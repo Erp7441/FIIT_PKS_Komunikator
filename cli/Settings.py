@@ -4,7 +4,7 @@ from cli.Menu import Menu
 from utils.Constants import DEFAULT_PORT, MAX_SEGMENT_SIZE, SENDER_BAD_PACKETS_SEQ, SENDER_BAD_PACKETS_ATTEMPTS, \
     RESEND_ATTEMPTS, NACK_RESPONSE_MULTIPLIER, ENCODE_DICT
 from utils.Utils import is_valid_ipv4, get_integer_safely, get_list_safely, get_string_safely, \
-    get_downloads_folder, select_folder, convert_bytes_to_str, convert_str_to_bytes, get_confirmation
+    get_downloads_folder, select_folder, convert_bytes_to_str, convert_str_to_bytes, get_confirmation, is_port_in_use
 
 
 class Settings:
@@ -44,7 +44,8 @@ class Settings:
     def get_port(self):
         self.port = get_integer_safely(
             "Please enter port number: ", DEFAULT_PORT,
-            lambda x: x <= DEFAULT_PORT, "Port number must be less or equal to " + str(65535)
+            lambda x: not is_port_in_use(x),
+            "Port is already in use or is invalid. Please try again.",
         )
 
     def get_segment_size(self):

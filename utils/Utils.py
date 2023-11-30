@@ -133,6 +133,26 @@ def is_valid_confirmation(string: str):
     return string.lower() == "y" or string.lower() == "yes" or string.lower() == "n" or string.lower() == "no"
 
 
+def is_valid_port(port: int):
+    try:
+        return 1 <= port <= 65535
+    except ValueError:
+        return False
+
+
+def is_port_in_use(port: int):
+    if not is_valid_port(port):
+        return True
+
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind(("127.0.0.1", port))
+        except socket.error:
+            return True
+    return False
+
+
 ###############################################
 # Getters
 ###############################################
