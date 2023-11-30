@@ -57,12 +57,12 @@ class Receiver:
                 break
 
             if packet is None:
-                print_debug("Received broken packet from {0}:{1}".format(ip, port))
+                print_color("Received broken packet from {0}:{1}".format(ip, port), color="blue")
                 if connection is not None:
                     self.connection_manager.send_nack_packet(connection)
                     # TODO:: Expect multiple packets
             else:
-                print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
+                print_color("Received {0}. packet with flags {1} from {2}:{3} without errors".format(packet.seq, str(packet.flags), ip, port), color="blue")
 
             # Checking if first packet is SYN
             if packet is not None and connection is None and not packet.flags.syn:
