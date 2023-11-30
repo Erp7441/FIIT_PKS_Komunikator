@@ -49,14 +49,3 @@ MAX_PAYLOAD_SIZE = MAX_SEGMENT_SIZE - SEQ_SIZE - CRC_SIZE - FLAGS_SIZE  # Bytes
 
 RECEIVER_KEEPALIVE_TIME = DEFAULT_KEEPALIVE_TIME + 1  # Seconds (Integer)
 SENDER_KEEPALIVE_TIME = DEFAULT_KEEPALIVE_TIME  # Seconds (Integer)
-
-###############################################
-# Encoding dictionary
-###############################################
-# Not needed to be set on server side, it gets transmitted to server via info packet
-ENCODE_DICT = {
-    "encode_data": False,
-    "encode_data_show_menu_option": False,
-    "encoded_data_step": 3,
-    "right": True
-}

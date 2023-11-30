@@ -4,7 +4,7 @@ from data.Data import Data
 from data.File import File
 from packet.Flags import Flags
 from packet.Segment import Segment
-from utils.Constants import MAX_FILE_SIZE, MAX_SEGMENT_SIZE, FLAGS_SIZE, CRC_SIZE, SEQ_SIZE, ENCODE_DICT
+from utils.Constants import MAX_FILE_SIZE, MAX_SEGMENT_SIZE, FLAGS_SIZE, CRC_SIZE, SEQ_SIZE
 from utils.Utils import print_color
 
 
@@ -38,9 +38,6 @@ def disassemble(data: Data, segment_size: int = MAX_SEGMENT_SIZE) -> list[Segmen
         "fragment_size": segment_size
     }
 
-    if ENCODE_DICT.get("encode_data", False):
-        info_dict["encoded_data_dict"] = ENCODE_DICT
-
     encoded_dict = dumps(info_dict)
 
     info_packet = Segment(Flags(info=True), data=encoded_dict)
@@ -68,11 +65,6 @@ def assemble(packets: list[Segment]):
 
     # Join together the packet data values
     data = b"".join([packet.data for packet in packets])
-
-    encoded_data_dict = info.get('encoded_data_dict')
-    if encoded_data_dict is not None:
-        for key, value in encoded_data_dict.items():
-            ENCODE_DICT[key] = value
 
     print_color("Reassembled {0} fragments of size {1}".format(len(packets), info.get('fragment_size')), color="green")
     # Decode the data

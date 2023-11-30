@@ -7,7 +7,6 @@ from connection.manager.SenderConnectionManager import SenderConnectionManager
 from data.Builder import disassemble
 from data.Data import Data
 from data.File import File
-from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT, SENDER_SOCKET_TIMEOUT
 from utils.Utils import print_debug, get_string_safely, print_color
 
