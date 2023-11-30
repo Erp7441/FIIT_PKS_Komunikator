@@ -54,7 +54,7 @@ class SenderConnectionManager(ConnectionManager):
                 connection.state = ConnectionState.ACTIVE
                 print_debug("Refreshed keepalive state!", color='green')
                 return True
-            print_debug("Failed to refresh keepalive state!", color='red')
+            print_color("Failed to refresh keepalive state!", color='red')
             return False
 
     def __str__(self):
