@@ -27,7 +27,7 @@ def run_sender_mode(settings: Settings):
     sender_sub_menu = Menu("Sender sub menu")
     sender_sub_menu.add_option("Send file", lambda: sender.send_file())
     sender_sub_menu.add_option("Send message", lambda: sender.send_message())
-    sender_sub_menu.add_option("Swap roles", lambda: sender.swap_roles())
+    sender_sub_menu.add_option("Swap roles", lambda: sender.connection_manager.initiate_swap(sender.get_current_connection()))
     sender_sub_menu.display(
         run_functions=[
             lambda: print_color(sender.get_current_connection().stats(), color="blue")

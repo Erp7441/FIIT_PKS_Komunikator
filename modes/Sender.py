@@ -107,36 +107,3 @@ class Sender:
     def get_current_connection(self):
         if self.connection_manager is not None:
             return self.connection_manager.get_connection(self.ip, self.port)
-
-    def swap_roles(self):
-        connection = self.get_current_connection()
-
-        swp_packet = Segment()
-        swp_packet.flags.swp = True
-        client_info_packet = Segment(data=self.settings.encode())
-        client_info_packet.flags.info = True
-
-        with self.connection_manager.lock:
-            # Sending SWP Received ACK
-            if self.connection_manager.send_data_packet(connection, swp_packet) is True:
-                # Sending settings Received ACK
-                if self.connection_manager.send_data_packet(connection, client_info_packet) is True:
-                    # Receive server settings
-                    _, _, packet = self.connection_manager.await_packet()
-
-                    # Send ACK for server settings
-                    self.connection_manager.send_ack_packet(connection)
-
-                    # Decode server settings and swap roles
-                    if packet is not None and packet.flags.info:
-                        settings = Settings().decode(packet.data)
-
-                        self.connection_manager.kill_connection(connection)
-                        self.close()
-
-                        from cli.MenuSystem import run_receiver_mode
-                        run_receiver_mode(settings)  # Start server mode
-
-                        print_debug("Exiting from SWP (Sender)...")
-
-            self.connection_manager.kill_connection(connection)

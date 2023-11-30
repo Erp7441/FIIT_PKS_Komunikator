@@ -223,6 +223,83 @@ class ConnectionManager:
             self.kill_connection(connection)  # Is technically a duplicate call in case await packet times out
         return False
 
+    ###############################################
+    # Swap
+    ###############################################
+    def initiate_swap(self, connection: Connection = None):
+        swp_packet = Segment()
+        swp_packet.flags.swp = True
+        client_info_packet = Segment(data=self.parent.settings.encode())
+        client_info_packet.flags.info = True
+
+        with self.lock:
+            # Sending SWP Received ACK
+            if self.send_data_packet(connection, swp_packet) is True:
+                # Sending settings Received ACK
+                if self.send_data_packet(connection, client_info_packet) is True:
+                    # Receive server settings
+                    _, _, packet = self.await_packet()
+
+                    # Send ACK for server settings
+                    self.send_ack_packet(connection)
+
+                    # Decode server settings and swap roles
+                    if packet is not None and packet.flags.info:
+                        from cli.Settings import Settings
+                        settings = Settings().decode(packet.data)
+
+                        self.kill_connection(connection)
+                        self.parent.close()
+
+                        if self.__class__.__name__ == "SenderConnectionManager":
+                            from cli.MenuSystem import run_receiver_mode
+                            run_receiver_mode(settings)  # Start server mode
+                        elif self.__class__.__name__ == "ReceiverConnectionManager":
+                            from cli.MenuSystem import run_sender_mode
+                            run_sender_mode(settings)
+
+                        print_debug("Exiting from SWP (Sender)...")
+
+            self.kill_connection(connection)
+
+    def received_swap(self, connection):
+        # Ack for SWP packet
+        self.send_ack_packet(connection)
+
+        # Receiving client info packet
+        _, _, client_info_packet = self.await_packet(connection)
+        if client_info_packet.flags.info:
+            # Sending ACK for client info packet
+            self.send_ack_packet(connection)
+        else:
+            self.kill_connection(connection)
+            return
+
+        # Preparing server info packet
+        info_packet = Segment(data=self.parent.settings.encode())
+        info_packet.flags.info = True
+
+        # Sending server info packet receiving ACK
+        if self.send_data_packet(connection, info_packet) is False:
+            self.kill_connection(connection)
+            return
+
+        from cli.Settings import Settings
+        settings = Settings().decode(client_info_packet.data)
+        settings.ip = connection.ip  # We want to connect to the other end
+
+        self.kill_connection(connection)
+        self.parent.close()
+
+        if self.__class__.__name__ == "SenderConnectionManager":
+            from cli.MenuSystem import run_receiver_mode
+            run_receiver_mode(settings)  # Start server mode
+        elif self.__class__.__name__ == "ReceiverConnectionManager":
+            from cli.MenuSystem import run_sender_mode
+            run_sender_mode(settings)
+
+        print_debug("Exiting from SWP (Receiver)...")
+
     def __str__(self):
         _str = "Connection Manger:\n"
 

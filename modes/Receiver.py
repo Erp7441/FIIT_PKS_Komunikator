@@ -25,10 +25,12 @@ class Receiver:
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
         self.socket.bind((ip, port))
         self.socket_closed = False  # Flag to check if socket is closed
+        self.last_connection = None
 
         # When user presses esc then exit receiver
         keyboard.hook_key("esc", callback=lambda event: self.close(event))
-        self._exit_thread = Thread(target=keyboard.wait, args=("esc",))
+        keyboard.hook_key("s", callback=lambda event: self.connection_manager.initiate_swap(self.last_connection))
+        self._exit_thread = Thread(target=keyboard.wait, args=("esc", "s",))
         self._exit_thread.start()
 
         self.run()
@@ -45,6 +47,10 @@ class Receiver:
             ip, port, packet = self.connection_manager.await_packet()
             connection = self.connection_manager.get_connection(ip, port)
 
+            # Setting last processed connection
+            if connection is not None:
+                self.last_connection = connection
+
             # Socket was closed. Exiting main loop
             if self.socket_closed:
                 break
@@ -53,7 +59,7 @@ class Receiver:
                 print_debug("Received broken packet from {0}:{1}".format(ip, port))
                 if connection is not None:
                     self.connection_manager.send_nack_packet(connection)
-                    # TODO:: Excpect multiple packets
+                    # TODO:: Expect multiple packets
             else:
                 print_debug("Received {0} packet from {1}:{2}".format(str(packet.flags), ip, port))
 
@@ -86,7 +92,7 @@ class Receiver:
                 packet is not None and packet.flags.swp and
                 connection is not None and connection.state == ConnectionState.ACTIVE
             ):
-                self.received_swp(connection)
+                self.connection_manager.received_swap(connection)
 
             # Closing connection
             elif packet is not None and packet.flags.fin and connection is not None and connection.state == ConnectionState.ACTIVE:
@@ -153,36 +159,3 @@ class Receiver:
         if self.settings is not None:
             _str += "Settings: " + str(self.settings) + "\n"
         return _str
-
-    def received_swp(self, connection):
-        # Ack for SWP packet
-        self.connection_manager.send_ack_packet(connection)
-
-        # Receiving client info packet
-        _, _, client_info_packet = self.connection_manager.await_packet(connection)
-        if client_info_packet.flags.info:
-            # Sending ACK for client info packet
-            self.connection_manager.send_ack_packet(connection)
-        else:
-            self.connection_manager.kill_connection(connection)
-            return
-
-        # Preparing server info packet
-        info_packet = Segment(data=self.settings.encode())
-        info_packet.flags.info = True
-
-        # Sending server info packet receiving ACK
-        if self.connection_manager.send_data_packet(connection, info_packet) is False:
-            self.connection_manager.kill_connection(connection)
-            return
-
-        settings = Settings().decode(client_info_packet.data)
-        settings.ip = connection.ip  # We want to connect to the other end
-
-        self.connection_manager.kill_connection(connection)
-        self.close()
-
-        from cli.MenuSystem import run_sender_mode
-        run_sender_mode(settings)
-
-        print_debug("Exiting from SWP (Receiver)...")
