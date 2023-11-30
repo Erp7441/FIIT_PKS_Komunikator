@@ -16,6 +16,8 @@ class File(Data):
             super(File, self).__init__()
             self.name = name
 
+        self.path = path
+
     def encode(self):
         return super(File, self).encode()
 

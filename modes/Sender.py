@@ -9,7 +9,7 @@ from data.Data import Data
 from data.File import File
 from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT, SENDER_SOCKET_TIMEOUT
-from utils.Utils import print_debug, get_string_safely
+from utils.Utils import print_debug, get_string_safely, print_color
 
 
 class Sender:
@@ -75,6 +75,7 @@ class Sender:
             data = File(select=True)
         else:
             data = File(path=path)
+        print_color("Sending file: " + str(data.path), color="blue")
         self.send(data)
 
     def send_message(self, message: str = None):

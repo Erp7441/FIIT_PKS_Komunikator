@@ -29,6 +29,7 @@ class Receiver:
 
         # When user presses esc then exit receiver
         keyboard.hook_key("esc", callback=lambda event: self.close(event))
+        # TODO:: Fix swap server side, how to catch it from client side?
         keyboard.hook_key("s", callback=lambda event: self.connection_manager.initiate_swap(self.last_connection))
         self._exit_thread = Thread(target=keyboard.wait, args=("esc", "s",))
         self._exit_thread.start()
@@ -119,12 +120,15 @@ class Receiver:
     def received_data(self, packet: Segment, connection: Connection):
         print_debug("Received DATA packet from {0}:{1}".format(connection.ip, connection.port))
         connection.add_packet(packet)
-        # TODO:: Implement sending of multiple ACKs here (server)
         self.connection_manager.send_ack_packet(connection)
 
     # Build data using builder function and output them to the system
     def reassemble_and_output_data(self, connection: Connection):
         data = assemble(connection.packets)
+
+        fragment_size = connection.packets[0].get("fragment_size", None)
+        fragments_len = len(connection.packets) - 1
+        print_color("Reassembled {0} fragments of size {1} from {2}:{3}".format(fragments_len, fragment_size, connection.ip, connection.port), color="green")
 
         if isinstance(data, File):
             if self.settings is None:

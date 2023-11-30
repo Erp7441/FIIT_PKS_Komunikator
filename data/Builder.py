@@ -34,7 +34,8 @@ def disassemble(data: Data, segment_size: int = MAX_SEGMENT_SIZE) -> list[Segmen
         "name": data.name if is_file else None,
         "number_of_packets": len(packets),
         "total_encoded_size": len(encoded_data),
-        "total_size": len(data.value) if data.value is not None else 0
+        "total_size": len(data.value) if data.value is not None else 0,
+        "fragment_size": segment_size
     }
 
     if ENCODE_DICT.get("encode_data", False):
