@@ -227,6 +227,9 @@ class ConnectionManager:
     # Swap
     ###############################################
     def initiate_swap(self, connection: Connection = None):
+        if connection is None:
+            return
+
         swp_packet = Segment()
         swp_packet.flags.swp = True
         client_info_packet = Segment(data=self.parent.settings.encode())
@@ -263,6 +266,9 @@ class ConnectionManager:
             self.kill_connection(connection)
 
     def received_swap(self, connection):
+        if connection is None:
+            return
+
         # Ack for SWP packet
         self.send_ack_packet(connection)
 
