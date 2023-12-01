@@ -1,5 +1,6 @@
 import sys
 import threading
+from time import sleep
 
 from cli.Settings import Settings
 from connection.Connection import Connection
@@ -224,7 +225,7 @@ class ConnectionManager:
     ###############################################
     # Swap
     ###############################################
-    def initiate_swap(self, connection: Connection = None, already_started: bool = False):
+    def initiate_swap(self, connection: Connection = None, already_started: bool = False, switch_ip: bool = False):
         if connection is None:
             return
 
@@ -248,11 +249,15 @@ class ConnectionManager:
                 # Decode server settings and swap roles
                 if packet is not None and packet.flags.info:
                     settings = Settings().decode(packet.data)
+
+                    if switch_ip:
+                        settings.ip = connection.ip  # We want to connect to the other end
+
                     self._toggle_role(connection, settings)
 
             self.kill_connection(connection)
 
-    def received_swap(self, connection: Connection, already_started: bool = False):
+    def received_swap(self, connection: Connection, already_started: bool = False, switch_ip: bool = True):
         if connection is None:
             return
 
@@ -279,7 +284,10 @@ class ConnectionManager:
             return
 
         settings = Settings().decode(client_info_packet.data)
-        settings.ip = connection.ip  # We want to connect to the other end
+
+        if switch_ip:
+            settings.ip = connection.ip  # We want to connect to the other end
+
         self._toggle_role(connection, settings)
 
     # Helper method that toggles between Sender and Receiver
