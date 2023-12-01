@@ -78,9 +78,8 @@ class ReceiverConnectionManager(ConnectionManager):
                 print_debug("Refreshed keepalive state of client!", color="green")
 
                 if swapping:
-                    self.initiate_swap(connection, already_started=True)
                     print_debug("Received swap, swap roles on receiver side", color="yellow")
-                    sys.exit(0)
+                    self.initiate_swap(connection, already_started=True)
 
                 return True
         print_color("Failed to refresh keepalive state!", color="red")

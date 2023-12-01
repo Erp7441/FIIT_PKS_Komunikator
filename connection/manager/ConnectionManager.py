@@ -1,5 +1,7 @@
+import sys
 import threading
 
+from cli.Settings import Settings
 from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
 from packet.Segment import Segment
@@ -232,7 +234,7 @@ class ConnectionManager:
         client_info_packet.flags.info = True
 
         # TODO:: Readd lock here and handle it somehow in "refresh_keepalive" in "ReceiverConnectionManager"
-        
+
         # Sending SWP Received ACK
         if already_started or self.send_data_packet(connection, swp_packet) is True:
             # Sending settings Received ACK
@@ -245,20 +247,8 @@ class ConnectionManager:
 
                 # Decode server settings and swap roles
                 if packet is not None and packet.flags.info:
-                    from cli.Settings import Settings
                     settings = Settings().decode(packet.data)
-
-                    self.kill_connection(connection)
-                    self.parent.close()
-
-                    if self.__class__.__name__ == "SenderConnectionManager":
-                        from cli.MenuSystem import run_receiver_mode
-                        run_receiver_mode(settings)  # Start server mode
-                    elif self.__class__.__name__ == "ReceiverConnectionManager":
-                        from cli.MenuSystem import run_sender_mode
-                        run_sender_mode(settings)
-
-                    print_debug("Exiting from SWP (Sender)...")
+                    self._toggle_role(connection, settings)
 
             self.kill_connection(connection)
 
@@ -288,21 +278,28 @@ class ConnectionManager:
             self.kill_connection(connection)
             return
 
-        from cli.Settings import Settings
         settings = Settings().decode(client_info_packet.data)
         settings.ip = connection.ip  # We want to connect to the other end
+        self._toggle_role(connection, settings)
 
+    # Helper method that toggles between Sender and Receiver
+    def _toggle_role(self, connection: Connection, settings: Settings):
         self.kill_connection(connection)
         self.parent.close()
 
+        from cli.MenuSystem import show_main_menu
         if self.__class__.__name__ == "SenderConnectionManager":
-            from cli.MenuSystem import run_receiver_mode
+            from cli.MenuSystem import run_receiver_mode, show_receiver_menu
             run_receiver_mode(settings)  # Start server mode
+            show_receiver_menu()
+            print_debug("Exiting from SWP (Sender) to main menu...")
         elif self.__class__.__name__ == "ReceiverConnectionManager":
-            from cli.MenuSystem import run_sender_mode
+            from cli.MenuSystem import run_sender_mode, show_sender_menu
             run_sender_mode(settings)
-
-        print_debug("Exiting from SWP (Receiver)...")
+            show_sender_menu()
+            print_debug("Exiting from SWP (Receiver) to main menu...")
+        show_main_menu()
+        sys.exit(0)
 
     def __str__(self):
         _str = "Connection Manger:\n"

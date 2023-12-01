@@ -58,9 +58,8 @@ class SenderConnectionManager(ConnectionManager):
                 print_debug("Refreshed keepalive state!", color='green')
 
                 if packet.flags.swp:
-                    self.received_swap(connection, already_started=True)
                     print_debug("Received swap, swap roles on sender side", color='yellow')
-                    sys.exit(0)
+                    self.received_swap(connection, already_started=True)
 
                 return True
             print_color("Failed to refresh keepalive state!", color='red')
