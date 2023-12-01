@@ -151,15 +151,12 @@ class ConnectionManager:
             print_debug("Sent packet SEQ {0} to {1}:{2} server (attempt {3})".format(packet.seq, connection.ip, connection.port, attempt+1))
             ip, port, response = self.await_packet(connection, kill_on_fail=False)  # Awaiting ACK
 
-            # TODO:: Implement sending of multiple ACKs here (client)
-            # TODO:: How to handle faulty ACK? Not sure, can resend? If server detects duplicate. Resend ack but not append?
             if ip != connection.ip or port != connection.port:
                 break
 
             if response.flags.ack:
                 return True  # If we received ACK, success
             elif response.flags.nack:
-                # TODO:: Send packet X times
                 continue  # If we received NACK, retry
             else:
                 break  # If we received something else stop.
@@ -171,8 +168,6 @@ class ConnectionManager:
     # Await packets
     ###############################################
     def await_packet(self, connection: Connection = None, kill_on_fail: bool = True):
-        # TODO:: Implement retry?
-
         try:
             data, addr = self.parent.socket.recvfrom(MTU)
         except OSError:

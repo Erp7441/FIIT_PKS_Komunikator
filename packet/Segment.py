@@ -24,11 +24,9 @@ class Segment:
 
         encoded_packet = self.flags.encode() + encoded_seq + encoded_data
         encoded_crc = convert_int_to_bytes(crc32(encoded_packet), CRC_SIZE)
-        # TODO:: Add encryption (Check Data and Builder for a idea on how to)
         return encoded_packet + encoded_crc
 
     def decode(self, data):
-        # TODO:: Add decryption (Check Data and Builder for a idea on how to)
 
         crc = data[-CRC_SIZE:]  # Save CRC
         data = data[:-CRC_SIZE]  # Remove it from data

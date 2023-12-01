@@ -44,7 +44,6 @@ def run_sender_mode(settings: Settings):
         pass
 
 def show_sender_menu():
-    # TODO:: Make the menu and debug output work together
     sender_menu = Menu("Sender menu")
     settings = Settings()
 
@@ -55,7 +54,6 @@ def show_sender_menu():
 
 
 def show_receiver_menu():
-    # TODO:: Make the menu and debug output work together
     receiver_menu = Menu("Receiver menu")
     settings = Settings(ip=DEFAULT_SERVER_IP)
 

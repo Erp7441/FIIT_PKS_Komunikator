@@ -60,7 +60,6 @@ class Receiver:
                 print_color("Received broken packet from {0}:{1}".format(ip, port), color="blue")
                 if connection is not None:
                     self.connection_manager.send_nack_packet(connection)
-                    # TODO:: Expect multiple packets
             else:
                 print_color("Received {0}. packet with flags {1} from {2}:{3} without errors".format(packet.seq, str(packet.flags), ip, port), color="blue")
 
@@ -128,7 +127,6 @@ class Receiver:
 
         if isinstance(data, File):
             if self.settings is None:
-                # TODO:: Print fragment size and number of fragments
                 data.save(select_folder("Please select folder where to save file"))
             else:
                 data.save(self.settings.downloads_dir)
