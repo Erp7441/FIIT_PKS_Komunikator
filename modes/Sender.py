@@ -19,8 +19,8 @@ class Sender:
         self.ip = ip if settings is None else settings.ip
         self.port = port if settings is None else settings.port
         self.settings = settings
-        self.establish_connection()
         self.socket_closed = False
+        self.establish_connection()  # Needs to be last call in constructor
 
     def establish_connection(self):
         if self.socket_closed:
