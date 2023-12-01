@@ -60,7 +60,7 @@ class ReceiverConnectionManager(ConnectionManager):
                 print_debug("Failed to refresh keepalive state! Connection is already closed", color="red")
                 return False
 
-            self.send_syn_ack_packet(connection)  # SYN-ACK
+            self.send_syn_ack_packet(connection, self.parent.swap)  # SYN-ACK
             ip, port, packet = self.await_packet(connection)
             if (
                 packet is not None and

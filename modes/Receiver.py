@@ -25,12 +25,13 @@ class Receiver:
         self.socket = s.socket(s.AF_INET, s.SOCK_DGRAM)
         self.socket.bind((ip, port))
         self.socket_closed = False  # Flag to check if socket is closed
-        self.last_connection = None
+
+        self.swap = False
 
         # When user presses esc then exit receiver
         keyboard.hook_key("esc", callback=lambda event: self.close(event))
         # TODO:: Fix swap server side, how to catch it from client side?
-        keyboard.hook_key("s", callback=lambda event: self.connection_manager.initiate_swap(self.last_connection))
+        keyboard.hook_key("s", callback=lambda event: self.init_swap(event))
         self._exit_thread = Thread(target=keyboard.wait, args=("esc", "s",))
         self._exit_thread.start()
 
@@ -157,3 +158,6 @@ class Receiver:
         if self.settings is not None:
             _str += "Settings: " + str(self.settings) + "\n"
         return _str
+
+    def init_swap(self, event=None):
+        self.swap = True

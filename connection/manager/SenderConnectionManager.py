@@ -49,10 +49,16 @@ class SenderConnectionManager(ConnectionManager):
                 return False
 
             self.send_syn_packet(connection)  # SYN
-            if self.await_syn_ack(connection, kill_on_fail=False):  # Awaiting SYN-ACK and sending ACK
+            response, packet = self.await_syn_ack(connection, kill_on_fail=False)
+            if response:  # Awaiting SYN-ACK and sending ACK
                 connection.current_keepalive_time = connection.keepalive_time  # Refresh keepalive timer
                 connection.state = ConnectionState.ACTIVE
                 print_debug("Refreshed keepalive state!", color='green')
+
+                if packet.flags.swp:
+                    # TODO:: Received swap, swap roles on sender side (and send ack before that)
+                    print_debug("Received swap, swap roles on sender side", color='yellow')
+
                 return True
             print_color("Failed to refresh keepalive state!", color='red')
             return False

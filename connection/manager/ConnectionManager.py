@@ -92,10 +92,11 @@ class ConnectionManager:
         print_debug("Sent FIN packet to {0}:{1}".format(connection.ip, connection.port))
         return fin_packet
 
-    def send_syn_ack_packet(self, connection: Connection):
+    def send_syn_ack_packet(self, connection: Connection, swap: bool = False):
         syn_ack_packet = Segment()
         syn_ack_packet.flags.syn = True
         syn_ack_packet.flags.ack = True
+        syn_ack_packet.flags.swp = swap
         syn_ack_packet.send_to(connection.ip, connection.port, self.parent.socket)
         connection.state = ConnectionState.SYN_ACK_SENT
         print_debug("Sent SYN-ACK packet to {0}:{1}".format(connection.ip, connection.port))
@@ -185,7 +186,7 @@ class ConnectionManager:
             return ip, port, None
         return ip, port, packet
 
-    def await_syn_ack(self, connection: Connection, kill_on_fail: bool = True):
+    def await_syn_ack(self, connection: Connection, kill_on_fail: bool = True, return_packet: bool = False):
         ip, port, packet = self.await_packet(connection, kill_on_fail)
 
         if (
@@ -197,10 +198,10 @@ class ConnectionManager:
             print_debug("Received SYN-ACK packet from {0}:{1}".format(connection.ip, connection.port))
             self.send_ack_packet(connection)
             connection.state = ConnectionState.ACTIVE
-            return True
+            return True if not return_packet else (True, packet)
         elif kill_on_fail:
             self.kill_connection(connection)  # Is technically a duplicate call in case await packet times out
-        return False
+        return False if not return_packet else (False, None)
 
     def await_fin_ack(self, connection: Connection, kill_on_fail: bool = True):
         ip, port, packet = self.await_packet(connection, kill_on_fail)
