@@ -1,5 +1,3 @@
-import sys
-
 from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
 from connection.manager.ConnectionManager import ConnectionManager

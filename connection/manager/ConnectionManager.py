@@ -1,6 +1,5 @@
 import sys
 import threading
-from time import sleep
 
 from cli.Settings import Settings
 from connection.Connection import Connection
@@ -233,8 +232,6 @@ class ConnectionManager:
         swp_packet.flags.swp = True
         client_info_packet = Segment(data=self.parent.settings.encode())
         client_info_packet.flags.info = True
-
-        # TODO:: Readd lock here and handle it somehow in "refresh_keepalive" in "ReceiverConnectionManager"
 
         # Sending SWP Received ACK
         if already_started or self.send_data_packet(connection, swp_packet) is True:
