@@ -1,4 +1,5 @@
-import sys
+import os
+import signal
 import threading
 
 from cli.Settings import Settings
@@ -304,7 +305,7 @@ class ConnectionManager:
             show_sender_menu()
             print_debug("Exiting from SWP (Receiver) to main menu...")
         show_main_menu()
-        sys.exit(0)
+        os.kill(os.getpid(), signal.SIGTERM)
 
     def __str__(self):
         _str = "Connection Manger:\n"

@@ -2,10 +2,10 @@ from time import sleep
 from typing import Callable
 
 from connection.ConnectionState import ConnectionState
-from utils.StoppableThread import StoppableThread
 from packet.Segment import Segment
 from utils.Constants import RECEIVER_KEEPALIVE_TIME, SENDER_KEEPALIVE_TIME, DEFAULT_KEEPALIVE_TIME, \
     DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS
+from utils.StoppableThread import StoppableThread
 from utils.Utils import print_debug
 
 
@@ -71,7 +71,6 @@ class Connection:
                 self.parent.kill_connection(self)
         else:
             self.keepalive_attempts = DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS
-
 
     ###############################################
     # Keep alive init
