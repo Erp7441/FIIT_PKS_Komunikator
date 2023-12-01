@@ -1,3 +1,5 @@
+import sys
+
 from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
 from connection.manager.ConnectionManager import ConnectionManager
@@ -55,12 +57,16 @@ class ReceiverConnectionManager(ConnectionManager):
     # Received SYN for refreshing the connection keepalive state
     #############################################################
     def refresh_keepalive(self, connection: Connection):
+
+        # Are we swapping?
+        swapping = self.parent.swap
+
         with self.lock:
             if connection.state == ConnectionState.CLOSED or connection.state == ConnectionState.RESET:
                 print_debug("Failed to refresh keepalive state! Connection is already closed", color="red")
                 return False
 
-            self.send_syn_ack_packet(connection, self.parent.swap)  # SYN-ACK
+            self.send_syn_ack_packet(connection, swapping)  # SYN-ACK
             ip, port, packet = self.await_packet(connection)
             if (
                 packet is not None and
@@ -70,6 +76,12 @@ class ReceiverConnectionManager(ConnectionManager):
                 connection.current_keepalive_time = connection.keepalive_time
                 connection.state = ConnectionState.ACTIVE
                 print_debug("Refreshed keepalive state of client!", color="green")
+
+                if swapping:
+                    self.initiate_swap(connection, already_started=True)
+                    print_debug("Received swap, swap roles on receiver side", color="yellow")
+                    sys.exit(0)
+
                 return True
         print_color("Failed to refresh keepalive state!", color="red")
         return False

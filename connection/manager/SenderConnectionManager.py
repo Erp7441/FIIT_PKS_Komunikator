@@ -1,3 +1,5 @@
+import sys
+
 from connection.Connection import Connection
 from connection.ConnectionState import ConnectionState
 from connection.manager.ConnectionManager import ConnectionManager
@@ -56,8 +58,9 @@ class SenderConnectionManager(ConnectionManager):
                 print_debug("Refreshed keepalive state!", color='green')
 
                 if packet.flags.swp:
-                    # TODO:: Received swap, swap roles on sender side (and send ack before that)
+                    self.received_swap(connection, already_started=True)
                     print_debug("Received swap, swap roles on sender side", color='yellow')
+                    sys.exit(0)
 
                 return True
             print_color("Failed to refresh keepalive state!", color='red')

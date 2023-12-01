@@ -222,7 +222,7 @@ class ConnectionManager:
     ###############################################
     # Swap
     ###############################################
-    def initiate_swap(self, connection: Connection = None):
+    def initiate_swap(self, connection: Connection = None, already_started: bool = False):
         if connection is None:
             return
 
@@ -231,42 +231,44 @@ class ConnectionManager:
         client_info_packet = Segment(data=self.parent.settings.encode())
         client_info_packet.flags.info = True
 
-        with self.lock:
-            # Sending SWP Received ACK
-            if self.send_data_packet(connection, swp_packet) is True:
-                # Sending settings Received ACK
-                if self.send_data_packet(connection, client_info_packet) is True:
-                    # Receive server settings
-                    _, _, packet = self.await_packet()
+        # TODO:: Readd lock here and handle it somehow in "refresh_keepalive" in "ReceiverConnectionManager"
+        
+        # Sending SWP Received ACK
+        if already_started or self.send_data_packet(connection, swp_packet) is True:
+            # Sending settings Received ACK
+            if self.send_data_packet(connection, client_info_packet) is True:
+                # Receive server settings
+                _, _, packet = self.await_packet()
 
-                    # Send ACK for server settings
-                    self.send_ack_packet(connection)
+                # Send ACK for server settings
+                self.send_ack_packet(connection)
 
-                    # Decode server settings and swap roles
-                    if packet is not None and packet.flags.info:
-                        from cli.Settings import Settings
-                        settings = Settings().decode(packet.data)
+                # Decode server settings and swap roles
+                if packet is not None and packet.flags.info:
+                    from cli.Settings import Settings
+                    settings = Settings().decode(packet.data)
 
-                        self.kill_connection(connection)
-                        self.parent.close()
+                    self.kill_connection(connection)
+                    self.parent.close()
 
-                        if self.__class__.__name__ == "SenderConnectionManager":
-                            from cli.MenuSystem import run_receiver_mode
-                            run_receiver_mode(settings)  # Start server mode
-                        elif self.__class__.__name__ == "ReceiverConnectionManager":
-                            from cli.MenuSystem import run_sender_mode
-                            run_sender_mode(settings)
+                    if self.__class__.__name__ == "SenderConnectionManager":
+                        from cli.MenuSystem import run_receiver_mode
+                        run_receiver_mode(settings)  # Start server mode
+                    elif self.__class__.__name__ == "ReceiverConnectionManager":
+                        from cli.MenuSystem import run_sender_mode
+                        run_sender_mode(settings)
 
-                        print_debug("Exiting from SWP (Sender)...")
+                    print_debug("Exiting from SWP (Sender)...")
 
             self.kill_connection(connection)
 
-    def received_swap(self, connection):
+    def received_swap(self, connection: Connection, already_started: bool = False):
         if connection is None:
             return
 
-        # Ack for SWP packet
-        self.send_ack_packet(connection)
+        if not already_started:
+            # Ack for SWP packet
+            self.send_ack_packet(connection)
 
         # Receiving client info packet
         _, _, client_info_packet = self.await_packet(connection)

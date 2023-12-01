@@ -30,7 +30,6 @@ class Receiver:
 
         # When user presses esc then exit receiver
         keyboard.hook_key("esc", callback=lambda event: self.close(event))
-        # TODO:: Fix swap server side, how to catch it from client side?
         keyboard.hook_key("s", callback=lambda event: self.init_swap(event))
         self._exit_thread = Thread(target=keyboard.wait, args=("esc", "s",))
         self._exit_thread.start()
