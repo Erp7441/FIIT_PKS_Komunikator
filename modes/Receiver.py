@@ -1,5 +1,4 @@
 import socket as s
-from threading import Thread
 
 import keyboard
 
@@ -11,6 +10,7 @@ from data.Builder import assemble
 from data.File import File
 from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT
+from utils.StoppableThread import StoppableThread
 from utils.Utils import print_debug, print_color, select_folder
 
 
@@ -32,7 +32,7 @@ class Receiver:
         keyboard.hook_key("esc", callback=lambda event: self.close(event))
         # TODO:: Change keybind to F-keys or something else
         keyboard.hook_key("s", callback=lambda event: self.init_swap(event))
-        self._exit_thread = Thread(target=keyboard.wait, args=("esc", "s",))
+        self._exit_thread = StoppableThread(target=keyboard.wait, args=("esc", "s",))
         self._exit_thread.start()
 
         self.run()
@@ -135,14 +135,23 @@ class Receiver:
             print_color(str(data), color="blue")
 
     def close(self, event=None):
+        if self.socket_closed:
+            return
+
         print_color("Exiting receiver...", color="blue")
         for connection in self.connection_manager.active_connections + self.connection_manager.inactive_connections:
             self.connection_manager.kill_connection(connection)
+        try:
+            self.socket.shutdown(s.SHUT_RDWR)
+            self.socket.close()
+        except OSError:
+            pass
+
         self.socket_closed = True
-        self.socket.shutdown(s.SHUT_RDWR)
-        self.socket.close()
+
         if event is not None and isinstance(event, keyboard.KeyboardEvent):
             keyboard.unhook_all()
+            self._exit_thread.stop()
             self._exit_thread.join(timeout=0)
 
     def __str__(self):

@@ -20,8 +20,13 @@ class Sender:
         self.port = port if settings is None else settings.port
         self.settings = settings
         self.establish_connection()
+        self.socket_closed = False
 
     def establish_connection(self):
+        if self.socket_closed:
+            print_color("Socket is closed", color="red")
+            return
+
         if (
             self.connection_manager is not None and self.ip is not None and self.port is not None and
             self.get_current_connection() is None
@@ -29,6 +34,10 @@ class Sender:
             self.connection_manager.establish_connection(self.ip, self.port)
 
     def close_connection(self):
+        if self.socket_closed:
+            print_color("Socket is closed", color="red")
+            return
+
         if (
             self.connection_manager is not None and self.ip is not None and self.port is not None and
             self.get_current_connection() is not None
@@ -36,6 +45,10 @@ class Sender:
             self.connection_manager.close_connection(self.ip, self.port)
 
     def send(self, data: Data):
+        if self.socket_closed:
+            print_color("Socket is closed", color="red")
+            return
+
         connection = self.get_current_connection()
         if connection is None:
             print_debug("No connection to send data to", color="orange")
@@ -70,6 +83,10 @@ class Sender:
         self.establish_connection()  # Reestablishing connection for sending more data
 
     def send_file(self, path: str = None):
+        if self.socket_closed:
+            print_color("Socket is closed", color="red")
+            return
+
         if path is None:
             data = File(select=True)
         else:
@@ -78,16 +95,27 @@ class Sender:
         self.send(data)
 
     def send_message(self, message: str = None):
+        if self.socket_closed:
+            print_color("Socket is closed", color="red")
+            return
+
         if message is None:
             message = get_string_safely("Enter message: ", error_msg="Invalid message")
         data = Data(message)
         self.send(data)
 
     def close(self):
+        if self.socket_closed:
+            return
+
         print_debug("Exiting sender...")
         self.close_connection()
-        self.socket.shutdown(s.SHUT_RDWR)
-        self.socket.close()
+        try:
+            self.socket.shutdown(s.SHUT_RDWR)
+            self.socket.close()
+        except OSError:
+            pass
+        self.socket_closed = True
 
     def __str__(self):
         _str = "Sender:\n"
@@ -105,5 +133,9 @@ class Sender:
         return _str
 
     def get_current_connection(self):
+        if self.socket_closed:
+            print_color("Socket is closed", color="red")
+            return
+
         if self.connection_manager is not None:
             return self.connection_manager.get_connection(self.ip, self.port)

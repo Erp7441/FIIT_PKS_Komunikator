@@ -43,6 +43,7 @@ def run_sender_mode(settings: Settings):
     except Exception:
         pass
 
+
 def show_sender_menu():
     sender_menu = Menu("Sender menu")
     settings = Settings()

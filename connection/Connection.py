@@ -2,7 +2,7 @@ from time import sleep
 from typing import Callable
 
 from connection.ConnectionState import ConnectionState
-from connection.KeepaliveThread import KeepaliveThread
+from utils.StoppableThread import StoppableThread
 from packet.Segment import Segment
 from utils.Constants import RECEIVER_KEEPALIVE_TIME, SENDER_KEEPALIVE_TIME, DEFAULT_KEEPALIVE_TIME, \
     DEFAULT_KEEPALIVE_REFRESH_ATTEMPTS
@@ -86,7 +86,7 @@ class Connection:
             self.current_keepalive_time = keepalive_time
 
         # Initialize sender keepalive thread
-        self.keepalive_thread = KeepaliveThread(target=keep_alive_method)
+        self.keepalive_thread = StoppableThread(target=keep_alive_method)
         self.keepalive_thread.start()
 
     ###############################################
