@@ -49,7 +49,7 @@ class SenderConnectionManager(ConnectionManager):
                 return False
 
             self.send_syn_packet(connection)  # SYN
-            response, packet = self.await_syn_ack(connection, kill_on_fail=False)
+            response, packet = self.await_syn_ack(connection, kill_on_fail=False, return_packet=True)
             if response:  # Awaiting SYN-ACK and sending ACK
                 connection.current_keepalive_time = connection.keepalive_time  # Refresh keepalive timer
                 connection.state = ConnectionState.ACTIVE
