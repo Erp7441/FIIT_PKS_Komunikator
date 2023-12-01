@@ -49,17 +49,14 @@ class Receiver:
             ip, port, packet = self.connection_manager.await_packet()
             connection = self.connection_manager.get_connection(ip, port)
 
-            # Setting last processed connection
-            if connection is not None:
-                self.last_connection = connection
-
             # Socket was closed. Exiting main loop
             if self.socket_closed:
                 break
 
             if packet is None:
-                print_color("Received broken packet from {0}:{1}".format(ip, port), color="blue")
+                print_debug("Received broken packet from {0}:{1}".format(ip, port))
                 if connection is not None:
+                    print_color("Received broken packet from {0}:{1}".format(ip, port), color="blue")
                     self.connection_manager.send_nack_packet(connection)
             else:
                 print_color("Received {0}. packet with flags {1} from {2}:{3} without errors".format(packet.seq, str(packet.flags), ip, port), color="blue")
