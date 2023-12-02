@@ -65,11 +65,13 @@ class ReceiverConnectionManager(ConnectionManager):
                 return False
 
             self.send_syn_ack_packet(connection, swapping)  # SYN-ACK
+            print_debug("BIG_DEBUGGING: SYN ACK SENT, AWAITING ACK")
             ip, port, packet = self.await_packet(connection)
             if (
                 packet is not None and
                 (connection.ip == ip and connection.port == port and packet.flags.ack)  # ACK
             ):
+                print_debug("BIG_DEBUGGING: Received ACK packet for SYN ACK")
                 # Reset current keepalive time
                 connection.current_keepalive_time = connection.keepalive_time
                 connection.state = ConnectionState.ACTIVE
