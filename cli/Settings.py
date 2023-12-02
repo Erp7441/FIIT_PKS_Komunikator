@@ -44,7 +44,7 @@ class Settings:
     def get_port(self):
         self.port = get_integer_safely(
             "Please enter port number: ", DEFAULT_PORT,
-            lambda x: not is_port_in_use(x),
+            lambda x: not is_port_in_use(x, self.ip),
             "Port is already in use or is invalid. Please try again.",
         )
 

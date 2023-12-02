@@ -120,6 +120,8 @@ def convert_any_to_bytes(value):
 # Checks
 ###############################################
 def is_valid_ipv4(ip):
+    if ip is None or not isinstance(ip, str):
+        return False
     ipv4_pattern = re.compile(
         r"^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\."
         r"(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\."
@@ -140,8 +142,8 @@ def is_valid_port(port: int):
         return False
 
 
-def is_port_in_use(port: int):
-    if not is_valid_port(port):
+def is_port_in_use(port: int, ip: str = "0.0.0.0"):
+    if not is_valid_port(port) or not is_valid_ipv4(ip):
         return True
 
     import socket
