@@ -10,7 +10,6 @@ from data.Builder import assemble
 from data.File import File
 from packet.Segment import Segment
 from utils.Constants import DEFAULT_PORT
-from utils.StoppableThread import StoppableThread
 from utils.Utils import print_debug, print_color, select_folder
 
 
@@ -28,12 +27,9 @@ class Receiver:
 
         self.swap = False
 
-        # When user presses esc then exit receiver
-        keyboard.hook_key("esc", callback=lambda event: self.close(event))
-        # TODO:: Change keybind to F-keys or something else
-        keyboard.hook_key("s", callback=lambda event: self.init_swap(event))
-        self._exit_thread = StoppableThread(target=keyboard.wait, args=("esc", "s",))
-        self._exit_thread.start()
+        # Adds key event listeners
+        keyboard.on_press_key("esc", callback=lambda event: self.close(event))
+        keyboard.on_press_key("s", callback=lambda event: self.init_swap(event))
 
         self.run()
 
@@ -148,8 +144,6 @@ class Receiver:
 
         if event is not None and isinstance(event, keyboard.KeyboardEvent):
             keyboard.unhook_all()
-            self._exit_thread.stop()
-            self._exit_thread.join(timeout=0)
 
     def __str__(self):
         _str = "Receiver:\n"
