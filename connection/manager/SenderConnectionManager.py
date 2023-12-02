@@ -48,9 +48,12 @@ class SenderConnectionManager(ConnectionManager):
                 print_debug("Failed to refresh keepalive state! Connection is already closed", color="red")
                 return False
 
+            print_debug("BIG_DEBUGGING: Sending SYN for KEEPALIVE")
             self.send_syn_packet(connection)  # SYN
+            print_debug("BIG_DEBUGGING: AWAITING SYN ACK for KEEPALIVE")
             response, packet = self.await_syn_ack(connection, kill_on_fail=False, return_packet=True)
             if response:  # Awaiting SYN-ACK and sending ACK
+                print_debug("BIG_DEBUGGING: RECEIVED SYN ACK for KEEPALIVE")
                 connection.current_keepalive_time = connection.keepalive_time  # Refresh keepalive timer
                 connection.state = ConnectionState.ACTIVE
                 print_debug("Refreshed keepalive state!", color='green')

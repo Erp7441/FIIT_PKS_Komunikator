@@ -200,6 +200,7 @@ class ConnectionManager:
         ):
             print_debug("Received SYN-ACK packet from {0}:{1}".format(connection.ip, connection.port))
             self.send_ack_packet(connection)
+            print_debug("BIG_DEBUGGING: ACK packet for KEEPALIVE sent")
             connection.state = ConnectionState.ACTIVE
             return True if not return_packet else (True, packet)
         elif kill_on_fail:
