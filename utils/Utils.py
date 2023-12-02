@@ -145,7 +145,7 @@ def is_port_in_use(port: int):
         return True
 
     import socket
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         try:
             s.bind(("127.0.0.1", port))
         except socket.error:
