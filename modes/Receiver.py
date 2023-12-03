@@ -29,7 +29,7 @@ class Receiver:
 
         # Adds key event listeners
         keyboard.on_press_key("esc", callback=lambda event: self.close(event))
-        keyboard.on_press_key("s", callback=lambda event: self.init_swap(event))
+        keyboard.on_press_key("f2", callback=lambda event: self.init_swap(event))
 
         self.run()
 
