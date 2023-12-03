@@ -1,4 +1,4 @@
-from cli.Menu import Menu
+from cli.Menu import Menu, SubMenu
 from cli.Settings import Settings
 from modes.Receiver import Receiver
 from modes.Sender import Sender
@@ -25,7 +25,7 @@ def run_sender_mode(settings: Settings):
         settings.get_ip()
     sender = Sender(settings=settings)
 
-    sender_sub_menu = Menu("Sender sub menu")
+    sender_sub_menu = SubMenu("Sender sub menu")
     sender_sub_menu.add_option("Send file", lambda: sender.send_file())
     sender_sub_menu.add_option("Send message", lambda: sender.send_message())
     sender_sub_menu.add_option("Swap roles", lambda: sender.connection_manager.initiate_swap(sender.get_current_connection()))
@@ -44,31 +44,37 @@ def run_sender_mode(settings: Settings):
         pass
 
 
-def show_sender_menu():
-    sender_menu = Menu("Sender menu")
+def create_sender_submenu():
+    sender_menu = SubMenu("Sender menu")
     settings = Settings()
 
-    sender_menu.add_option("Connect", lambda: run_sender_mode(settings))
+    sender_menu.add_option("Connect", lambda: run_sender_mode(settings), waiting=True)
     sender_menu.add_option("Show settings", lambda: print("Current settings:\n" + str(settings)))
     sender_menu.add_option("Modify settings", lambda: settings.modify_settings())
-    sender_menu.display()
+    return sender_menu
 
 
-def show_receiver_menu():
-    receiver_menu = Menu("Receiver menu")
+def create_receiver_submenu():
+    receiver_menu = SubMenu("Receiver menu")
     settings = Settings(ip=DEFAULT_SERVER_IP)
 
-    receiver_menu.add_option("Start", lambda: run_receiver_mode(settings))
+    receiver_menu.add_option("Start", lambda: run_receiver_mode(settings), waiting=True)
     receiver_menu.add_option("Show settings", lambda: print("Current settings:\n" + str(settings)))
     receiver_menu.add_option("Modify settings", lambda: settings.modify_settings())
-    receiver_menu.display()
+    return receiver_menu
 
 
 def show_main_menu():
     get_debug_mode()
     main_menu = Menu("Main menu")
-    main_menu.add_option("Run Receiver Mode", show_receiver_menu)
-    main_menu.add_option("Run Sender Mode", show_sender_menu)
+
+    receiver_menu = create_receiver_submenu()
+    sender_menu = create_sender_submenu()
+
+    main_menu.add_submenu(submenu=receiver_menu)
+    main_menu.add_submenu(submenu=sender_menu)
+
+
     main_menu.add_option("Toggle Debug Output", toggle_debug_mode)
     main_menu.display()
     # TODO:: Resolve hanging on main menu when swapped roles trying to exit the program

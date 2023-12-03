@@ -10,5 +10,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Exit script gracefully when Ctrl+C is pressed
         exit(0)
-
-
