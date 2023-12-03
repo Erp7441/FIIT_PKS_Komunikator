@@ -71,4 +71,3 @@ def show_main_menu():
     main_menu.add_option("Run Sender Mode", show_sender_menu)
     main_menu.add_option("Toggle Debug Output", toggle_debug_mode)
     main_menu.display()
-    # TODO:: Resolve hanging on main menu when swapped roles trying to exit the program
