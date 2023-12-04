@@ -52,7 +52,7 @@ class Settings:
     def get_segment_size(self):
         self.segment_size = get_integer_safely(
             "Please enter segment size: ", MAX_SEGMENT_SIZE,
-            lambda x: x <= MAX_SEGMENT_SIZE, "Segment size must be less than " + str(MAX_SEGMENT_SIZE)
+            lambda x: MAX_SEGMENT_SIZE >= x >= 10, "Segment size must be less than " + str(MAX_SEGMENT_SIZE+1) + " and greater than 9"
         )
 
     def get_bad_packets_seq(self):
