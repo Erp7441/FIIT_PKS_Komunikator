@@ -58,6 +58,7 @@ class Sender:
         dead = False
 
         packets = disassemble(data, self.settings.segment_size)
+        print_color("Created " + str(len(packets)) + " packets of length " + str(self.settings.segment_size), color="blue")
         for i, packet in enumerate(packets):
 
             # If connection is dead, return
