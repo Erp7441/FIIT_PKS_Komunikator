@@ -1,4 +1,4 @@
-from utils.Utils import convert_bytes_to_str, convert_str_to_bytes, convert_any_to_bytes
+from utils.Utils import convert_bytes_to_str, convert_str_to_bytes, convert_any_to_bytes, get_enc_data
 
 
 class Data:
@@ -14,6 +14,14 @@ class Data:
             self.value = convert_any_to_bytes(value)
 
     def encode(self):
+        dash = convert_str_to_bytes(str("___"))
+        if self.value is None:
+            return None
+
+        self.value = get_enc_data(self.value, step=5, right=True)
+        self.value = dash + self.value
+        self.value = self.value + dash
+
         return self.value
 
     def decode(self, encoded_data: bytes):

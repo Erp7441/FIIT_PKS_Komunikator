@@ -155,6 +155,34 @@ def is_port_in_use(port: int, ip: str = "0.0.0.0"):
     return False
 
 
+def get_enc_data(data: bytes, step: int = 5, right: bool = True):
+    result = b""
+
+    # Direction of encoding
+    if not right:
+        step = -step
+
+    for char in data:
+        if chr(char).isalpha():
+            # Offset for reaching the letters in ASCII table (either lower or upper case)
+            offset = ord('A') if chr(char).isupper() else ord('a')
+
+            # New character index within the ASCII table
+            new_char_index = (int(char) - offset + step) % 26 + offset
+
+            # Convert the new character index back to a character
+            new_char = chr(new_char_index)
+
+            # Encode the new character and append
+            encoded_char = new_char.encode(ENCODING)
+            result += encoded_char
+        else:
+            result += convert_str_to_bytes(chr(char))
+
+    return result
+
+
+
 ###############################################
 # Getters
 ###############################################
