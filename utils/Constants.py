@@ -43,7 +43,7 @@ OFFSET = 9  # Bytes
 ###############################################
 # Calculated constants
 ###############################################
-MAX_SEGMENT_SIZE = MTU - ETHERNET_HEADER_LENGTH - IP_HEADER_LENGTH - UDP_HEADER_LENGTH - OFFSET  # Bytes
+MAX_SEGMENT_SIZE = MTU - 6 - ETHERNET_HEADER_LENGTH - IP_HEADER_LENGTH - UDP_HEADER_LENGTH - OFFSET  # Bytes
 MAX_PAYLOAD_SIZE = MAX_SEGMENT_SIZE - SEQ_SIZE - CRC_SIZE - FLAGS_SIZE  # Bytes
 
 RECEIVER_KEEPALIVE_TIME = DEFAULT_KEEPALIVE_TIME + 2  # Seconds (Integer)
